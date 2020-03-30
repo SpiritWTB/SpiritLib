@@ -63,7 +63,7 @@ end
 
 
 -- this wont be public use, it recursively dupes children. Children of _original will be duped and parented to _dupe, then the same will be done for the children
-local function duplicateAttachments(_original, _dupe)
+SpiritLib.Attachment.duplicateAttachments = function(_original, _dupe)
 	for k, attachedPartID in pairs(getAttachedIDS(_original)) do
 
 		local _originalChild = PartByName(attachedPartID)
@@ -80,7 +80,7 @@ local function duplicateAttachments(_original, _dupe)
 end
 
 -- this wont be public use, it recursively deletes children objects
-local function deleteAttachments(_original)
+SpiritLib.Attachment.deleteAttachments = function(_original)
 	for k, attachedPartID in pairs(getAttachedIDS(_original)) do
 
 		local _child = PartByName(attachedPartID)
@@ -96,13 +96,13 @@ local function deleteAttachments(_original)
 end
 
 -- returns a list of ids for *direct* children of an object
-local function getAttachedIDS(_parent)
+SpiritLib.Attachment.getAttachedIDS = function(_parent)
 	if (SpiritLib.Attachment.reverseAssociations[_parent.id] ~= nil) then
 		return SpiritLib.Attachment.reverseAssociations[_parent.id]
 	end
 end
 
-function Update()
+SpiritLib.Attachment.Update = function()
 	for attachedPartID, attachInfo in pairs(SpiritLib.Attachment.attachments) do
 
 		local attachedPart = PartByID(attachedPartID)
@@ -123,7 +123,7 @@ function Update()
 end
 
 -- this is used in cases like when one part no longer exists because it has been deleted. It just removes the object from any previous association.
-local function ClearAttachmentData(_unattachThisID, _fromThisID)
+SpiritLib.Attachment.ClearAttachmentData = function(_unattachThisID, _fromThisID)
 	SpiritLib.Attachment.attachments[_unattachThisID] = nil
 
 	-- find the list of children for the parent
