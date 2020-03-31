@@ -29,15 +29,15 @@ for k, moduleName in pairs(modules) do
     print("Loading " .. v .. " module...")
 end
 
--- call the Update functions in the modules if they exist
-function Update()
-	for moduleName, isLoaded in pairs(modules) do
+local regsiteredOverrides = {}
 
-		local Module = This.scripts[1][moduleName]
-
-		if (Module ~= nil and Module.Update ~= nil) then
-			Module.Update()
-		end
+function HookFunction(_overrideFunctionName, _function)
+	if (TableContains(registeredOverrides, _overrideFunctionName)) then
+		local originalFunction = This.scripts[1][_overrideFunctionName];
+		This.scripts[1][_overrideFunctionName] = function(...)
+			originalFunction(...)
+			_function(...)
+		end 
 	end
 end
 
@@ -77,4 +77,5 @@ function TableContains(_table, _value)
 
 	return false
 end
+
 
