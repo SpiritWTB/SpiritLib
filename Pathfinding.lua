@@ -44,30 +44,17 @@ function LoadModule()
 	end
 
 	-- converts a WorldPosition directly to a node in the NodeMap (if one exists)
-	SpiritLib[ModuleName].Baker.GetCurrentNode = function(_pos)
+	SpiritLib[ModuleName].Baker.PositionToNode = function(_pos)
 		local gridPos = SpiritLib[ModuleName].Baker.PositionToGridPosition(_pos)
 
 		-- IF THIS IS NIL THE ZOMBIE MADE IT OFF THE GRID, probably respawn him
 		return SpiritLib[ModuleName].Baker.NodeMap[gridPos]
 	end
 
-	print("NavMap baking for this map, this is a heavy operation, please give it time.")
+	SpiritLib[ModuleName].Baker.BakeNodeMap = function()
 
+		print("NavMap baking for this map, this is a heavy operation, please give it time.")
 
-	local loadedSaveFile = File.ReadCompressed("SpiritLib_navmesh_" .. uniqueMapVersionName .. ".txt") 
-
-	-- if we found a save file try to load it
-	if (loadedSaveFile ~= nil) then
-		SpiritLib[ModuleName].Baker.NodeMap = FromJson(loadedSaveFile)
-	end
-
-	-- if something went wrong during loading, clear the list (though if something went wrong we might have crashed)
-	if (SpiritLib[ModuleName].Baker.NodeMap == nil) then
-		SpiritLib[ModuleName].Baker.NodeMap = {}
-	end
-
-	-- if NodeMap is blank, either something went wrong or we don't have a map, so generate one 
-	if (SpiritLib[ModuleName].Baker.NodeMap == {}) then
 		for x=1, SpiritLib[ModuleName].Baker.gridSize.x do
 			for y=1, SpiritLib[ModuleName].Baker.gridSize.y do
 				for z=1, SpiritLib[ModuleName].Baker.gridSize.z do
@@ -127,8 +114,45 @@ function LoadModule()
 			print("NavMap already exists. It seems to have not loaded correctly though, so we'll overwrite it.")
 		end
 		File.WriteCompressed("SpiritLib_navmesh_" .. uniqueMapVersionName .. ".txt")
-
 	end
+
+	SpiritLib[ModuleName].Baker.FindPath = function(_startPos, _endPos)
+		local startNode = SpiritLib[ModuleName].Baker.PositionToNode(_startPos)
+		local targetNode = SpiritLib[ModuleName].Baker.PositionToNode(_endPos)
+
+		
+
+		table.insert(openList, startNode)
+
+		while (#openList > 0 ) do
+			local currentNode = openList[1]
+			for i=2, #openList do
+				--TODO: A bunch of stuff here
+			end
+		end
+	end
+
+	
+
+
+	local loadedSaveFile = File.ReadCompressed("SpiritLib_navmesh_" .. uniqueMapVersionName .. ".txt") 
+
+	-- if we found a save file try to load it
+	if (loadedSaveFile ~= nil) then
+		SpiritLib[ModuleName].Baker.NodeMap = FromJson(loadedSaveFile)
+	end
+
+	-- if something went wrong during loading, clear the list (though if something went wrong we might have crashed)
+	if (SpiritLib[ModuleName].Baker.NodeMap == nil) then
+		SpiritLib[ModuleName].Baker.NodeMap = {}
+	end
+
+	-- if NodeMap is blank, either something went wrong or we don't have a map, so generate one 
+	if (SpiritLib[ModuleName].Baker.NodeMap == {}) then
+		SpiritLib[ModuleName].Baker.BakeNodeMap()
+	end
+
+
 
 	
 
