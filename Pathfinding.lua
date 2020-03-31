@@ -75,7 +75,8 @@ function LoadModule()
 							-- this is missing gcost and hcost but only because this is a node that's being saved. We only need the costs during actual pathfinding, we don't need them saved in json.
 							local node = {
 								position = pos,
-								neighbors = {}
+								gridPos = gridPosition,
+								neighborGridPositions = {}
 							}
 
 							SpiritLib[ModuleName].Baker.NodeMap[gridPosition] = node
@@ -86,7 +87,7 @@ function LoadModule()
 		end
 
 		for k,v in pairs(SpiritLib[ModuleName].Baker.NodeMap) do
-			-- raycast to all gridneighbors to see if they're node neighbors
+			-- raycast to all grid neighbors to see if they're node neighbors
 			for rx=-1, 1 do
 				for ry=-1, 1 do
 					for rz=-1, 1 do
@@ -98,8 +99,8 @@ function LoadModule()
 							-- if we didn't hit anything going from one nodes gridposition to the other
 							if (RayCast(k, neighborGridPos).hitObject == nil) then
 								--they're neighbors!
-								-- we might be able to just "v.neighbors" here but I dont' want to risk it for now
-								table.insert(SpiritLib[ModuleName].Baker.NodeMap[k].neighbors, neighborGridPos)
+								-- we might be able to just "v.neighborGridPositions" here but I dont' want to risk it for now
+								table.insert(SpiritLib[ModuleName].Baker.NodeMap[k].neighborGridPositions, neighborGridPos)
 							end
 						end
 					end
@@ -116,20 +117,61 @@ function LoadModule()
 		File.WriteCompressed("SpiritLib_navmesh_" .. uniqueMapVersionName .. ".txt")
 	end
 
+	-- borrowed from https://forums.coronalabs.com/topic/61784-function-for-reversing-table-order/
+	SpiritLib[ModuleName].Baker.ReverseTable = function (_table)
+		local i, j = 1, #_table
+
+		while i < j do
+			_table[i], _table[j] = _table[j], _table[i]
+
+			i = i + 1
+			j = j - 1
+		end
+	end
+
+	--"Manhatten Distance" means adding together the distances of each axis.
+	SpiritLib[ModuleName].Baker.ManhattenDistance = function(_pos1, _pos2)
+		local m_dist = math.abs(_pos1.x - _pos2.x)
+		m_dist = m_dist + math.abs(_pos1.y - _pos2.y)
+		m_dist = m_dist + math.abs(_pos1.z - _pos2.z)
+
+		return m_dist
+	end
+
 	SpiritLib[ModuleName].Baker.FindPath = function(_startPos, _endPos)
 		local startNode = SpiritLib[ModuleName].Baker.PositionToNode(_startPos)
 		local targetNode = SpiritLib[ModuleName].Baker.PositionToNode(_endPos)
 
-		
+		-- work backwards from the targetNode, finding our way
+		local currentNode = targetNode
+		local path = {}
 
-		table.insert(openList, startNode)
+		-- keep track of how many steps it's moved looking for a path, give up at a certain point so this loop doesn't kill us
+		local maxComplexity = 300
+		local complexity = 0
 
-		while (#openList > 0 ) do
-			local currentNode = openList[1]
-			for i=2, #openList do
-				--TODO: A bunch of stuff here
+		-- if we haven't broken our complexity limit, and we havne't reached the startNode yet ( starting from targetNode )
+		while(currentNode~=startNode and complexity <= maxComplexity) do
+			-- check each neighbor and find the one with the least fCost
+			for k,v in pairs(currentNode.neighborGridPositions) do
+				local neighborNode = SpiritLib[ModuleName].Baker.NodeMap[v]
+
+				-- only calculate if we haven't already calculated these
+				if (neighborNode.gCost == nil) then
+					neighborNode.gCost = Vector3.Distance(neighborNode.position, startNode.position)
+					neighborNode.hCost = SpiritLib[ModuleName].Baker.ManhattenDistance(neighborNode.gridPos, targetNode.gridPos)
+					neighborNode.fCost = gCost + hCost
+				end
+
+				if (fCost < currentNode.fCost) then
+					currentNode = neighborNode
+				end
 			end
+
+			complexity = complexity + 1
 		end
+
+		return path;
 	end
 
 	
