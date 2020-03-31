@@ -37,11 +37,11 @@ function LoadModule()
 
 	SpiritLib[ModuleName].WallBuyLocations = {}
 
-	function Update()
-		CheckRadiusForKeypress()
+	SpiritLib[ModuleName].Update = function()
+		SpiritLib[ModuleName].CheckRadiusForKeypress()
 	end
 
-	function CheckRadiusForKeypress()
+	SpiritLib[ModuleName].CheckRadiusForKeypress = function()
 		local player = LocalPlayer();
 
 		for wallBuyID, wallBuyLocation in pairs(SpiritLib[ModuleName].WallBuyLocations) do
@@ -54,7 +54,7 @@ function LoadModule()
 				-- If they just entered into range, we're gonna show the "press e to buy" text
 				if (!SpiritLib[ModuleName].isWithinDistance) then
 					SpiritLib[ModuleName].isWithinDistance = true
-					ShowPurchaseHint()
+					SpiritLib[ModuleName].ShowPurchaseHint()
 					-- show thingy
 				end
 
@@ -65,22 +65,22 @@ function LoadModule()
 
 			else
 				SpiritLib[ModuleName].isWithinDistance = false
-				ClosePurchaseHint()
+				SpiritLib[ModuleName].ClosePurchaseHint()
 			end
 		end
 	end
 
-	function ShowPurchaseHint()
+	SpiritLib[ModuleName].ShowPurchaseHint = function()
 		local textPos = newVector2(ScreenSize().x/2,ScreenSize().y/2);
 		local textSize = 7
 		SpiritLib[ModuleName].purchaseHintText = MakeUIText(textPos, textSize, "Press E to buy a " + );
 	end
 
-	function ClosePurchaseHint()
+	SpiritLib[ModuleName].ClosePurchaseHint = function()
 		SpiritLib[ModuleName].purchaseHintText.Close()
 	end
 
-	function OnConnect(_player)
+	SpiritLib[ModuleName].OnConnect = function(_player)
 		if (SpiritLib.PlayerData[_player] == nil) then
 			SpiritLib.PlayerData[_player] = {} 
 		end
@@ -88,15 +88,15 @@ function LoadModule()
 		SpiritLib.PlayerData[_player].money = 0
 	end
 
-	function AddMoney(_player, _amount)
+	SpiritLib[ModuleName].AddMoney = function(_player, _amount)
 		SpiritLib.PlayerData[_player].money = SpiritLib.PlayerData[_player].money - _amount
 	end
 
-	function SetMoney(_player, _amount)
+	SpiritLib[ModuleName].SetMoney = function(_player, _amount)
 		SpiritLib.PlayerData[_player].money = _amount
 	end 
 
-	function NetworkStringReceive( _player, _msgName, _data )
+	SpiritLib[ModuleName].NetworkStringReceive = function( _player, _msgName, _data )
 
 		-- this message will only be sent to hosts, so this is host-side or server-side
 		if (_msgName == "tryBuyWeapon") then
@@ -117,7 +117,7 @@ function LoadModule()
 						if (_player.money >= weaponPrice) then
 
 							-- take away the cost of the weapon and give them the weapon
-							AddMoney(_player, -weaponPrice)
+							SpiritLib[ModuleName].AddMoney(_player, -weaponPrice)
 							SpiritLib.WeaponSystem.Call("GiveWeapon", _player, weaponName)
 						end
 					end
@@ -126,7 +126,7 @@ function LoadModule()
 		end
 	end
 
-	function RegisterWallBuy(_wallBuyPart, _type)
+	SpiritLib[ModuleName].RegisterWallBuy = function(_wallBuyPart, _type)
 		SpiritLib[ModuleName].WallBuyLocations[_wallBuyPart.id] = {
 			type = _type,
 			position = _wallBuyPart.position

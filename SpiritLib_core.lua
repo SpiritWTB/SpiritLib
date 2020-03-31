@@ -1,4 +1,6 @@
-﻿local modules = {
+﻿SpiritLib = {}
+
+local modules = {
 	Animation = false, 
 	WeaponSystem  = false, 
 	Attachment  = false, 
@@ -17,7 +19,7 @@ for k, moduleName in pairs(modules) do
     -- Load module script
     loader.script = moduleName
 
-    loader.scripts[1].SpiritLib = This.scripts[1]
+    loader.scripts[1].SpiritLib = SpiritLib
     loader.scripts[1].ModuleName = moduleName
 
     if (loader.scripts[1]["LoadModule"] ~= nil) then
