@@ -5,7 +5,6 @@
 -- make sure spiritlib is installed
 local SpiritLibPart = PartByName("SpiritLib")
 SpiritLib = SpiritLibPart.scripts[1]
-if (SpiritLibPart == nil or SpiritLibPart.scripts[1] == nil) then print("Attachment is part of SpiritLib, which cannot be found. Please install SpiritLib properly.") end
 
 SpiritLib.Attachment = {}
 
@@ -135,3 +134,5 @@ SpiritLib.Attachment.ClearAttachmentData = function(_unattachThisID, _fromThisID
 		end
 	end
 end
+
+SpiritLib.Call("ModuleLoadFinished", This)
