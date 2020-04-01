@@ -19,12 +19,16 @@ function Start()
 	    -- Load module script
 	    loader.script = moduleName
 	
-		
-	    if (loader.scripts[1]~= nil and loader.scripts[1].Globals.LoadModule ~= nil) then
-	    	loader.scripts[1].Call("LoadModule", SpiritLib, moduleName)
+		if (loader.scripts[1]~= nil) then
+
+		    if (loader.scripts[1].Globals.LoadModule ~= nil) then
+		    	loader.scripts[1].Call("LoadModule", SpiritLib, moduleName)
+			end
+
+		    print("Loading " .. moduleName .. " module...")
+		else
+			print(moduleName .. " module listed but not found.")
 		end
-	
-	    print("Attempting to load " .. moduleName .. " module...")
 	end
 end
 
