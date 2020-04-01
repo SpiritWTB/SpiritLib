@@ -24,7 +24,7 @@ function Start()
 	    	loader.scripts[1].Call("LoadModule", SpiritLib, moduleName)
 		end
 	
-	    print("Loading " .. moduleName .. " module...")
+	    print("Attempting to load " .. moduleName .. " module...")
 	end
 end
 
