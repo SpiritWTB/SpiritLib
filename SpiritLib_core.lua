@@ -8,25 +8,24 @@ local modules = {
 	PlayerData = false
 }
 
-
--- attempt to load all the modules
-for k, moduleName in pairs(modules) do
-	-- the loader runs a script, which registers stuff with 
-    local loader = CreatePart(0, newVector3(0, 0, 0), newVector3(0, 0, 0))
-    loader.visible = false
-    loader.cancollide = false
-
-    -- Load module script
-    loader.script = moduleName
-
-    loader.scripts[1].SpiritLib = SpiritLib
-    loader.scripts[1].ModuleName = moduleName
-
-    if (loader.scripts[1]["LoadModule"] ~= nil) then
-    	loader.scripts[1].Call("LoadModule")
+function Start()
+	-- attempt to load all the modules
+	for moduleName, v in pairs(modules) do
+		-- the loader runs a script, which registers stuff with 
+	    local loader = CreatePart(0, newVector3(0, 0, 0), newVector3(0, 0, 0))
+	    loader.visible = false
+	    loader.cancollide = false
+	
+	    -- Load module script
+	    loader.script = moduleName
+	
+		
+	    if (loader.scripts[1]~= nil and loader.scripts[1].Globals.LoadModule ~= nil) then
+	    	loader.scripts[1].Call("LoadModule", SpiritLib, moduleName)
+		end
+	
+	    print("Loading " .. moduleName .. " module...")
 	end
-
-    print("Loading " .. v .. " module...")
 end
 
 local regsiteredOverrides = {}
@@ -58,9 +57,9 @@ end
 
 
 function ModuleLoadFinished(_loader)
-	if (_loader.scripts[1] ~= nil and _loader.scripts[1].ModuleName ~= nil) then
-		if (modules[_loader.scripts[1].ModuleName] ~= nil) then
-			modules[_loader.scripts[1].ModuleName] = true
+	if (_loader.scripts[1] ~= nil and _loader.scripts[1].Global.ModuleName ~= nil) then
+		if (modules[_loader.scripts[1].Globals.ModuleName] ~= nil) then
+			modules[_loader.scripts[1].Globals.ModuleName] = true
 		end
 	else
 		print("ERROR: Module name not found, please contact SpiritLib devs and make sure you're not deleting the loader parts while SpiritLib is loading modules.")
