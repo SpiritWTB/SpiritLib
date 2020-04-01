@@ -140,6 +140,5 @@ function LoadModule()
 		end
 	end)
 
+	SpiritLib.Call("ModuleLoadFinished", This)
 end
-
-SpiritLib.Call("ModuleLoadFinished", This)

@@ -37,10 +37,6 @@ function LoadModule()
 
 	SpiritLib[ModuleName].WallBuyLocations = {}
 
-	SpiritLib[ModuleName].Update = function()
-		SpiritLib[ModuleName].CheckRadiusForKeypress()
-	end
-
 	SpiritLib[ModuleName].CheckRadiusForKeypress = function()
 		local player = LocalPlayer();
 
@@ -80,13 +76,7 @@ function LoadModule()
 		SpiritLib[ModuleName].purchaseHintText.Close()
 	end
 
-	SpiritLib[ModuleName].OnConnect = function(_player)
-		if (SpiritLib.PlayerData[_player] == nil) then
-			SpiritLib.PlayerData[_player] = {} 
-		end
-
-		SpiritLib.PlayerData[_player].money = 0
-	end
+	
 
 	SpiritLib[ModuleName].AddMoney = function(_player, _amount)
 		SpiritLib.PlayerData[_player].money = SpiritLib.PlayerData[_player].money - _amount
@@ -96,7 +86,32 @@ function LoadModule()
 		SpiritLib.PlayerData[_player].money = _amount
 	end 
 
-	SpiritLib[ModuleName].NetworkStringReceive = function( _player, _msgName, _data )
+	SpiritLib[ModuleName].RegisterWallBuy = function(_wallBuyPart, _type)
+		SpiritLib[ModuleName].WallBuyLocations[_wallBuyPart.id] = {
+			type = _type,
+			position = _wallBuyPart.position
+		}
+	end
+
+
+
+
+
+
+
+	SpiritLib[ModuleName].HookFunction("Update", function()
+		SpiritLib[ModuleName].CheckRadiusForKeypress()
+	end)
+
+	SpiritLib[ModuleName].HookFunction("OnConnect", function(_player)
+		if (SpiritLib.PlayerData[_player] == nil) then
+			SpiritLib.PlayerData[_player] = {} 
+		end
+
+		SpiritLib.PlayerData[_player].money = 0
+	end)
+
+	SpiritLib[ModuleName].HookFunction("NetworkStringReceive", function( _player, _msgName, _data )
 
 		-- this message will only be sent to hosts, so this is host-side or server-side
 		if (_msgName == "tryBuyWeapon") then
@@ -124,22 +139,7 @@ function LoadModule()
 				end
 			end
 		end
-	end
+	end)
 
-	SpiritLib[ModuleName].RegisterWallBuy = function(_wallBuyPart, _type)
-		SpiritLib[ModuleName].WallBuyLocations[_wallBuyPart.id] = {
-			type = _type,
-			position = _wallBuyPart.position
-		}
-	end
-
-
-
-
-
-
-
-
-
-
+	SpiritLib.Call("ModuleLoadFinished", This)
 end
