@@ -47,12 +47,12 @@ function SafeGetTable(_script, _table, _moduleName)
 	for k,v in pairs(_table) do
 		-- if it's a table go through again, this will be recursive since tables seem to be the problem
 		if (type(v) == "table") then
-			copy[k] = SafeGetTable(_script, _table[k])
+			copy[k] = SafeGetTable(_script, v)
 		elseif (type(v) == "function") then
-			copy[k] = function(...) _script.Call() end
+			copy[k] = v
 		else
 			print(type(v))
-			copy[k] = _table[k]
+			copy[k] = v
 		end
 	end
 
