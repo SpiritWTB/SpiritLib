@@ -8,6 +8,8 @@ local modules = {
 	PlayerData = false
 }
 
+local moduleLoaders = {}
+
 function Start()
 	-- attempt to load all the modules
 	for moduleName, v in pairs(modules) do
@@ -18,19 +20,46 @@ function Start()
 	
 	    -- Load module script
 	    loader.script = moduleName
+
+	    moduleLoaders[moduleName] = loader
 	
-		if (loader.scripts[1]~= nil) then
 
-		    if (loader.scripts[1].Globals.LoadModule ~= nil) then
-		    	loader.scripts[1].Call("LoadModule", SpiritLib, moduleName)
-			end
-
+		if (loader ~=nil and loader.scripts[1]~= nil and loader.scripts[1].Globals.SpiritLib[moduleName] ~= nil) then
+		
+			SpiritLib[moduleName] = SafeGetTable(loader.scripts[1], loader.scripts[1].Globals.SpiritLib[moduleName])
+	
 		    print("Loading " .. moduleName .. " module...")
 		else
-			print(moduleName .. " module listed but not found.")
+			if (moduleName ~= nil) then
+				print("module " .. moduleName .. " failed to load")
+			end
 		end
 	end
+
+
+	SpiritLib.Pathfinding.Baker.BakeNodeMap()
 end
+
+
+function SafeGetTable(_script, _table, _moduleName)
+	local copy = {}
+
+	for k,v in pairs(_table) do
+		-- if it's a table go through again, this will be recursive since tables seem to be the problem
+		if (type(v) == "table") then
+			copy[k] = SafeGetTable(_script, _table[k])
+		elseif (type(v) == "function") then
+			copy[k] = function(...) _script.Call() end
+		else
+			print(type(v))
+			copy[k] = _table[k]
+		end
+	end
+
+	return copy
+end
+
+
 
 local regsiteredOverrides = {}
 
