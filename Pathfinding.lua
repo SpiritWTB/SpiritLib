@@ -182,6 +182,13 @@ print(startNode)
 
 		-- if we haven't broken our complexity limit, and we havne't reached the startNode yet ( starting from targetNode )
 		while(currentNode~=startNode and complexity <= maxComplexity) do
+			if (currentNode.gCost == nil) then
+				currentNode.gCost = Vector3.Distance(currentNode.position, startNode.position)
+				currentNode.hCost = SpiritLib[moduleName].functions.ManhattenDistance(currentNode.gridPos, targetNode.gridPos)
+				
+				currentNode.fCost = currentNode.gCost + currentNode.hCost
+			end
+
 			-- check each neighbor and find the one with the least fCost
 			for k,v in pairs(currentNode.neighborGridPositions) do
 				local neighborNode = SpiritLib[moduleName].Baker.NodeMap[v]
@@ -189,11 +196,12 @@ print(startNode)
 				-- only calculate if we haven't already calculated these
 				if (neighborNode.gCost == nil) then
 					neighborNode.gCost = Vector3.Distance(neighborNode.position, startNode.position)
-					neighborNode.hCost = SpiritLib[moduleName].Baker.ManhattenDistance(neighborNode.gridPos, targetNode.gridPos)
-					neighborNode.fCost = gCost + hCost
+					neighborNode.hCost = SpiritLib[moduleName].functions.ManhattenDistance(neighborNode.gridPos, targetNode.gridPos)
+					
+					neighborNode.fCost = neighborNode.gCost + neighborNode.hCost
 				end
-
-				if (fCost < currentNode.fCost) then
+				
+				if (neighborNode.fCost ~= nil and neighborNode.fCost < currentNode.fCost) then
 					currentNode = neighborNode
 				end
 			end
@@ -256,8 +264,10 @@ if (SpiritLib[moduleName].Baker.NodeMap == nil or SpiritLib[moduleName].Baker.No
 	print("path: " .. tostring(path))
 	for k,v in pairs(path) do
 		print("===")
-		print(k)
-		print(v)
+		
+		for _k,_v in pairs(v) do
+			print(_v)
+		end
 	end
 	
 end
