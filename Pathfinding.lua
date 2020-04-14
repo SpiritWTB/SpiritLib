@@ -101,7 +101,6 @@ SpiritLib[moduleName].functions = {
 								neighborGridPositions = {}
 							}
 
-							print(tostring(node) .. tostring(node.gridPos))
 
 							SpiritLib[moduleName].Baker.NodeMap[gridPosition] = node
 						end
@@ -189,6 +188,8 @@ SpiritLib[moduleName].functions = {
 		local maxComplexity = 300
 		local complexity = 0
 
+		local passedNodes = {}
+
 		-- if we haven't broken our complexity limit, and we havne't reached the startNode yet ( starting from targetNode )
 		while(currentNode~=startNode and complexity <= maxComplexity) do
 			if (currentNode.gCost == nil) then
@@ -198,25 +199,33 @@ SpiritLib[moduleName].functions = {
 				currentNode.fCost = currentNode.gCost + currentNode.hCost
 			end
 
+			local chosenNextNode = nil
 			-- check each neighbor and find the one with the least fCost
 			for k,v in pairs(currentNode.neighborGridPositions) do
 				local neighborNode = SpiritLib[moduleName].Baker.NodeMap[v]
+				
 
 				-- only calculate if we haven't already calculated these
 				if (neighborNode.gCost == nil) then
-					neighborNode.gCost = Vector3.Distance(neighborNode.position, startNode.position)
+					neighborNode.gCost = currentNode.gCost + Vector3.Distance(neighborNode.position, startNode.position)
 					neighborNode.hCost = SpiritLib[moduleName].functions.ManhattenDistance(neighborNode.gridPos, targetNode.gridPos)
-					
 					neighborNode.fCost = neighborNode.gCost + neighborNode.hCost
+				else
+					neighborNode.gCost = currentNode.gCost + Vector3.Distance(neighborNode.position, startNode.position)
 				end
 				
-				if (neighborNode.fCost ~= nil and neighborNode.fCost < currentNode.fCost) then
-					currentNode = neighborNode
+				if (neighborNode.fCost ~= nil and (chosenNextNode==nil or neighborNode.gCost < chosenNextNode.gCost) and passedNodes[neighborNode.gridPos]==nil) then
+					chosenNextNode = neighborNode
 				end
 			end
 
+			if (chosenNextNode ~= nil) then
+				currentNode = chosenNextNode
+				passedNodes[chosenNextNode.gridPos] = true
+			end
+
 			table.insert(path, currentNode);
-			print(currentNode)
+			print(currentNode.gridPos)
 
 			complexity = complexity + 1
 		end
@@ -272,16 +281,18 @@ if (SpiritLib[moduleName].Baker.NodeMap == nil or SpiritLib[moduleName].Baker.No
 	print("path: " .. tostring(path))
 
 	--SpiritLib[moduleName].Baker.NodeMap
-	--[[for k,v in pairs(SpiritLib[moduleName].Baker.NodeMap) do
+	for k,v in pairs(SpiritLib[moduleName].Baker.NodeMap) do
 		local part = CreatePart(0)
 		part.position = v.position
 		part.size = newVector3(0.2,0.2,0.2)
 		part.cancollide = false
-	end]]
+	end
 
+	local i = 0
 	for k,v in pairs(path) do
+		i = i + 1
 		local part = CreatePart(0)
-		part.position = v.position
+		part.position = v.position + newVector3(0,0.075*i,0)
 		part.cancollide = false
 
 	end
