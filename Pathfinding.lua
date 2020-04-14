@@ -32,7 +32,7 @@ SpiritLib[moduleName].Baker.slopeAllowance = 50
 
 -- distance between points that we check
 SpiritLib[moduleName].Baker.gridPointSpacing = 2
-SpiritLib[moduleName].Baker.gridSize = newVector3(20,20,20)
+SpiritLib[moduleName].Baker.gridSize = newVector3(20,10,20)
 
 print("creating function list")
 
@@ -66,6 +66,15 @@ SpiritLib[moduleName].functions = {
 		return SpiritLib[moduleName].Baker.NodeMap[gridPos]
 	end,
 
+	GetRootParent = function(_part)
+		local nextParent = _part.parent
+		if (nextParent ~= nil) then
+			return SpiritLib[moduleName].functions.GetRootParent(nextParent);
+		else
+			return _part
+		end
+	end,
+
 	BakeNodeMap = function()
 
 		print("NavMap baking for this map, this is a heavy operation, please give it time.")
@@ -73,14 +82,12 @@ SpiritLib[moduleName].functions = {
 		for x=1, SpiritLib[moduleName].Baker.gridSize.x do
 			for y=1, SpiritLib[moduleName].Baker.gridSize.y do
 				for z=1, SpiritLib[moduleName].Baker.gridSize.z do
-
 					-- in the future we'll do a Cube collision check here, but wtb doesn't have it rn
 					-- so raycast from the top to the bottom of what would be the cube
-					local imaginaryCubeTop = 		newVector3(x,y+0.5,z)
+					local imaginaryCubeTop = 		newVector3(x,y+10.5,z)
 					local imaginaryCubeBottom = 	newVector3(x,y-0.5,z)
-
 					local check = RayCast(imaginaryCubeTop, imaginaryCubeBottom)
-					if (check and check.hitDistance>0) then
+					if (check and check.hitDistance>0 and check.hitObject~=nil and check.hitObject.name == "NavFloor") then
 						if (SpiritLib[moduleName].functions.NormalMakesRamp(check.hitNormal)) then
 
 							local gridPosition = newVector3(x,y,z)
@@ -93,6 +100,8 @@ SpiritLib[moduleName].functions = {
 								gridPos = gridPosition,
 								neighborGridPositions = {}
 							}
+
+							print(tostring(node) .. tostring(node.gridPos))
 
 							SpiritLib[moduleName].Baker.NodeMap[gridPosition] = node
 						end
@@ -115,7 +124,7 @@ SpiritLib[moduleName].functions = {
 
 							-- if we didn't hit anything going from one nodes gridposition to the other
 
-							local hit = RayCast(k, neighborGridPos)
+							local hit = RayCast(v.position, SpiritLib[moduleName].Baker.NodeMap[neighborGridPos].position)
 							if (hit == nil) then
 								--they're neighbors!
 								-- we might be able to just "v.neighborGridPositions" here but I dont' want to risk it for now
@@ -169,9 +178,9 @@ SpiritLib[moduleName].functions = {
 		local startNode = SpiritLib[moduleName].functions.PositionToNode(_startPos)
 		local targetNode = SpiritLib[moduleName].functions.PositionToNode(_endPos)
 
-print(startNode)
-
+		print(startNode)
 		print(targetNode)
+
 		-- work backwards from the targetNode, finding our way
 		local currentNode = targetNode
 		local path = {}
@@ -206,9 +215,8 @@ print(startNode)
 				end
 			end
 
-
-			print(currentNode.position)
 			table.insert(path, currentNode);
+			print(currentNode)
 
 			complexity = complexity + 1
 		end
@@ -262,12 +270,20 @@ if (SpiritLib[moduleName].Baker.NodeMap == nil or SpiritLib[moduleName].Baker.No
 	print("traversed findpath")
 
 	print("path: " .. tostring(path))
+
+	--SpiritLib[moduleName].Baker.NodeMap
+	--[[for k,v in pairs(SpiritLib[moduleName].Baker.NodeMap) do
+		local part = CreatePart(0)
+		part.position = v.position
+		part.size = newVector3(0.2,0.2,0.2)
+		part.cancollide = false
+	end]]
+
 	for k,v in pairs(path) do
-		print("===")
-		
-		for _k,_v in pairs(v) do
-			print(_v)
-		end
+		local part = CreatePart(0)
+		part.position = v.position
+		part.cancollide = false
+
 	end
 	
 end
