@@ -82,29 +82,36 @@ SpiritLib[moduleName].functions = {
 		for x=1, SpiritLib[moduleName].Baker.gridSize.x do
 			for y=1, SpiritLib[moduleName].Baker.gridSize.y do
 				for z=1, SpiritLib[moduleName].Baker.gridSize.z do
+
+					local isOpen = false
+
 					-- in the future we'll do a Cube collision check here, but wtb doesn't have it rn
 					-- so raycast from the top to the bottom of what would be the cube
 					local imaginaryCubeTop = 		newVector3(x,y+10.5,z)
 					local imaginaryCubeBottom = 	newVector3(x,y-0.5,z)
 					local check = RayCast(imaginaryCubeTop, imaginaryCubeBottom)
+
 					if (check and check.hitDistance>0 and check.hitObject~=nil and check.hitObject.name == "NavFloor") then
 						if (SpiritLib[moduleName].functions.NormalMakesRamp(check.hitNormal)) then
-
-							local gridPosition = newVector3(x,y,z)
-
-							local pos = gridPosition * SpiritLib[moduleName].Baker.gridPointSpacing
-
-							-- this is missing gcost and hcost but only because this is a node that's being saved. We only need the costs during actual pathfinding, we don't need them saved in json.
-							local node = {
-								position = pos,
-								gridPos = gridPosition,
-								neighborGridPositions = {}
-							}
-
-
-							SpiritLib[moduleName].Baker.NodeMap[gridPosition] = node
+							-- the stuff above checks if it's a position the AI should be able to walk to. They can't go into walls or up super steep ramps
+							isOpen = true
 						end
 					end
+
+					local gridPosition = newVector3(x,y,z)
+
+					local pos = gridPosition * SpiritLib[moduleName].Baker.gridPointSpacing
+
+					-- this is missing gcost and hcost but only because this is a node that's being saved. We only need the costs during actual pathfinding, we don't need them saved in json.
+					local node = {
+						position = pos,
+						gridPos = gridPosition,
+						neighborGridPositions = {},
+						isOpen = isOpen
+					}
+
+
+					SpiritLib[moduleName].Baker.NodeMap[gridPosition] = node
 				end
 			end
 		end
@@ -112,22 +119,22 @@ SpiritLib[moduleName].functions = {
 		print("first loop traversed")
 
 		for k,v in pairs(SpiritLib[moduleName].Baker.NodeMap) do
+			local nodeBeingChecked = SpiritLib[moduleName].Baker.NodeMap[k]
 			-- raycast to all grid neighbors to see if they're node neighbors
 			for rx=-1, 1 do
 				for ry=-1, 1 do
 					for rz=-1, 1 do
 						local neighborGridPos = newVector3(k.x + rx, k.y + ry, k.z + rz)
+						local neighbor = SpiritLib[moduleName].Baker.NodeMap[neighborGridPos]
 
 						-- if this isn't the original position and it's a real node position
-						if (neighborGridPos~=k and SpiritLib[moduleName].Baker.NodeMap[neighborGridPos]~=nil) then
-
+						if (neighborGridPos~=k and neighbor~=nil) then
 							-- if we didn't hit anything going from one nodes gridposition to the other
-
-							local hit = RayCast(v.position, SpiritLib[moduleName].Baker.NodeMap[neighborGridPos].position)
-							if (hit == nil) then
+							local hit = RayCast(v.position, neighbor.position)
+							if (hit == nil and neighbor.isOpen) then
 								--they're neighbors!
 								-- we might be able to just "v.neighborGridPositions" here but I dont' want to risk it for now
-								table.insert(SpiritLib[moduleName].Baker.NodeMap[k].neighborGridPositions, neighborGridPos)
+								table.insert(nodeBeingChecked.neighborGridPositions, neighborGridPos)
 
 							end
 						end
@@ -282,12 +289,12 @@ if (SpiritLib[moduleName].Baker.NodeMap == nil or SpiritLib[moduleName].Baker.No
 	print("path: " .. tostring(path))
 
 	--SpiritLib[moduleName].Baker.NodeMap
-	for k,v in pairs(SpiritLib[moduleName].Baker.NodeMap) do
+	--[[for k,v in pairs(SpiritLib[moduleName].Baker.NodeMap) do
 		local part = CreatePart(0)
 		part.position = v.position
 		part.size = newVector3(0.2,0.2,0.2)
 		part.cancollide = false
-	end
+	end]]
 
 	local i = 0
 	for k,v in pairs(path) do
@@ -298,4 +305,12 @@ if (SpiritLib[moduleName].Baker.NodeMap == nil or SpiritLib[moduleName].Baker.No
 
 	end
 	
+end
+
+function Update()
+	if (InputPressed("p")) then
+		local zombie = PartByName("Zombie")
+		local player = PartByName("Player")
+		local path = SpiritLib[moduleName].functions.FindPath(zombie.position, player.position)
+	end
 end
