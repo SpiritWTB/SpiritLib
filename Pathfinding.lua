@@ -211,11 +211,12 @@ SpiritLib[moduleName].functions = {
 					neighborNode.hCost = SpiritLib[moduleName].functions.ManhattenDistance(neighborNode.gridPos, targetNode.gridPos)
 					neighborNode.fCost = neighborNode.gCost + neighborNode.hCost
 				else
-					neighborNode.gCost = currentNode.gCost + Vector3.Distance(neighborNode.position, startNode.position)
+					neighborNode.gCost = Vector3.Distance(neighborNode.position, startNode.position)
 				end
 				
-				if (neighborNode.fCost ~= nil and (chosenNextNode==nil or neighborNode.fCost < chosenNextNode.gCost) and passedNodes[neighborNode.gridPos]==nil) then
-					chosenNextNode = neighborNode
+				if (neighborNode.fCost ~= nil and (chosenNextNode==nil or neighborNode.fCost < chosenNextNode.fCost) and passedNodes[neighborNode.gridPos]==nil) then
+
+					chosenNextNode = neighborNode	
 				end
 			end
 
