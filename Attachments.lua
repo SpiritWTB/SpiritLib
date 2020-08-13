@@ -1,10 +1,9 @@
-﻿-- this library just fakes parenting without the scale until WTB has some way to make multiple objects into one
+-- this library just fakes parenting without the scale until WTB has some way to make multiple objects into one
 -- this is not going to work on overlapping physics objects
 -- this file says "child" and "parent" a lot but it's talking about an object being attached to another, not default WTB parenting. The whole point of the Attachments library is to avoid WTB Parenting for now.
 
 -- this is actually not usually necessary, since you can attach parts together without this by attaching 2 to the same 1:1:1 ratio part.
 -- this should then, mainly, be used for parenting to players. Occasionally also if you really need nested parents
-
 
 
 SpiritLib = nil
