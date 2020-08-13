@@ -1,40 +1,10 @@
-﻿SpiritLib = nil
-ModuleName = nil
+﻿local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
 
--- variables ModuleName and SpiritLib will be set before this runs
-function LoadModule()
-	SpiritLib[ModuleName] = {}
+function CallModuleFunction(moduleName, name, ...) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Call(name, ...) end
+function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
 
-
-
-
-
-	-- Add your module functions and variables to SpiritLib[ModuleName] here
-
-	-- example: variable
-	SpiritLib[ModuleName].MyVariable = true
-
-	-- example: function
-	SpiritLib[ModuleName].MyFunction = function()
-		-- function contents here
+function Update()
+	if InputPressed("z") then
+		CallModuleFunction("Networking", "CreateStreamedValue", "MousePos:" .. LocalPlayer().id, MousePosWorld())
 	end
-
-
-
-	-- if you're going to do some setup right when the module gets loaded, do it down here after the functions, otherwise, if you try to run them, theoretically they'll no exist yet
-
-
-
-	-- If you need to use override functions, you must register them with SpiritLib by defining them like this
-	SpiritLib[ModuleName].HookFunction("Start", function()
-		print("The module template has hit the Start() hook")
-	end)
-
-
-
-
-	SpiritLib.Call("ModuleLoadFinished", This)
-
 end
-
-
