@@ -1,13 +1,17 @@
 SpiritLib = {}
 
 SpiritLib.Modules = {
-	["Networking"] = {}
+	["JSON"] = {},
+	["Models"] = {}
 }
 
 function Start()
 	-- attempt to load all the modules
 	for moduleName, v in pairs(SpiritLib.Modules) do
-		local modulePart = PartByName("SpiritLib " .. moduleName)
+		local modulePart = CreatePart(0)
+		-- modulePart.visible = false
+		modulePart.cancollide = false
+		modulePart.script = "SpiritLib " .. moduleName
 
 		SpiritLib.Modules[moduleName] = modulePart
 	end

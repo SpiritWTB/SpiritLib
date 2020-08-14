@@ -1,3 +1,8 @@
+local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
+
+function CallModuleFunction(moduleName, name, ...) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Call(name, ...) end
+function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
+
 local function CreateBoundingBox(parts)
 	if type(parts) ~= "table" or #parts < 1 then
 		return
@@ -23,8 +28,8 @@ local function CreateBoundingBox(parts)
 	local xMax, xMin, yMax, yMin, zMax, zMin = corners[1].x, corners[1].x, corners[1].y, corners[1].y, corners[1].z, corners[1].z
 
 	for i, corner in pairs(corners) do
-		-- local point = CreatePart(1, corner, Vector3.zero)
-		point.size = newVector3(0.1, 0.1, 0.1)
+		--[[ local point = CreatePart(1, corner, Vector3.zero)
+		point.size = newVector3(0.1, 0.1, 0.1) ]]
 
 		if corner.x > xMax then xMax = corner.x end
 		if corner.x < xMin then xMin = corner.x end
@@ -53,10 +58,9 @@ local function CreateBoundingBox(parts)
 	return encompasser
 end
 
-local bruh = {PartByName("1"), PartByName("2"), PartByName("3")}
-
 function Update()
-	if InputPressed("q") then
-		CreateBoundingBox(bruh)
+	if InputPressed("e") then
+		CallModuleFunction("JSON", "LoadModel", "hurb")
+		-- CreateBoundingBox(bruh)
 	end
 end
