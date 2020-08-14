@@ -141,12 +141,6 @@ local partsUpdated = 0
 function updateRoutine()
 
 	for attachedPartID, attachInfo in pairs(attachments) do
-		partsUpdated = partsUpdated + 1
-
-		if (partsUpdated > 175) then
-			coroutine.yield()
-			partsUpdated = 0
-		end
 
 		local parentPart = PartByID(attachInfo.parentID)
 
@@ -165,6 +159,13 @@ function updateRoutine()
 					attachedPart.angles = parentPart.angles - attachInfo.angOffset
 				else 
 					Unattach(attachInfo.parent)
+				end
+
+				partsUpdated = partsUpdated + 1
+
+				if (partsUpdated > 175) then
+					coroutine.yield()
+					partsUpdated = 0
 				end
 			end
 		else
