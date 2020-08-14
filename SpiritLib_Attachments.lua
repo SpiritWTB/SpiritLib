@@ -124,14 +124,6 @@ end
 
 
 function Update()
-	if (InputPressed("i")) then
-		for i=1, 100 do
-			local part = CreatePart(0)
-			part.cancollide = false
-			part.position = This.position + newVector3(i/10,i/10,i/10)
-			Attach(part,This)
-		end
-	end
 
 	for attachedPartID, attachInfo in pairs(attachments) do
 
