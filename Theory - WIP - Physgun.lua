@@ -1,3 +1,8 @@
+local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
+function CallModuleFunction(moduleName, name, ...) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Call(name, ...) end
+function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
+
+
 WEAPON = {}
 
 WEAPON.Name = "The Grabber"
@@ -28,7 +33,7 @@ WEAPON.think = function(unsure if we need arguments)
 	end
 end
 
-
+CallModuleFunction("Weapons","RegisterWeapon", WEAPON)
 
 -- **  this will run on the server AND client, so let's make sure on the server (we'll do it on both for the heck of it) that they can indeed hit that entity. This is subject to a little lag if, for instance, the host runs around a corner as he's being shot, but it's decent host-level security, and that's all we have right now... we might can do this outside of the individual weapon before calling weapon.Fire
 

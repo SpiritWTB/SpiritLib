@@ -99,3 +99,36 @@ function IndexToKeyBind(index)
 end
 
 SpawnUIBoxes()
+
+
+
+
+
+
+
+--if not IsHost() then return end
+
+RegisteredWeapons = {}
+
+function RegisterWeapon(weaponTable)
+	-- todo: check to make sure they've got a name and stuff, basic things that will break the game if they aren't there
+	
+end
+
+-- TODO: RUN THIS ON FIXED CONNECT
+function InitializeInventories()
+	-- use player ID as key, table as a value
+	playerWeaponInventories = {}
+
+	for _, ply in pairs(GetAllPlayers()) do
+		playerWeaponInventories[ply] = {}
+	end
+end
+
+function GiveWeapon(player)
+	if (playerWeaponInventories[player] ~= null) then
+
+		table.insert(playerWeaponInventories[player], weapon)
+	end
+end
+
