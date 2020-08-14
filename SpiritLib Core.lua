@@ -9,7 +9,7 @@ function Start()
 	-- attempt to load all the modules
 	for moduleName, v in pairs(SpiritLib.Modules) do
 		local modulePart = CreatePart(0)
-		-- modulePart.visible = false
+		modulePart.visible = false
 		modulePart.cancollide = false
 		modulePart.script = "SpiritLib " .. moduleName
 
