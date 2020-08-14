@@ -22,7 +22,9 @@ function Attach(_attachThis, _toThis)
 	attachments[_attachThis.id] = {
 		parentID = _toThis.id,
 		posOffset = _attachThis.position - _toThis.position,
-		angOffset = _attachThis.angles - _toThis.angles
+		angOffset = _attachThis.angles - _toThis.angles,
+		lastParentPosition = _toThis.position,
+		lastParentAngles = _toThis.angles
 	}
 
 
@@ -34,9 +36,23 @@ function Attach(_attachThis, _toThis)
 
 end
 
+-- this is used in cases like when one part no longer exists because it has been deleted. It just removes the object from any previous association.
+function Unattach(_unattachThisID, _fromThisID)
+	attachments[_unattachThisID] = nil
+
+	-- find the list of children for the parent
+	if (reverseAssociations[_fromThisID] ~= nil) then
+		for index, childID in pairs(reverseAssociations[_fromThisID]) do
+			if (childID == _unattachThisID) then
+				reverseAssociations[_fromThisID][index] = nil
+			end
+		end
+	end
+end
 
 
--- this will refresh the position and rotation offsets, they would use this after changing the position of a "child" object
+
+-- this will refresh the position and rotation offsets, they would use this after changing the position of a "child" object relative to the parent
 function RefreshAttachment(_attachThis)
 	local attachInfo = attachments[_attachThis.id]
 	if (attachInfo ~= nil) then
@@ -105,37 +121,43 @@ function getAttachedIDS(_parent)
 	end
 end
 
--- this is used in cases like when one part no longer exists because it has been deleted. It just removes the object from any previous association.
-function ClearAttachmentData(_unattachThisID, _fromThisID)
-	attachments[_unattachThisID] = nil
-
-	-- find the list of children for the parent
-	if (reverseAssociations[_fromThisID] ~= nil) then
-		for index, childID in pairs(reverseAssociations[_fromThisID]) do
-			if (childID == _unattachThisID) then
-				reverseAssociations[_fromThisID][index] = nil
-			end
-		end
-	end
-end
 
 
 function Update()
+	if (InputPressed("i")) then
+		for i=1, 100 do
+			local part = CreatePart(0)
+			part.cancollide = false
+			part.position = This.position + newVector3(i/10,i/10,i/10)
+			Attach(part,This)
+		end
+	end
+
 	for attachedPartID, attachInfo in pairs(attachments) do
 
-		local attachedPart = PartByID(attachedPartID)
+		
 		local parentPart = PartByID(attachInfo.parentID)
 
+		local shouldUpdateChildren = ( attachInfo.lastParentPosition ~= parentPart.position or attachInfo.lastParentAngles ~= parentPart.angles )
+
 		if (parentPart ~= nil) then
-			if (attachedPart ~= nil) then
-				attachedPart.position = parentPart.position - attachInfo.posOffset.x*parentPart.right - attachInfo.posOffset.y*parentPart.up - attachInfo.posOffset.z*parentPart.forward
-				attachedPart.angles = parentPart.angles - attachInfo.angOffset
-			else 
-				ClearAttachmentData(attachInfo.parent)
+			if (shouldUpdateChildren) then
+
+				attachInfo.lastParentPosition = parentPart.position
+				attachInfo.lastParentAngles = parentPart.angles
+
+				local attachedPart = PartByID(attachedPartID)
+
+				if (attachedPart ~= nil) then
+					attachedPart.position = parentPart.position + attachInfo.posOffset.x*parentPart.right + attachInfo.posOffset.y*parentPart.up + attachInfo.posOffset.z*parentPart.forward
+					attachedPart.angles = parentPart.angles - attachInfo.angOffset
+				else 
+					Unattach(attachInfo.parent)
+				end
 			end
 		else
 			-- if we're here one of the parts was probably deleted
-			ClearAttachmentData(attachedPartID)
+			Unattach(attachedPartID)
 		end
 	end
 end
