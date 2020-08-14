@@ -40,8 +40,14 @@ end
 function RefreshAttachment(_attachThis)
 	local attachInfo = attachments[_attachThis.id]
 	if (attachInfo ~= nil) then
-		attachInfo.posOffset = _attachThis.position - _toThis.position,
+		local angles = _toThis.angles
+
+		_toThis.angles = newVector3(0,0,0);
+
+		attachInfo.posOffset = _attachThis.position - _toThis.position
 		attachInfo.angOffset = _attachThis.angles - _toThis.angles
+
+		_toThis.angles = angles;
 	end
 end
 
@@ -114,25 +120,22 @@ function ClearAttachmentData(_unattachThisID, _fromThisID)
 end
 
 
+function Update()
+	for attachedPartID, attachInfo in pairs(attachments) do
 
---[[
-	HookFunction("Update", function()
-		for attachedPartID, attachInfo in pairs(attachments) do
+		local attachedPart = PartByID(attachedPartID)
+		local parentPart = PartByID(attachInfo.parentID)
 
-			local attachedPart = PartByID(attachedPartID)
-			local parentPart = PartByID(attachInfo.parentID)
-
-			if (parentPart ~= nil) then
-				if (attachedPart ~= nil) then
-					attachedPart.position = parentPart.position - attachInfo.posOffset
-					attachedPart.angles = parentPart.angles - attachInfo.angOffset
-				else 
-					ClearAttachmentData(attachInfo.parent)
-				end
-			else
-				-- if we're here one of the parts was probably deleted
-				ClearAttachmentData(attachedPartID)
+		if (parentPart ~= nil) then
+			if (attachedPart ~= nil) then
+				attachedPart.position = parentPart.position - attachInfo.posOffset.x*parentPart.right - attachInfo.posOffset.y*parentPart.up - attachInfo.posOffset.z*parentPart.forward
+				attachedPart.angles = parentPart.angles - attachInfo.angOffset
+			else 
+				ClearAttachmentData(attachInfo.parent)
 			end
+		else
+			-- if we're here one of the parts was probably deleted
+			ClearAttachmentData(attachedPartID)
 		end
-	end)
-]]
+	end
+end
