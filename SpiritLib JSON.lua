@@ -127,11 +127,3 @@ function LoadWorld(name)
 
 	return returnData
 end
-
-local bruh = {PartByName("1"), PartByName("2"), PartByName("3")}
-
-function Update()
-	if InputPressed("q") then
-		SaveModel("hurb", bruh)
-	end
-end
