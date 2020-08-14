@@ -13,6 +13,7 @@ attachments = {}
 -- this table holds a table of all children for a given parent, it's used for speed and does not contain all the relationship info like the attachments table. It's just a list of children ids for each parent
 reverseAssociations = {}
 
+
 --SpiritLib\[ModuleName\].*function\((.*)\)
 
 -- this will "parent" a part to another
@@ -123,11 +124,30 @@ end
 
 
 
-function Update()
+
+
+function DrawUpdate()
+	if (attachmentsUpdate ~= nil) then
+		if (coroutine.status(attachmentsUpdate) == "suspended" or coroutine.running(attachmentsUpdate)==false) then
+			coroutine.resume(attachmentsUpdate)
+		end
+	end
+end
+
+
+
+
+local partsUpdated = 0
+function updateRoutine()
 
 	for attachedPartID, attachInfo in pairs(attachments) do
+		partsUpdated = partsUpdated + 1
 
-		
+		if (partsUpdated > 175) then
+			coroutine.yield()
+			partsUpdated = 0
+		end
+
 		local parentPart = PartByID(attachInfo.parentID)
 
 		local shouldUpdateChildren = ( attachInfo.lastParentPosition ~= parentPart.position or attachInfo.lastParentAngles ~= parentPart.angles )
@@ -152,4 +172,9 @@ function Update()
 			Unattach(attachedPartID)
 		end
 	end
+
+	attachmentsUpdate = coroutine.create(updateRoutine)
 end
+
+attachmentsUpdate = coroutine.create(updateRoutine)
+
