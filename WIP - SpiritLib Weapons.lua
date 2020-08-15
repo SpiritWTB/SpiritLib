@@ -1,3 +1,8 @@
+local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
+function CallModuleFunction(moduleName, name, ...) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Call(name, ...) end
+function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
+
+
 local boxesCount = 10
 local boxesSize = newVector2(52, 52)
 local boxesSpacing = 6
@@ -108,15 +113,8 @@ SpawnUIBoxes()
 
 --if not IsHost() then return end
 
-RegisteredWeapons = {}
-
-function RegisterWeapon(weaponTable)
-	-- todo: check to make sure they've got a name and stuff, basic things that will break the game if they aren't there
-	
-end
-
 -- TODO: RUN THIS ON FIXED CONNECT
-function InitializeInventories()
+function InitializeWeaponInventories()
 	-- use player ID as key, table as a value
 	playerWeaponInventories = {}
 
@@ -125,10 +123,33 @@ function InitializeInventories()
 	end
 end
 
-function GiveWeapon(player)
+function GiveWeapon(player, weaponName)
 	if (playerWeaponInventories[player] ~= null) then
 
+		weapon = Registe
+		-- todo use spawn model when we
+		weaponPart = CallModuleFunction("Models", "LoadModel", weapon.model)
 		table.insert(playerWeaponInventories[player], weapon)
 	end
 end
 
+RegisteredWeapons = {}
+WeaponsByName = {}
+
+function RegisterWeapon(weaponTable)
+	-- todo: check to make sure they've got a name and stuff, basic things that will break the game if they aren't there
+	table.insert(RegisteredWeapons, weaponTable)
+	WeaponsByName[weaponTable.name] = weaponTable
+end
+
+
+function InitializeWeapons()
+	RegisterWeapon({
+		name = "Physgun",
+		script = "SpiritLib Weapon Physgun",
+		model = "physicsgun"
+	})
+end
+
+InitializeWeaponInventories()
+InitializeWeapons()
