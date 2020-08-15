@@ -107,12 +107,6 @@ SpawnUIBoxes()
 
 
 
-
-
-
-
---if not IsHost() then return end
-
 -- TODO: RUN THIS ON FIXED CONNECT
 function InitializeWeaponInventories()
 	-- use player ID as key, table as a value
@@ -124,11 +118,15 @@ function InitializeWeaponInventories()
 end
 
 function GiveWeapon(player, weaponName)
-	if (playerWeaponInventories[player] ~= null) then
+	if (playerWeaponInventories[player] ~= nil and WeaponsByName[weaponName]~=nil) then
 
-		weapon = Registe
-		-- todo use spawn model when we
-		weaponPart = CallModuleFunction("Models", "LoadModel", weapon.model)
+		local weapon = CopyTable(WeaponsByName[weaponName])
+
+		-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
+		--weaponPart = CallModuleFunction("Models", "LoadModel", weapon.model)
+
+		weapon.part = CreatePart(0)
+		
 		table.insert(playerWeaponInventories[player], weapon)
 	end
 end
@@ -153,3 +151,27 @@ end
 
 InitializeWeaponInventories()
 InitializeWeapons()
+
+
+--http://lua-users.org/wiki/CopyTable
+
+function CopyTable(orig, --[[optional]]copies)
+    copies = copies or {}
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        if copies[orig] then
+            copy = copies[orig]
+        else
+            copy = {}
+            copies[orig] = copy
+            for orig_key, orig_value in next, orig, nil do
+                copy[CopyTable(orig_key, copies)] = CopyTable(orig_value, copies)
+            end
+            setmetatable(copy, CopyTable(getmetatable(orig), copies))
+        end
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
