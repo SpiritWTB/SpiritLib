@@ -1,7 +1,6 @@
 SpiritLib = {}
 
 SpiritLib.Modules = {
-	["JSON"] = {},
 	["Models"] = {}
 }
 
