@@ -109,6 +109,9 @@ SpawnUIBoxes()
 
 
 
+
+if not IsHost() then return end
+
 -- TODO: RUN THIS ON FIXED CONNECT
 function InitializeWeaponInventories()
 	-- use player ID as key, table as a value
@@ -142,7 +145,12 @@ RegisteredWeapons = {}
 WeaponsByName = {}
 
 function RegisterWeapon(weaponTable)
-	-- todo: check to make sure they've got a name and stuff, basic things that will break the game if they aren't there
+	-- check to make sure they've got a name and stuff, basic things that will break the game if they aren't there
+	if not weaponTable.name then return end
+	if not weaponTable.scriptName then return end
+	if not weaponTable.model then return end
+
+
 	table.insert(RegisteredWeapons, weaponTable)
 	WeaponsByName[weaponTable.name] = weaponTable
 end
