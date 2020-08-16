@@ -11,6 +11,7 @@ function Start()
 		local modulePart = CreatePart(0)
 		modulePart.visible = false
 		modulePart.cancollide = false
+		modulePart.name = "SpiritLib " .. moduleName
 		modulePart.script = "SpiritLib " .. moduleName
 
 		SpiritLib.Modules[moduleName] = modulePart
