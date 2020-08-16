@@ -1,36 +1,10 @@
-local allTabs = {
-	{
-		name = "Spawnlists",
-		width = 80
-	},
-	{
-		name = "Weapons",
-		width = 80
-	},
-	{
-		name = "Entities",
-		width = 80
-	},
-	{
-		name = "NPCs",
-		width = 80
-	},
-	{
-		name = "Vehicles",
-		width = 80
-	},
-	{
-		name = "Dupes",
-		width = 80
-	},
-	{
-		name = "Saves",
-		width = 80
-	}
-}
-
 local tabsHeight = 28
 local tabsPadding = 4
+local panelPadding = 4
+
+local allTabs = {}
+local allTabsWidth = 0
+local currentTab
 
 local mainWindowSize = newVector2(ScreenSize().x - 120, ScreenSize().y - 120)
 local mainWindowPos = newVector2(60, 60)
@@ -43,42 +17,68 @@ local tabsWindowPos = newVector2(0, -tabsWindowSize.y)
 local tabsWindow = MakeUIPanel(tabsWindowPos, tabsWindowSize, mainWindow)
 tabsWindow.color = newColor(0.14, 0.14, 0.14, 0.98)
 
-local allWidth = 0
+local function SelectTab(name)
+	local selected = allTabs[name]
 
-for i, tab in pairs(allTabs) do
-	local holderSize = newVector2(tab.width, tabsHeight)
-	local holderPos = newVector2(allWidth + tabsPadding, tabsPadding)
+	print(selected)
+
+	if selected and selected ~= currentTab then
+		currentTab.button.color = newColor(0.26, 0.26, 0.26, 1)
+		currentTab.button.textColor = newColor(0.6, 0.6, 0.6, 1)
+		currentTab.panel.enabled = false
+
+		currentTab = selected
+
+		currentTab.button.color = newColor(0.46, 0.46, 0.46, 1)
+		currentTab.buttontextColor = newColor(0.8, 0.8, 0.8, 1)
+		currentTab.panel.enabled = true
+	end
+end
+
+local function CreateTab(name, width)
+	local holderSize = newVector2(width, tabsHeight)
+	local holderPos = newVector2(allTabsWidth + tabsPadding, tabsPadding)
 	local holder = MakeUIPanel(holderPos, holderSize, tabsWindow)
+	holder.color = Color.clear
 
-	local button = MakeUIButton(Vector2.zero, holderSize)
-	button.name = tab.name
+	local button = MakeUIButton(Vector2.zero, holderSize, "<b>" .. name .. "</b>")
+	button.name = name
 	button.parent = holder
 	button.position = newVector2(0, 0)
 
-	local textBox = MakeUIText(Vector2.zero, holderSize, "<b>" .. tab.name .. "</b>", button)
-	textBox.textSize = 12
-	textBox.textAlignment = "MiddleCenter"
+	button.textSize = 12
+	button.textAlignment = "MiddleCenter"
 
-	if i == 1 then
-		button.color = newColor(0.46, 0.46, 0.46, 1)
-		textBox.textColor = newColor(0.8, 0.8, 0.8, 1)
-	else
+	local panel = MakeUIPanel(Vector2.zero, mainWindowSize - newVector2(panelPadding * 2, panelPadding * 2))
+	panel.name = name .. " Panel"
+	panel.parent = mainWindow
+	panel.position = newVector2(panelPadding, panelPadding)
+	panel.color = Color.clear
+
+	allTabs[name] = {
+		button = button,
+		panel = panel
+	}
+
+	if currentTab then
 		button.color = newColor(0.26, 0.26, 0.26, 1)
-		textBox.textColor = newColor(0.6, 0.6, 0.6, 1)
+		button.textColor = newColor(0.6, 0.6, 0.6, 1)
+		panel.enabled = false
+	else
+		button.color = newColor(0.46, 0.46, 0.46, 1)
+		button.textColor = newColor(0.8, 0.8, 0.8, 1)
+		currentTab = allTabs[name]
 	end
 
-	tab.holder = holder
-	tab.button = button
-	tab.label = textBox
+	allTabsWidth = allTabsWidth + width
+	tabsWindow.size = newVector2(allTabsWidth + tabsPadding * 2, tabsWindowSize.y)
 
-	allWidth = allWidth + tab.width
+	return panel
 end
 
-local currentButton = allTabs[1]
-tabsWindow.size = newVector2(allWidth + tabsPadding * 2, tabsWindowSize.y)
-
 function OnUIButtonClick(button)
-	if button.parent == tabsWindow then
+	if button.parent == holder and button.parent.parent == mainWindow then
+		SelectTab(button.name)
 		print("hurb")
 	end
 end
@@ -90,3 +90,11 @@ function Update()
 		mainWindow.enabled = false
 	end
 end
+
+CreateTab("Spawnlists", 80)
+CreateTab("Weapons", 80)
+CreateTab("Entities", 80)
+CreateTab("NPCs", 80)
+CreateTab("Vehicles", 80)
+CreateTab("Dupes", 80)
+CreateTab("Saves", 80)
