@@ -39,6 +39,8 @@ function SelectItem(entryNumber)
 	allBoxes[current].color = newColor(allBoxes[current].color.r, allBoxes[current].color.g, allBoxes[current].color.b, 0)
 	current = entryNumber
 	allBoxes[current].color = newColor(allBoxes[current].color.r, allBoxes[current].color.g, allBoxes[current].color.b, 0.4)
+
+	NetworkSendToHost("selectWeaponSlot", { entryNumber })
 end
 
 function Update()
@@ -114,20 +116,25 @@ function InitializeWeaponInventories()
 
 	for _, ply in pairs(GetAllPlayers()) do
 		playerWeaponInventories[ply] = {}
+		ply.table.SelectedWeaponSlot = nil
 	end
 end
 
-function GiveWeapon(player, weaponName)
+
+function GiveWeapon(player, weaponName, slot)
 	if (playerWeaponInventories[player] ~= nil and WeaponsByName[weaponName]~=nil) then
 
-		local weapon = CopyTable(WeaponsByName[weaponName])
+		local weaponTableInstance = CopyTable(WeaponsByName[weaponName])
 
 		-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
 		--weaponPart = CallModuleFunction("Models", "LoadModel", weapon.model)
 
-		weapon.part = CreatePart(0)
-		
-		table.insert(playerWeaponInventories[player], weapon)
+		weaponTableInstance.part = CreatePart(0)
+
+		weaponTableInstance.part.script = weaponTableInstance.scriptName
+
+		playerWeaponInventories[player][slot] = weaponTableInstance
+		player.table.SelectedWeaponSlot = slot
 	end
 end
 
@@ -140,14 +147,55 @@ function RegisterWeapon(weaponTable)
 	WeaponsByName[weaponTable.name] = weaponTable
 end
 
+function NetworkStringReceive(player, name, data)
+
+	if IsHost() and name=="selectWeaponSlot" then
+		if playerWeaponInventories[player][data[1]] ~= nil then
+			player.table.SelectedWeaponSlot = slot
+		end
+	end
+
+	--[[
+	
+		weaponInput
+	-------------------
+
+		1 = Fire
+		2 = FireRelease
+		3 = AltFire
+		4 = AltFireRelease
+		5 = Reload
+	]]
+
+	if IsHost() and name == "weaponInput" and player.table.SelectedWeaponSlot ~= nil then
+		local slot = player.table.SelectedWeaponSlot
+
+		if data[1] == 1 then
+			playerWeaponInventories[player][slot].part.scripts[1].Call("Fire")
+		elseif data[1] == 2 then
+			playerWeaponInventories[player][slot].part.scripts[1].Call("FireRelease")
+		elseif data[1] == 3 then
+			playerWeaponInventories[player][slot].part.scripts[1].Call("AltFire")
+		elseif data[1] == 4 then
+			playerWeaponInventories[player][slot].part.scripts[1].Call("AltFireRelease")
+		elseif data[1] == 5 then
+			playerWeaponInventories[player][slot].part.scripts[1].Call("Reload")
+		end
+
+	end
+end
+
 
 function InitializeWeapons()
+
 	RegisterWeapon({
 		name = "Physgun",
-		script = "SpiritLib Weapon Physgun",
+		scriptName = "SpiritLib Weapon Physgun",
 		model = "physicsgun"
 	})
+
 end
+
 
 InitializeWeaponInventories()
 InitializeWeapons()
