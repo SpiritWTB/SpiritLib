@@ -103,8 +103,6 @@ local function CreateButton(name, description, panel, modelDataJson)
 	holder.position = holderPos
 	holder.color = Color.clear
 
-
-
 	local button = MakeUIButton(Vector2.zero, holderSize, "<b>" .. name .. "</b>")
 	button.name = name
 	button.parent = holder
@@ -142,14 +140,8 @@ function OnUIButtonClick(button)
 		SelectTab(button.name)
 	end
 
-	if button.table.isSpiritLibSpawnButton and button.table.spawnData ~= nil then
-		print("attempting to spawn " .. tostring(button.table.spawnData))
-
-		-- it might seem weird that we convert and store this as non json just to convert it before we send, but that's because we wont have to convert just to pass it here once we get scripts-on-the-side,
-		-- just can't pass tables for now
-
+	if button.table.isSpiritLibSpawnButton and button.table.spawnData then
 		local spawnPos = LocalPlayer().position + LocalPlayer().forward
-
 		CallModuleFunction("Models", "GenerateModel", button.table.spawnData, spawnPos)
 	end
 end

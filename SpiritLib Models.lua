@@ -28,9 +28,6 @@ local function CreateBoundingBox(parts)
 	local xMax, xMin, yMax, yMin, zMax, zMin = corners[1].x, corners[1].x, corners[1].y, corners[1].y, corners[1].z, corners[1].z
 
 	for i, corner in pairs(corners) do
-		--[[ local point = CreatePart(1, corner, Vector3.zero)
-		point.size = newVector3(0.1, 0.1, 0.1) ]]
-
 		if corner.x > xMax then xMax = corner.x end
 		if corner.x < xMin then xMin = corner.x end
 		if corner.y > yMax then yMax = corner.y end
@@ -45,11 +42,9 @@ local function CreateBoundingBox(parts)
 
 	local encompasser = CreatePart(0, center, Vector3.zero)
 	encompasser.size = diff
-	encompasser.shadows = false
-	encompasser.color = Color.clear
+	encompasser.visible = false
 
 	for i, part in pairs(parts) do
-		part.frozen = true
 		part.cancollide = false
 		CallModuleFunction("Attachments", "Attach", part, encompasser)
 	end
