@@ -8,7 +8,6 @@ SpiritLib.Modules = {
 }
 
 function Start()
-	-- attempt to load all the modules
 	for moduleName, v in pairs(SpiritLib.Modules) do
 		local modulePart = CreatePart(0)
 		modulePart.visible = false
@@ -16,18 +15,8 @@ function Start()
 		modulePart.name = "SpiritLib " .. moduleName
 		modulePart.script = "SpiritLib " .. moduleName
 
-		print("Created " .. moduleName)
-
 		SpiritLib.Modules[moduleName] = modulePart
-	end
-end
 
-function OLDExecuteFunction(moduleName, name, ...)
-	local args = {...}
-
-	if args[2] == "GetVariable" then
-		return SpiritLib.Modules[args[1]].scripts[1].Globals[args[3]]
-	else
-		return SpiritLib.Modules[args[1]].scripts[1].Call(args[2], table.unpack(args, 3))
+		print(moduleName .. " module loaded!")
 	end
 end

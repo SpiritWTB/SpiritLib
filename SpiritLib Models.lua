@@ -36,7 +36,6 @@ local function CreateBoundingBox(parts)
 		if corner.z < zMin then zMin = corner.z end
 	end
 
-	-- get half of the difference between these. Basically, these 3 are the distances it takes to get halfway from min to max (for that axis)
 	local diff = newVector3(xMax - xMin, yMax - yMin, zMax - zMin)
 	local center = newVector3(xMin + diff.x / 2, yMin + diff.y / 2, zMin + diff.z / 2)
 
@@ -216,19 +215,3 @@ function LoadWorld(name)
 
 	return returnData
 end
-
-function Update()
-	if InputPressed("q") then
-		--SaveModel("hurb", bruh)
-	elseif InputPressed("e") then
-		--local model = LoadModel("hurb")
-	end
-
-	if (InputPressed("t")) then
-		SaveModel("WoodCrate", "A small wooden crate", PartsByName("WoodCrate"))
-		SaveModel("Physgun", "The model to be for the Physgun weapon", PartsByName("Physgun"))
-		SaveModel("Traffic Cone", "A classic orange and white traffic cone", PartsByName("TrafficCone"))
-		SaveModel("Fence ", "A fence piece to be used for yard fences or insecure walls", PartsByName("Fence"))
-	end
-end
-
