@@ -78,7 +78,8 @@ local function GenerateData(part)
 	return output
 end
 
-local function GeneratePart(data)
+local function GeneratePart(data, --[[optional = false]] allowPhysics)
+
 	local part = CreatePart(data.parttype, data.position + newVector3(0, 5, 0), data.angles)
 	part.name = data.name
 	part.size = data.size
@@ -86,6 +87,10 @@ local function GeneratePart(data)
 	part.bevel = data.bevel
 	part.visible = data.visible
 	part.cancollide = data.cancollide
+
+	if allowPhysics then
+		part.frozen = data.frozen
+	end
 
 	if data.script then
 		part.script = data.script
@@ -206,7 +211,7 @@ function LoadWorld(name)
 	local returnData = {}
 
 	for i, part in pairs(allParts) do
-		local generated = GeneratePart(part)
+		local generated = GeneratePart(part, true)
 
 		if generated then
 			table.insert(returnData, generated)
