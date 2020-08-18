@@ -99,22 +99,27 @@ local function GeneratePart(data)
 	return part
 end
 
-function SaveModel(name, parts)
-	if type(name) ~= "string" or #name < 1 or type(parts) ~= "table" or #parts < 1 then
+function SaveModel(name, description, parts)
+	if type(name) ~= "string" or #name < 1 or type(description) ~= "string" or #description < 1 or type(parts) ~= "table" or #parts < 1 then
+		print("Invalid model setup for" .. tostring(name))
 		return
 	end
 
-	local allParts = {}
+	local allParts = {
+		modelName = name,
+		modelDescription = description,
+		modelData = {}
+	}
 
 	for i, part in pairs(parts) do
 		local data = GenerateData(part)
 
 		if data then
-			table.insert(allParts, data)
+			table.insert(allParts.data, data)
 		end
 	end
 
-	File.WriteCompressed(name, ToJson(allParts))
+	File.WriteCompressed("model_" .. name, ToJson(allParts))
 end
 
 function LoadModel(name)
