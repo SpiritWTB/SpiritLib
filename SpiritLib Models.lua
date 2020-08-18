@@ -66,8 +66,7 @@ local function GenerateData(part)
 	output.position = part.position
 	output.angles = part.angles
 	output.size = part.size
-	output.color = part.color
-	output.transparency = part.transparency
+	output.color = newColor(part.color.r, part.color.g, part.color.b, 1 - part.transparency)
 	output.bevel = part.bevel
 	output.visible = part.visible
 	output.cancollide = part.cancollide
@@ -84,7 +83,6 @@ local function GeneratePart(data)
 	part.name = data.name
 	part.size = data.size
 	part.color = newColor(data.color.x, data.color.y, data.color.z, data.color.w)
-	part.transparency = data.transparency
 	part.bevel = data.bevel
 	part.visible = data.visible
 	part.cancollide = data.cancollide
