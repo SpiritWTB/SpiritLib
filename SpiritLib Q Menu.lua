@@ -123,14 +123,17 @@ local function CreateButton(name, description, panel, modelDataJson)
 	occupiedSize = occupiedSize + newVector2(realSize.x, 0)
 
 	-- find the right side (include right-side padding)
-	local rightEdgeX = panel.position.x + panel.size.x - panelPadding
+	local panelEdge = panel.position + panel.size - newVector2(panelPadding, panelPadding)
 
 	-- uncomment to show right edge and positions being checked against it
 	--MakeUIButton(newVector2(rightEdgeX, 100), Vector2.one*100, "R-Edge")
 	--MakeUIButton(newVector2(panel.position.x + occupiedSize.x, 180), Vector2.one*100, "SBRWidth")
 
-	-- if the occupiedSize has increased past the right edge X, set x to 0 and increase the occupiedSize y
-	if panel.position.x + occupiedSize.x + realSize.x > rightEdgeX then
+	if panel.position.x + occupiedSize.x + realSize.x > panelEdge.x then
+		occupiedSize = newVector2(buttonsPadding, occupiedSize.y + realSize.y)
+	end
+
+	if panel.position.y + occupiedSize.y + realSize.y > panelEdge.y then
 		occupiedSize = newVector2(buttonsPadding, occupiedSize.y + realSize.y)
 	end
 end
