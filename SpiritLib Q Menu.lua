@@ -44,6 +44,8 @@ local function CreateTab(name, width)
 	button.textSize = 12
 	button.textAlignment = "MiddleCenter"
 
+	button.table.isTab = true
+
 	local panel = MakeUIPanel(Vector2.zero, mainWindowSize - newVector2(panelPadding * 2, panelPadding * 2))
 	panel.name = name .. " Panel"
 	panel.parent = mainWindow
@@ -87,7 +89,7 @@ local function SelectTab(name)
 	end
 end
 
-local function CreateButton(name, panel)
+local function CreateButton(name, description, panel, modelData)
 	local holderSize = buttonsSize
 	local holderPos = spawnButtonRowWidth
 	local holder = MakeUIPanel(Vector2.zero, holderSize)
@@ -95,6 +97,8 @@ local function CreateButton(name, panel)
 	holder.parent = panel
 	holder.position = holderPos
 	holder.color = Color.clear
+
+
 
 	local button = MakeUIButton(Vector2.zero, holderSize, "<b>" .. name .. "</b>")
 	button.name = name
@@ -105,6 +109,9 @@ local function CreateButton(name, panel)
 
 	button.color = newColor(0.26, 0.26, 0.26, 1)
 	button.textColor = newColor(0, 0, 0, 1)
+
+	button.table.isSpiritLibSpawnButton = true
+	button.table.spawnData = modelData
 
 	-- figure out the size of the button with its padding
 	local realSize = buttonsSize + newVector2(buttonsPadding, buttonsPadding)
@@ -126,8 +133,12 @@ local function CreateButton(name, panel)
 end
 
 function OnUIButtonClick(button)
-	if button.parent and button.parent.parent and button.parent.parent.parent and button.parent.parent.parent == mainWindow then
+	if button.table.isTab then
 		SelectTab(button.name)
+	end
+
+	if button.table.isSpiritLibSpawnButton and button.table.spawnData ~= nil then
+		CallModuleFunction("Models", "GenerateModel", button.table.spawnData, LocalPlayer().positoin + LocalPlayer().forward)
 	end
 end
 
@@ -139,15 +150,23 @@ function Update()
 	end
 end
 
-local hello = CreateTab("Spawnlists", 80)
-
-for i = 1, 100 do
-	CreateButton("Test " .. i, hello)
-end
-
-CreateTab("Weapons", 80)
+CreateTab("Models", 60)
+CreateTab("Weapons", 70)
 CreateTab("Entities", 80)
-CreateTab("NPCs", 80)
+CreateTab("NPCs", 40)
 CreateTab("Vehicles", 80)
-CreateTab("Dupes", 80)
-CreateTab("Saves", 80)
+CreateTab("Dupes", 50)
+CreateTab("Saves", 50)
+
+BuiltInModels = {
+	"{'name':'Traffic Cone','description':'A classic orange and white traffic cone','data':[{'name':'TrafficCone','parttype':0,'position':{x: -2.70359, y: 1.242865, z: 3.589343},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.9295015, y: 0.1022455, z: 0.9295015},'color':{x: 0.972549, y: 0.254902, z: 0.1882353, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'TrafficCone','parttype':4,'position':{x: -2.703588, y: 1.772532, z: 3.589342},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.5873281, y: 0.9660257, z: 0.5873281},'color':{x: 0.8980392, y: 0.5019608, z: 0.2, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'TrafficCone','parttype':4,'position':{x: -2.703589, y: 1.77319, z: 3.589343},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.5873281, y: 0.9660257, z: 0.5873281},'color':{x: 0.972549, y: 0.254902, z: 0.1882353, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'TrafficCone','parttype':4,'position':{x: -2.703589, y: 1.82006, z: 3.589343},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.4853157, y: 0.6902756, z: 0.4853157},'color':{x: 1, y: 1, z: 1, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'TrafficCone','parttype':4,'position':{x: -2.703589, y: 1.97006, z: 3.589343},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.3049602, y: 0.3837534, z: 0.3049602},'color':{x: 1, y: 1, z: 1, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'TrafficCone','parttype':0,'position':{x: -2.70359, y: 1.242865, z: 3.589343},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.9154018, y: 0.1006946, z: 0.9154018},'color':{x: 0.8980392, y: 0.5019608, z: 0.2, w: 1},'bevel':true,'visible':true,'cancollide':true}]}",
+	"{'name':'WoodCrate','description':'A small wooden crate','data':[{'name':'WoodCrate','parttype':0,'position':{x: 2.099818, y: 1.865, z: 1.916675},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.1999999, y: 0.5999999, z: 0.1999999},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'WoodCrate','parttype':0,'position':{x: 2.899818, y: 1.865, z: 1.916675},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.1999999, y: 0.5999999, z: 0.1999999},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'WoodCrate','parttype':0,'position':{x: 2.899818, y: 1.865, z: 1.116674},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.1999999, y: 0.5999999, z: 0.1999999},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'WoodCrate','parttype':0,'position':{x: 2.099818, y: 1.865, z: 1.116674},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.1999999, y: 0.5999999, z: 0.1999999},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'WoodCrate','parttype':0,'position':{x: 2.499818, y: 1.465001, z: 1.916674},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.5999999, y: 0.1999999, z: 0.1999999},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'WoodCrate','parttype':0,'position':{x: 2.499818, y: 1.465001, z: 1.116673},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.5999999, y: 0.1999999, z: 0.1999999},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'WoodCrate','parttype':0,'position':{x: 2.499818, y: 2.265001, z: 1.116673},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.5999999, y: 0.1999999, z: 0.1999999},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'WoodCrate','parttype':0,'position':{x: 2.499818, y: 2.265001, z: 1.916674},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.5999999, y: 0.1999999, z: 0.1999999},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'WoodCrate','parttype':0,'position':{x: 2.099818, y: 2.265001, z: 1.516674},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.1999999, y: 0.1999999, z: 1},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'WoodCrate','parttype':0,'position':{x: 2.899818, y: 2.265001, z: 1.516674},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.1999999, y: 0.1999999, z: 1},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'WoodCrate','parttype':0,'position':{x: 2.899818, y: 1.465001, z: 1.516674},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.1999999, y: 0.1999999, z: 1},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'WoodCrate','parttype':0,'position':{x: 2.099818, y: 1.465001, z: 1.516674},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.1999999, y: 0.1999999, z: 1},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'WoodCrate','parttype':0,'position':{x: 2.499818, y: 1.865001, z: 1.516674},'angles':{x: 0, y: 0, z: 0},'size':{x: 0.7690598, y: 0.7690598, z: 0.7690598},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true}]}",
+	"{'name':'Physgun','description':'The model to be for the Physgun weapon','data':[{'name':'Physgun','parttype':0,'position':{x: 0.7776691, y: 2.372158, z: 3.527275},'angles':{x: -2.049057E-05, y: 0, z: 0},'size':{x: 0.3494445, y: 0.2, z: 0.2694452},'color':{x: 0.09803922, y: 0.09803922, z: 0.09803922, w: 1},'bevel':false,'visible':true,'cancollide':false},{'name':'Physgun','parttype':0,'position':{x: 0.7726693, y: 2.453192, z: 4.055526},'angles':{x: -2.049057E-05, y: 0, z: 0},'size':{x: 0.11, y: 0.11, z: 0.7494453},'color':{x: 0.4901961, y: 0.7294118, z: 0.9529412, w: 1},'bevel':true,'visible':true,'cancollide':false},{'name':'Physgun','parttype':2,'position':{x: 0.8837144, y: 2.49032, z: 3.419743},'angles':{x: 29.99999, y: 180.0001, z: -5.641095E-12},'size':{x: 0.1051069, y: 0.1051069, z: 0.1051069},'color':{x: 0.4901961, y: 0.7294118, z: 0.9529412, w: 1},'bevel':false,'visible':true,'cancollide':false},{'name':'Physgun','parttype':0,'position':{x: 0.2717658, y: 2.399264, z: 3.610444},'angles':{x: -2.049057E-05, y: 0, z: 0},'size':{x: 0.1201054, y: 0.1707214, z: 0.1707214},'color':{x: 0.4901961, y: 0.7294118, z: 0.9529412, w: 1},'bevel':true,'visible':true,'cancollide':false},{'name':'Physgun','parttype':0,'position':{x: 0.4081386, y: 2.399264, z: 3.610444},'angles':{x: -2.049057E-05, y: 0, z: 0},'size':{x: 0.2799995, y: 0.101, z: 0.101},'color':{x: 0.3921569, y: 0.3921569, z: 0.3921569, w: 1},'bevel':false,'visible':true,'cancollide':false},{'name':'Physgun','parttype':0,'position':{x: 0.7776692, y: 2.135939, z: 3.411176},'angles':{x: 315, y: 0, z: 0},'size':{x: 0.1443028, y: 0.1833965, z: 0.4580714},'color':{x: 0.09803922, y: 0.09803922, z: 0.09803922, w: 1},'bevel':false,'visible':true,'cancollide':false},{'name':'Physgun','parttype':0,'position':{x: 0.7776692, y: 2.135619, z: 3.411497},'angles':{x: 315, y: 0, z: 0},'size':{x: 0.1833975, y: 0.1243024, z: 0.4580713},'color':{x: 0.09803922, y: 0.09803922, z: 0.09803922, w: 1},'bevel':false,'visible':true,'cancollide':false},{'name':'Physgun','parttype':0,'position':{x: 0.7776692, y: 1.96499, z: 3.243405},'angles':{x: 315, y: 0, z: 0},'size':{x: 0.103042, y: 0.1030415, z: 0.1784013},'color':{x: 0.3921569, y: 0.3921569, z: 0.3921569, w: 1},'bevel':false,'visible':true,'cancollide':false},{'name':'Physgun','parttype':0,'position':{x: 0.7776693, y: 2.458192, z: 3.905545},'angles':{x: -2.049057E-05, y: 0, z: 0},'size':{x: 0.16, y: 0.22, z: 0.9194456},'color':{x: 0.3921569, y: 0.3921569, z: 0.3921569, w: 1},'bevel':true,'visible':true,'cancollide':false},{'name':'Physgun','parttype':0,'position':{x: 0.7776691, y: 2.332157, z: 4.00375},'angles':{x: -2.049057E-05, y: 0, z: 0},'size':{x: 0.3494445, y: 0.2, z: 0.2694452},'color':{x: 0.09803922, y: 0.09803922, z: 0.09803922, w: 1},'bevel':true,'visible':true,'cancollide':false},{'name':'Physgun','parttype':0,'position':{x: 0.7776692, y: 2.399264, z: 3.688537},'angles':{x: -2.049057E-05, y: 0, z: 0},'size':{x: 0.3666723, y: 0.3998346, z: 0.4334079},'color':{x: 0.3921569, y: 0.3921569, z: 0.3921569, w: 1},'bevel':false,'visible':true,'cancollide':false},{'name':'Physgun','parttype':0,'position':{x: 0.7776692, y: 2.324264, z: 3.688537},'angles':{x: -2.049057E-05, y: 0, z: 0},'size':{x: 0.6494446, y: 0.4494447, z: 0.6494453},'color':{x: 0.09803922, y: 0.09803922, z: 0.09803922, w: 1},'bevel':true,'visible':true,'cancollide':false},{'name':'Physgun','parttype':0,'position':{x: 0.7776692, y: 2.099429, z: 3.377844},'angles':{x: 315, y: 0, z: 0},'size':{x: 0.1583596, y: 0.1583608, z: 0.4209192},'color':{x: 0.09803922, y: 0.09803922, z: 0.09803922, w: 1},'bevel':false,'visible':true,'cancollide':false}]}",
+	"{'name':'Fence ','description':'A fence piece to be used for yard fences or insecure walls','data':[{'name':'Fence','parttype':0,'position':{x: 9.142446, y: 4.868464, z: 13.19534},'angles':{x: 0, y: 0, z: 275.8658},'size':{x: 0.3675291, y: 4.980514, z: 0.1045292},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'Fence','parttype':0,'position':{x: 9.388923, y: 2.63609, z: 13.19534},'angles':{x: 0, y: 0, z: 285.9571},'size':{x: 0.3675291, y: 4.980514, z: 0.1045292},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'Fence','parttype':0,'position':{x: 7.493279, y: 3.599243, z: 13.10234},'angles':{x: 0, y: 0, z: 357.2724},'size':{x: 0.3675291, y: 4.980514, z: 0.1045292},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'Fence','parttype':0,'position':{x: 10.40439, y: 3.81103, z: 13.10234},'angles':{x: 0, y: 0, z: 359.9142},'size':{x: 0.3675291, y: 4.980514, z: 0.1045292},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'Fence','parttype':0,'position':{x: 11.09275, y: 3.739253, z: 13.10234},'angles':{x: 0, y: 0, z: 3},'size':{x: 0.3675291, y: 4.980514, z: 0.1045292},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'Fence','parttype':0,'position':{x: 9.692061, y: 3.739253, z: 13.10234},'angles':{x: 0, y: 0, z: -9.071345E-06},'size':{x: 0.3675291, y: 4.980514, z: 0.1045292},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'Fence','parttype':0,'position':{x: 8.986076, y: 3.754663, z: 13.10234},'angles':{x: 0, y: 0, z: 0.9999934},'size':{x: 0.3675291, y: 4.980514, z: 0.1045292},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true},{'name':'Fence','parttype':0,'position':{x: 8.26298, y: 3.776123, z: 13.10234},'angles':{x: 0, y: 0, z: 359},'size':{x: 0.3675291, y: 4.980514, z: 0.1045292},'color':{x: 0.3764706, y: 0.227451, z: 0.1568628, w: 1},'bevel':false,'visible':true,'cancollide':true}]}"
+}
+
+for i, modelJson in pairs(BuiltInModels) do
+	model = FromJson(modelJson)
+
+	CreateButton(model.name, model.description, allTabs["Models"].panel, model.data)
+end

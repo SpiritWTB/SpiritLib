@@ -105,10 +105,12 @@ function SaveModel(name, description, parts)
 		return
 	end
 
+	print("saving model: " .. name)
+
 	local allParts = {
-		modelName = name,
-		modelDescription = description,
-		modelData = {}
+		name = name,
+		description = description,
+		data = {}
 	}
 
 	for i, part in pairs(parts) do
@@ -122,6 +124,34 @@ function SaveModel(name, description, parts)
 	File.WriteCompressed("model_" .. name, ToJson(allParts))
 end
 
+function GenerateModel(modelTable, --[[optional]]position)
+	local modelParts = {}
+
+	for i, part in pairs(modelTable.data) do
+		local generated = GeneratePart(part)
+
+		if generated then
+			table.insert(returnData, generated)
+		end
+	end
+
+	local rootPart
+	
+	if (modelParts) then
+		rootPart = CreateBoundingBox(modelParts)
+	else
+		print("Issue creating model - modelParts does not exist")
+	end
+
+	rootPart.name = modelTable.name
+
+	if (position ~= nil) then
+		rootPart.position = position
+	end
+
+	return rootPart
+end
+
 function LoadModel(name)
 	if type(name) ~= "string" or #name < 1 then
 		return
@@ -132,19 +162,9 @@ function LoadModel(name)
 	end
 
 	local json = File.ReadCompressed(name)
-	local allParts = FromJson(json)
+	local modelTable = FromJson(json)
 
-	local returnData = {}
-
-	for i, part in pairs(allParts) do
-		local generated = GeneratePart(part)
-
-		if generated then
-			table.insert(returnData, generated)
-		end
-	end
-
-	return returnData
+	return GenerateModel(modelTable)
 end
 
 function SaveWorld(name)
@@ -194,16 +214,18 @@ function LoadWorld(name)
 	return returnData
 end
 
-local bruh = {PartByName("1"), PartByName("2"), PartByName("3")}
-
 function Update()
 	if InputPressed("q") then
-		SaveModel("hurb", bruh)
+		--SaveModel("hurb", bruh)
 	elseif InputPressed("e") then
-		local model = LoadModel("hurb")
+		--local model = LoadModel("hurb")
+	end
 
-		if model then
-			CreateBoundingBox(model)
-		end
+	if (InputPressed("t")) then
+		SaveModel("WoodCrate", "A small wooden crate", PartsByName("WoodCrate"))
+		SaveModel("Physgun", "The model to be for the Physgun weapon", PartsByName("Physgun"))
+		SaveModel("Traffic Cone", "A classic orange and white traffic cone", PartsByName("TrafficCone"))
+		SaveModel("Fence ", "A fence piece to be used for yard fences or insecure walls", PartsByName("Fence"))
 	end
 end
+
