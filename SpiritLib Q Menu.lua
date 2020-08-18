@@ -106,7 +106,8 @@ local function CreateButton(name, panel)
 	button.color = newColor(0.26, 0.26, 0.26, 1)
 	button.textColor = newColor(0, 0, 0, 1)
 
-	local realSize = buttonsSize + newVector2(buttonsPadding * 2, buttonsPadding * 2)
+	local realSize = buttonsSize + newVector2(buttonsPadding, buttonsPadding)
+	-- local realSize = buttonsSize + newVector2(buttonsPadding * 2, buttonsPadding * 2)
 
 	if allButtonsSize.x + realSize.x < panel.size.x - panel.position.x then
 		allButtonsSize = newVector2(allButtonsSize.x + realSize.x, allButtonsSize.y)
