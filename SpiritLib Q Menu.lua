@@ -59,7 +59,8 @@ local function CreateTab(name, width)
 
 	allTabs[name] = {
 		button = button,
-		panel = panel
+		panel = panel,
+		pages = {}
 	}
 
 	if currentTab then
@@ -134,7 +135,7 @@ local function CreateButton(name, description, panel, modelDataJson)
 	end
 
 	if panel.position.y + occupiedSize.y + realSize.y > panelEdge.y then
-		occupiedSize = newVector2(buttonsPadding, occupiedSize.y + realSize.y)
+		print(button.name)
 	end
 end
 

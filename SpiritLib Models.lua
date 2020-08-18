@@ -11,8 +11,8 @@ local function CreateBoundingBox(parts)
 	local corners = {}
 
 	for i, part in pairs(parts) do
-		local fDir = part.forward * (part.size.x / 2)
-		local rDir = part.right * (part.size.z / 2)
+		local fDir = part.forward * (part.size.z / 2)
+		local rDir = part.right * (part.size.x / 2)
 		local uDir = part.up * (part.size.y / 2)
 
 		table.insert(corners, part.position + fDir + rDir + uDir)
