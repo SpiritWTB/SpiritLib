@@ -8,6 +8,7 @@ SpiritLib.Modules = {
 }
 
 function Start()
+	This.name = "SpiritLib"
 	for moduleName, v in pairs(SpiritLib.Modules) do
 		local modulePart = CreatePart(0)
 		modulePart.visible = false
