@@ -3,12 +3,14 @@ SpiritLib = {}
 SpiritLib.Modules = {
 	["Attachments"] = false,
 	["Models"] = false,
+	["Default Models"] = false,
 	["Q Menu"] = false,
 	["Weapons"] = false,
 }
 
 function Start()
 	This.name = "SpiritLib"
+
 	for moduleName, v in pairs(SpiritLib.Modules) do
 		local modulePart = CreatePart(0)
 		modulePart.visible = false
