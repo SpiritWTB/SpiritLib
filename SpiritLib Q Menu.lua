@@ -3,18 +3,18 @@ local tabsPadding = 4
 
 local panelPadding = 4
 
-local buttonsSize = newVector2(160, 160)
-local buttonsPadding = 8
+local buttonsSize = newVector2(120, 120)
+local buttonsPadding = 4
 
 local allTabs = {}
-local allTabsWidth = 0
+local tabsRowWidth = 0
 local currentTab
 
 local allButtons = {}
-local allButtonsSize = Vector2.zero
+local spawnButtonRowWidth = newVector2(buttonsPadding, buttonsPadding)
 local currentButton
 
-local mainWindowSize = newVector2(ScreenSize().x - 120, ScreenSize().y - 120)
+local mainWindowSize = newVector2(ScreenSize().x - 168, ScreenSize().y - 120)
 local mainWindowPos = newVector2(60, 60)
 local mainWindow = MakeUIPanel(mainWindowPos, mainWindowSize)
 mainWindow.color = newColor(0.14, 0.14, 0.14, 0.98)
@@ -30,7 +30,7 @@ tabsWindow.color = newColor(0.14, 0.14, 0.14, 0.98)
 
 local function CreateTab(name, width)
 	local holderSize = newVector2(width, tabsHeight)
-	local holderPos = newVector2(allTabsWidth + tabsPadding, tabsPadding)
+	local holderPos = newVector2(tabsRowWidth + tabsPadding, tabsPadding)
 	local holder = MakeUIPanel(Vector2.zero, holderSize)
 	holder.name = name .. " Holder"
 	holder.parent = tabsWindow
@@ -65,8 +65,8 @@ local function CreateTab(name, width)
 		currentTab = allTabs[name]
 	end
 
-	allTabsWidth = allTabsWidth + width
-	tabsWindow.size = newVector2(allTabsWidth + tabsPadding * 2, tabsWindowSize.y)
+	tabsRowWidth = tabsRowWidth + width
+	tabsWindow.size = newVector2(tabsRowWidth + tabsPadding * 2, tabsWindowSize.y)
 
 	return panel
 end
@@ -89,7 +89,7 @@ end
 
 local function CreateButton(name, panel)
 	local holderSize = buttonsSize
-	local holderPos = allButtonsSize + newVector2(buttonsPadding, buttonsPadding)
+	local holderPos = spawnButtonRowWidth
 	local holder = MakeUIPanel(Vector2.zero, holderSize)
 	holder.name = name .. " Holder"
 	holder.parent = panel
@@ -106,13 +106,22 @@ local function CreateButton(name, panel)
 	button.color = newColor(0.26, 0.26, 0.26, 1)
 	button.textColor = newColor(0, 0, 0, 1)
 
+	-- figure out the size of the button with its padding
 	local realSize = buttonsSize + newVector2(buttonsPadding, buttonsPadding)
-	-- local realSize = buttonsSize + newVector2(buttonsPadding * 2, buttonsPadding * 2)
 
-	if allButtonsSize.x + realSize.x < panel.size.x - panel.position.x then
-		allButtonsSize = newVector2(allButtonsSize.x + realSize.x, allButtonsSize.y)
-	else
-		allButtonsSize = newVector2(0, allButtonsSize.y + realSize.y)
+	--add the realsize x
+	spawnButtonRowWidth = spawnButtonRowWidth + newVector2(realSize.x, 0)
+
+	-- find the right side (include right-side padding)
+	local rightEdgeX = panel.position.x + panel.size.x - panelPadding
+
+	-- uncomment to show right edge and positions being checked against it
+	--MakeUIButton(newVector2(rightEdgeX, 100), Vector2.one*100, "R-Edge")
+	--MakeUIButton(newVector2(panel.position.x + spawnButtonRowWidth.x, 180), Vector2.one*100, "SBRWidth")
+
+	-- if the spawnButtonRowWidth has increased past the right edge X, set x to 0 and increase the spawnButtonRowWidth y
+	if panel.position.x + spawnButtonRowWidth.x + realSize.x > rightEdgeX then
+		spawnButtonRowWidth = newVector2(buttonsPadding, spawnButtonRowWidth.y + realSize.y)
 	end
 end
 
