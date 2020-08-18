@@ -124,14 +124,22 @@ function SaveModel(name, description, parts)
 	File.WriteCompressed("model_" .. name, ToJson(allParts))
 end
 
+
 function GenerateModel(modelTable, --[[optional]]position)
+
+	print("generating")
+	-- REMOVE THIS IF STATEMENT ONCE WE GET SCRIPTS ON THE SIDE
+	if (type(modelTable) == "string") then
+		modelTable = FromJson(modelTable)
+	end
+
 	local modelParts = {}
 
 	for i, part in pairs(modelTable.data) do
 		local generated = GeneratePart(part)
 
 		if generated then
-			table.insert(returnData, generated)
+			table.insert(modelParts, generated)
 		end
 	end
 

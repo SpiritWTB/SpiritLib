@@ -1,3 +1,8 @@
+local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
+
+function CallModuleFunction(moduleName, name, ...) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Call(name, ...) end
+function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
+
 local tabsHeight = 28
 local tabsPadding = 4
 
@@ -138,7 +143,11 @@ function OnUIButtonClick(button)
 	end
 
 	if button.table.isSpiritLibSpawnButton and button.table.spawnData ~= nil then
-		CallModuleFunction("Models", "GenerateModel", button.table.spawnData, LocalPlayer().positoin + LocalPlayer().forward)
+		print("attempting to spawn " .. tostring(button.table.spawnData))
+
+		-- it might seem weird that we convert and store this as non json just to convert it before we send, but that's because we wont have to convert just to pass it here once we get scripts-on-the-side,
+		-- just can't pass tables for now
+		CallModuleFunction("Models", "GenerateModel", ToJson(button.table.spawnData), LocalPlayer().position + LocalPlayer().forward)
 	end
 end
 
