@@ -45,12 +45,13 @@ local function CreateBoundingBox(parts)
 
 	local encompasser = CreatePart(0, center, Vector3.zero)
 	encompasser.size = diff
-	encompasser.color = newColor(1, 0, 0, 0.5)
+	encompasser.shadows = false
+	encompasser.color = Color.clear
 
 	for i, part in pairs(parts) do
 		part.frozen = true
 		part.cancollide = false
-		part.parent = encompasser
+		CallModuleFunction("Attachments", "Attach", part, encompasser)
 	end
 
 	encompasser.frozen = false
@@ -126,8 +127,8 @@ end
 
 
 function GenerateModel(modelTable, --[[optional]]position)
-
 	print("generating")
+
 	-- REMOVE THIS IF STATEMENT ONCE WE GET SCRIPTS ON THE SIDE
 	if (type(modelTable) == "string") then
 		modelTable = FromJson(modelTable)
@@ -144,14 +145,13 @@ function GenerateModel(modelTable, --[[optional]]position)
 	end
 
 	local rootPart
-	
+
 	if (modelParts) then
 		rootPart = CreateBoundingBox(modelParts)
+		rootPart.name = modelTable.name
 	else
 		print("Issue creating model - modelParts does not exist")
 	end
-
-	rootPart.name = modelTable.name
 
 	if (position ~= nil) then
 		rootPart.position = position

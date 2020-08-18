@@ -1,6 +1,7 @@
 SpiritLib = {}
 
 SpiritLib.Modules = {
+	["Attachments"] = false,
 	["Models"] = false,
 	["Q Menu"] = false,
 	["Weapons"] = false,
@@ -14,6 +15,8 @@ function Start()
 		modulePart.cancollide = false
 		modulePart.name = "SpiritLib " .. moduleName
 		modulePart.script = "SpiritLib " .. moduleName
+
+		print("Created " .. moduleName)
 
 		SpiritLib.Modules[moduleName] = modulePart
 	end

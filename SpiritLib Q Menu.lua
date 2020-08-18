@@ -94,7 +94,7 @@ local function SelectTab(name)
 	end
 end
 
-local function CreateButton(name, description, panel, modelData)
+local function CreateButton(name, description, panel, modelDataJson)
 	local holderSize = buttonsSize
 	local holderPos = spawnButtonRowWidth
 	local holder = MakeUIPanel(Vector2.zero, holderSize)
@@ -116,7 +116,7 @@ local function CreateButton(name, description, panel, modelData)
 	button.textColor = newColor(0, 0, 0, 1)
 
 	button.table.isSpiritLibSpawnButton = true
-	button.table.spawnData = modelData
+	button.table.spawnData = modelDataJson
 
 	-- figure out the size of the button with its padding
 	local realSize = buttonsSize + newVector2(buttonsPadding, buttonsPadding)
@@ -147,7 +147,10 @@ function OnUIButtonClick(button)
 
 		-- it might seem weird that we convert and store this as non json just to convert it before we send, but that's because we wont have to convert just to pass it here once we get scripts-on-the-side,
 		-- just can't pass tables for now
-		CallModuleFunction("Models", "GenerateModel", ToJson(button.table.spawnData), LocalPlayer().position + LocalPlayer().forward)
+
+		local spawnPos = LocalPlayer().position + LocalPlayer().forward
+
+		CallModuleFunction("Models", "GenerateModel", button.table.spawnData, spawnPos)
 	end
 end
 
@@ -177,5 +180,6 @@ BuiltInModels = {
 for i, modelJson in pairs(BuiltInModels) do
 	model = FromJson(modelJson)
 
-	CreateButton(model.name, model.description, allTabs["Models"].panel, model.data)
+	-- once we get scripts on the side pass through the model, not the modelJson
+	CreateButton(model.name, model.description, allTabs["Models"].panel, modelJson)
 end
