@@ -37,7 +37,7 @@ local pageButtonsSize = newVector2(28, 28)
 local pageButtonsPadding = 4
 
 local tabsPanelSize = newVector2(0, tabButtonsHeight + tabButtonsPadding * 2)
-local paginationPanelSize = newVector2(112, pageButtonsSize.y + pageButtonsPadding * 2)
+local paginationPanelSize = newVector2(0, pageButtonsSize.y + pageButtonsPadding * 2)
 
 local allTabs = {}
 local tabsRowWidth = 0
@@ -64,7 +64,7 @@ paginationPanel.position = paginationPanelPos
 paginationPanel.color = newColor(0.14, 0.14, 0.14, 0.98)
 
 local firstButtonSize = pageButtonsSize
-local firstButtonPos = newVector2(0, 0)
+local firstButtonPos = newVector2(pageButtonsPadding, pageButtonsPadding)
 local firstButton = MakeUIButton(Vector2.zero, firstButtonSize, "<b><<</b>")
 firstButton.name = "First Page"
 firstButton.parent = paginationPanel
@@ -74,7 +74,7 @@ firstButton.textSize = 12
 firstButton.textAlignment = "MiddleCenter"
 
 local prevButtonSize = pageButtonsSize
-local prevButtonPos = newVector2(firstButtonPos.x + firstButtonSize.x, 0)
+local prevButtonPos = newVector2(firstButtonPos.x + firstButtonSize.x, pageButtonsPadding)
 local prevButton = MakeUIButton(Vector2.zero, prevButtonSize, "<b><</b>")
 prevButton.name = "Previous Page"
 prevButton.parent = paginationPanel
@@ -83,8 +83,18 @@ DisableButton(prevButton)
 prevButton.textSize = 12
 prevButton.textAlignment = "MiddleCenter"
 
+local pageCountSize = newVector2(60, 28)
+local pageCountPos = newVector2(prevButtonPos.x + prevButtonSize.x, pageButtonsPadding)
+local pageCount = MakeUIText(pageCountPos, pageCountSize, "0/0")
+pageCount.name = "Page Count"
+pageCount.parent = paginationPanel
+pageCount.position = pageCountPos
+pageCount.textColor = newColor(0.6, 0.6, 0.6, 1)
+pageCount.textSize = 12
+pageCount.textAlignment = "MiddleCenter"
+
 local nextButtonSize = pageButtonsSize
-local nextButtonPos = newVector2(prevButtonPos.x + prevButtonSize.x, 0)
+local nextButtonPos = newVector2(pageCountPos.x + pageCountSize.x, pageButtonsPadding)
 local nextButton = MakeUIButton(Vector2.zero, nextButtonSize, "<b>></b>")
 nextButton.name = "Next Page"
 nextButton.parent = paginationPanel
@@ -94,7 +104,7 @@ nextButton.textSize = 12
 nextButton.textAlignment = "MiddleCenter"
 
 local lastButtonSize = pageButtonsSize
-local lastButtonPos = newVector2(nextButtonPos.x + nextButtonSize.x, 0)
+local lastButtonPos = newVector2(nextButtonPos.x + nextButtonSize.x, pageButtonsPadding)
 local lastButton = MakeUIButton(Vector2.zero, lastButtonSize, "<b>>></b>")
 lastButton.name = "Last Page"
 lastButton.parent = paginationPanel
@@ -102,6 +112,9 @@ lastButton.position = lastButtonPos
 DisableButton(lastButton)
 lastButton.textSize = 12
 lastButton.textAlignment = "MiddleCenter"
+
+paginationPanel.size = newVector2(pageButtonsPadding * 4 + pageButtonsSize.x * 4 + pageCountSize.x, pageButtonsPadding * 2 + pageButtonsSize.y)
+paginationPanel.position = newVector2(mainPanelSize.x / 2 - paginationPanelSize.x / 2, mainPanelSize.y)
 
 local function CreateTab(name, width)
 	local holderSize = newVector2(width, tabButtonsHeight)
@@ -182,6 +195,8 @@ local function UpdatePagination()
 		EnableButton(firstButton, true)
 		EnableButton(lastButton, true)
 	end
+
+	pageCount.text = "<b>" .. tostring(currentTab.currentPage) .. "/" .. tostring(#currentTab.pages) .. "</b>"
 end
 
 local function CreateButton(name, description, tab, modelDataJson)
