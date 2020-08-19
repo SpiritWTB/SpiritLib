@@ -245,6 +245,7 @@ local function CreateButton(name, description, tab, modelDataJson)
 
 	local descLabel = MakeUITextWithHolder(tostring(name) .. " Button Description Label", descLabelPos, descLabelSize, description, button, safetyPadding)
 	descLabel.textColor = newColor(0.6, 0.6, 0.6, 1)
+	descLabel.textSize = 11
 	descLabel.textAlignment = "TopCenter"
 
 	EnableButton(button, false)
