@@ -320,13 +320,13 @@ function Update()
 	end
 end
 
-CreateTab("Models", 60)
-CreateTab("Weapons", 70)
-CreateTab("Entities", 80)
-CreateTab("NPCs", 40)
-CreateTab("Vehicles", 80)
-CreateTab("Dupes", 50)
-CreateTab("Saves", 50)
+CreateTab("Model", 60)
+CreateTab("Weapon", 70)
+CreateTab("Entitie", 80)
+CreateTab("NPC", 40)
+CreateTab("Vehicle", 80)
+CreateTab("Dupe", 50)
+CreateTab("Save", 50)
 
 --for i2 = 1, 100 do
 for i, modelJson in pairs(GetModuleVariable("Default Models", "AllModels")) do
