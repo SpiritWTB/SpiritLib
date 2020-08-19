@@ -100,7 +100,11 @@ local function GeneratePart(data, --[[optional = false]] allowPhysics)
 end
 
 function SaveModel(name, description, parts)
-	if type(name) ~= "string" or #name < 1 or type(description) ~= "string" or #description < 1 or type(parts) ~= "table" or #parts < 1 then
+	SaveObject("Model", name, description, parts)
+end
+
+function SaveObject(objectType, name, description, parts)
+	if type(name) ~= "type" or #type < 1 or type(name) ~= "string" or #name < 1 or type(description) ~= "string" or #description < 1 or type(parts) ~= "table" or #parts < 1 then
 		print("Invalid model setup for" .. tostring(name))
 		return
 	end
@@ -110,6 +114,7 @@ function SaveModel(name, description, parts)
 	local allParts = {
 		name = name,
 		description = description,
+		objectType = objectType,
 		data = {}
 	}
 
@@ -121,7 +126,7 @@ function SaveModel(name, description, parts)
 		end
 	end
 
-	File.WriteCompressed("model_" .. name, ToJson(allParts))
+	File.Write("model_" .. name, ToJson(allParts))
 end
 
 
