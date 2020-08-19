@@ -322,7 +322,7 @@ end
 
 CreateTab("Model", 60)
 CreateTab("Weapon", 70)
-CreateTab("Entitie", 80)
+CreateTab("Entity", 80)
 CreateTab("NPC", 40)
 CreateTab("Vehicle", 80)
 CreateTab("Dupe", 50)
