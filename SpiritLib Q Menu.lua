@@ -3,6 +3,56 @@ local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
 function CallModuleFunction(moduleName, name, ...) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Call(name, ...) end
 function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
 
+function MakeUIButtonWithHolder(name, position, size, --[[optional = ""]]text, parentUI)
+	local holderSize = size
+	local holderPos = position
+	local holder = MakeUIPanel(Vector2.zero, holderSize)
+	holder.name = tostring(name) .. " Button Holder"
+	holder.parent = parentUI
+	holder.position = holderPos
+	holder.color = Color.clear
+
+	local button = MakeUIButton(Vector2.zero, holderSize, text or "")
+	button.name = tostring(name) .. " Button"
+	button.parent = holder
+	button.position = newVector2(0, 0)
+	button.textSize = 12
+	button.textAlignment = "MiddleCenter"
+
+	button.table.holder = holder
+
+	return button
+end
+
+function MakeUITextWithHolder(name, position, size, --[[optional = ""]]text, --[[optional = nil]]parentUI, --[[optional = 0]]wrappingPadding)
+
+	wrappingPadding = wrappingPadding or 0
+
+	local holderSize = size
+	local holderPos = position
+	local holder = MakeUIPanel(Vector2.zero, holderSize)
+	holder.name = tostring(name) .. " Label Holder"
+
+	if parentUI then
+		holder.parent = parentUI
+	end
+
+	holder.position = holderPos
+	holder.color = Color.clear
+
+	local label = MakeUIText(Vector2.zero, newVector2(holderSize.x-wrappingPadding*2, holderSize.y), text or "")
+	label.name = tostring(name) .. " Label"
+	label.parent = holder
+	label.position = newVector2(wrappingPadding,0)
+	label.textColor = newColor(0.6, 0.6, 0.6, 1)
+	label.textSize = 12
+	label.textAlignment = "MiddleCenter"
+
+	label.table.holder = holder
+
+	return label
+end
+
 local function EnableButton(button, unhide)
 	if button and button.type == "UIButton" then
 		button.color = newColor(0.26, 0.26, 0.26, 1)
@@ -43,7 +93,7 @@ local allTabs = {}
 local tabsRowWidth = 0
 local currentTab
 
-local mainPanelSize = newVector2(ScreenSize().x - 120, ScreenSize().y - 156)
+local mainPanelSize = newVector2(ScreenSize().x - 136, ScreenSize().y - 156)
 local mainPanelPos = newVector2(60, 96)
 local mainPanel = MakeUIPanel(mainPanelPos, mainPanelSize)
 mainPanel.color = newColor(0.14, 0.14, 0.14, 0.98)
@@ -58,80 +108,49 @@ tabsPanel.color = newColor(0.14, 0.14, 0.14, 0.98)
 
 local paginationPanelPos = newVector2(mainPanelSize.x / 2 - paginationPanelSize.x / 2, mainPanelSize.y)
 local paginationPanel = MakeUIPanel(Vector2.zero, paginationPanelSize)
-paginationPanel.name = "Pagination Panel"
 paginationPanel.parent = mainPanel
+paginationPanel.name = "Pagination Panel"
 paginationPanel.position = paginationPanelPos
 paginationPanel.color = newColor(0.14, 0.14, 0.14, 0.98)
 
+
 local firstButtonSize = pageButtonsSize
 local firstButtonPos = newVector2(pageButtonsPadding, pageButtonsPadding)
-local firstButton = MakeUIButton(Vector2.zero, firstButtonSize, "<b><<</b>")
-firstButton.name = "First Page"
-firstButton.parent = paginationPanel
-firstButton.position = firstButtonPos
+local firstButton = MakeUIButtonWithHolder("First Page", firstButtonPos, firstButtonSize, "<b><<</b>", paginationPanel)
+firstButton.table.isFirstPageButton = true
 DisableButton(firstButton)
-firstButton.textSize = 12
-firstButton.textAlignment = "MiddleCenter"
 
 local prevButtonSize = pageButtonsSize
-local prevButtonPos = newVector2(firstButtonPos.x + firstButtonSize.x, pageButtonsPadding)
-local prevButton = MakeUIButton(Vector2.zero, prevButtonSize, "<b><</b>")
-prevButton.name = "Previous Page"
-prevButton.parent = paginationPanel
-prevButton.position = prevButtonPos
+local prevButtonPos = newVector2(firstButtonPos.x + firstButtonSize.x+ pageButtonsPadding, pageButtonsPadding)
+local prevButton = MakeUIButtonWithHolder("Previous Page", prevButtonPos, prevButtonSize, "<b><</b>", paginationPanel)
+prevButton.table.isPreviousPageButton = true
 DisableButton(prevButton)
-prevButton.textSize = 12
-prevButton.textAlignment = "MiddleCenter"
 
 local pageCountSize = newVector2(60, 28)
-local pageCountPos = newVector2(prevButtonPos.x + prevButtonSize.x, pageButtonsPadding)
-local pageCount = MakeUIText(pageCountPos, pageCountSize, "0/0")
-pageCount.name = "Page Count"
-pageCount.parent = paginationPanel
-pageCount.position = pageCountPos
-pageCount.textColor = newColor(0.6, 0.6, 0.6, 1)
-pageCount.textSize = 12
-pageCount.textAlignment = "MiddleCenter"
+local pageCountPos = newVector2(prevButtonPos.x + prevButtonSize.x+ pageButtonsPadding, pageButtonsPadding)
+local pageCount = MakeUITextWithHolder("Page Count", pageCountPos, pageCountSize, "0/0", paginationPanel)
+pageCount.textSize = 10
 
 local nextButtonSize = pageButtonsSize
-local nextButtonPos = newVector2(pageCountPos.x + pageCountSize.x, pageButtonsPadding)
-local nextButton = MakeUIButton(Vector2.zero, nextButtonSize, "<b>></b>")
-nextButton.name = "Next Page"
-nextButton.parent = paginationPanel
-nextButton.position = nextButtonPos
+local nextButtonPos = newVector2(pageCountPos.x + pageCountSize.x+ pageButtonsPadding, pageButtonsPadding)
+local nextButton = MakeUIButtonWithHolder("Next Page", nextButtonPos, nextButtonSize, "<b>></b>", paginationPanel)
+nextButton.table.isNextPageButton = true
 DisableButton(nextButton)
-nextButton.textSize = 12
-nextButton.textAlignment = "MiddleCenter"
 
 local lastButtonSize = pageButtonsSize
-local lastButtonPos = newVector2(nextButtonPos.x + nextButtonSize.x, pageButtonsPadding)
-local lastButton = MakeUIButton(Vector2.zero, lastButtonSize, "<b>>></b>")
-lastButton.name = "Last Page"
-lastButton.parent = paginationPanel
-lastButton.position = lastButtonPos
+local lastButtonPos = newVector2(nextButtonPos.x + nextButtonSize.x + pageButtonsPadding, pageButtonsPadding)
+local lastButton = MakeUIButtonWithHolder("Last Page", lastButtonPos, lastButtonSize, "<b>>></b>", paginationPanel)
+lastButton.table.isLastPageButton = true
 DisableButton(lastButton)
-lastButton.textSize = 12
-lastButton.textAlignment = "MiddleCenter"
 
-paginationPanel.size = newVector2(pageButtonsPadding * 4 + pageButtonsSize.x * 4 + pageCountSize.x, pageButtonsPadding * 2 + pageButtonsSize.y)
-paginationPanel.position = newVector2(mainPanelSize.x / 2 - paginationPanelSize.x / 2, mainPanelSize.y)
+paginationPanel.size = newVector2(pageButtonsPadding * 6 + pageButtonsSize.x * 4 + pageCountSize.x, pageButtonsPadding * 2 + pageButtonsSize.y)
+paginationPanel.position = newVector2(mainPanelSize.x / 2 - paginationPanel.size.x / 2, mainPanelSize.y)
 
 local function CreateTab(name, width)
-	local holderSize = newVector2(width, tabButtonsHeight)
-	local holderPos = newVector2(tabsRowWidth + tabButtonsPadding, tabButtonsPadding)
-	local holder = MakeUIPanel(Vector2.zero, holderSize)
-	holder.name = name .. " Holder"
-	holder.parent = tabsPanel
-	holder.position = holderPos
-	holder.color = Color.clear
+	local buttonSize = newVector2(width, tabButtonsHeight)
+	local buttonPos = newVector2(tabsRowWidth + tabButtonsPadding, tabButtonsPadding)
 
-	local button = MakeUIButton(Vector2.zero, holderSize, "<b>" .. name .. "</b>")
-	button.name = name
-	button.parent = holder
-	button.position = newVector2(0, 0)
-	button.textSize = 12
-	button.textAlignment = "MiddleCenter"
-	button.table.isTab = true
+	local button = MakeUIButtonWithHolder(name, buttonPos, buttonSize, "<b>" .. name .. "</b>", tabsPanel)
 
 	local panel = MakeUIPanel(Vector2.zero, mainPanelSize - newVector2(panelPadding * 2, panelPadding * 2))
 	panel.name = name .. " Page 1"
@@ -196,26 +215,37 @@ local function UpdatePagination()
 		EnableButton(lastButton, true)
 	end
 
-	pageCount.text = "<b>" .. tostring(currentTab.currentPage) .. "/" .. tostring(#currentTab.pages) .. "</b>"
+	if #currentTab.pages < 2 then
+		DisableButton(firstButton, true)
+		DisableButton(prevButton, true)
+		DisableButton(nextButton, true)
+		DisableButton(lastButton, true)
+	end
+
+	pageCount.text = "<b> Page " .. tostring(currentTab.currentPage) .. "/" .. tostring(#currentTab.pages) .. "</b>"
 end
 
 local function CreateButton(name, description, tab, modelDataJson)
 	local panel = tab.pages[#tab.pages]
 
-	local holderSize = buttonsSize
-	local holderPos = panel.table.occupiedSize
-	local holder = MakeUIPanel(Vector2.zero, holderSize)
-	holder.name = name .. " Holder"
-	holder.parent = panel
-	holder.position = holderPos
-	holder.color = Color.clear
 
-	local button = MakeUIButton(Vector2.zero, holderSize, "<b>" .. name .. tostring(#tab.pages) .. "</b>")
-	button.name = name
-	button.parent = holder
-	button.position = newVector2(0, 0)
-	button.textSize = 12
-	button.textAlignment = "MiddleCenter"
+	local buttonSize = buttonsSize
+	local buttonPos = panel.table.occupiedSize
+	local button = MakeUIButtonWithHolder(name, buttonPos, buttonSize, "", panel)
+
+
+	local safetyPadding = 6
+	local nameLabelSize = newVector2(buttonSize.x, buttonSize.y/3)
+	local descLabelSize = newVector2(buttonSize.x, buttonSize.y/2)
+	local descLabelPos = newVector2(0, buttonSize.y/2.6)
+
+	local nameLabel = MakeUITextWithHolder(tostring(name) .. " Button Name Label", newVector2(0,12), nameLabelSize, "<b>" .. name .. "</b>\n--------", button, safetyPadding)
+	nameLabel.textColor = newColor(0.6, 0.6, 0.6, 1)
+	nameLabel.textAlignment = "TopCenter"
+
+	local descLabel = MakeUITextWithHolder(tostring(name) .. " Button Description Label", descLabelPos, descLabelSize, description, button, safetyPadding)
+	descLabel.textColor = newColor(0.6, 0.6, 0.6, 1)
+	descLabel.textAlignment = "TopCenter"
 
 	EnableButton(button, false)
 
@@ -265,13 +295,13 @@ local function SelectPage(number)
 end
 
 function OnUIButtonClick(button)
-	if button.name == "First Page" then
+	if button.table.isFirstPageButton then
 		SelectPage(1)
-	elseif button.name == "Previous Page" then
+	elseif button.table.isPreviousPageButton then
 		SelectPage(currentTab.currentPage - 1)
-	elseif button.name == "Next Page" then
+	elseif button.table.isNextPageButton then
 		SelectPage(currentTab.currentPage + 1)
-	elseif button.name == "Last Page" then
+	elseif button.table.isLastPageButton then
 		SelectPage(#currentTab.pages)
 	elseif button.table.isTab then
 		SelectTab(button.name)
@@ -297,11 +327,12 @@ CreateTab("Vehicles", 80)
 CreateTab("Dupes", 50)
 CreateTab("Saves", 50)
 
-for i = 1, 100 do
-    for i2, modelJson in pairs(GetModuleVariable("Default Models", "AllModels")) do
-        local model = FromJson(modelJson)
+--for i2 = 1, 100 do
+for i, modelJson in pairs(GetModuleVariable("Default Models", "AllModels")) do
+    local model = FromJson(modelJson)
 
-        -- once we get scripts on the side pass through the model, not the modelJson
-        CreateButton(model.name, model.description, allTabs["Models"], modelJson)
-    end
+    -- once we get scripts on the side pass through the model, not the modelJson
+    CreateButton(model.name, model.description, allTabs["Models"], modelJson)
 end
+--end
+UpdatePagination()
