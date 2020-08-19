@@ -333,7 +333,7 @@ for i, modelJson in pairs(GetModuleVariable("Default Models", "AllModels")) do
     local model = FromJson(modelJson)
 
     -- once we get scripts on the side pass through the model, not the modelJson
-    CreateButton(model.name, model.description, allTabs["Models"], modelJson)
+    CreateButton(model.name, model.description, allTabs[model.objectType], modelJson)
 end
 --end
 UpdatePagination()
