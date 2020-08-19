@@ -1,11 +1,11 @@
 SpiritLib = {}
 
 SpiritLib.Modules = {
-	["Attachments"] = false,
-	["Models"] = false,
-	["Default Models"] = false,
+	["Attachment"] = false,
+	["Model"] = false,
+	["Default Model"] = false,
 	["Q Menu"] = false,
-	["Weapons"] = false,
+	["Weapon"] = false,
 }
 
 function Start()
