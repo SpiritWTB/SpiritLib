@@ -1,21 +1,22 @@
 --[[ Start SpiritLib Setup ]]
 
-local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
+local function SpiritLib() return PartByName("SpiritLib").scripts[1] end
 
 -- Calls functions from SpiritLib modules, and uses special sauce to give their return value
-function CallModuleFunction(moduleName, functionName, ...) 
+local function CallModuleFunction(moduleName, functionName, ...)
 	local token = SpiritLib().Globals.SpiritLib.Call("GetToken", This)
-	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...) 
+	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...)
 	return This.table.spiritLibReturns[token]
 end
 
 -- gets variables from SpiritLib modules
-function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
+local function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
 
 -- this is our special cross-script version of "return"
 function ReturnCall(caller, token, functionName, ...) caller.table.spiritLibReturns[token] = _G[functionName](...) end
 
 -- [[ End SpiritLib Setup ]]
+
 
 local function CreateBoundingBox(parts)
 	if type(parts) ~= "table" or #parts < 1 then

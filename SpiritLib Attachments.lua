@@ -1,3 +1,23 @@
+--[[ Start SpiritLib Setup ]]
+
+local function SpiritLib() return PartByName("SpiritLib").scripts[1] end
+
+-- Calls functions from SpiritLib modules, and uses special sauce to give their return value
+local function CallModuleFunction(moduleName, functionName, ...)
+	local token = SpiritLib().Globals.SpiritLib.Call("GetToken", This)
+	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...)
+	return This.table.spiritLibReturns[token]
+end
+
+-- gets variables from SpiritLib modules
+local function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
+
+-- this is our special cross-script version of "return"
+function ReturnCall(caller, token, functionName, ...) caller.table.spiritLibReturns[token] = _G[functionName](...) end
+
+-- [[ End SpiritLib Setup ]]
+
+
 -- this library just fakes parenting without the scale until WTB has some way to make multiple objects into one
 -- this is not going to work on overlapping physics objects
 -- this file says "child" and "parent" a lot but it's talking about an object being attached to another, not default WTB parenting. The whole point of the Attachments library is to avoid WTB Parenting for now.
