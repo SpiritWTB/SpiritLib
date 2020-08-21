@@ -170,6 +170,13 @@ function GenerateModel(modelTable, --[[optional]]position)
 		rootPart.position = position
 	end
 
+	--todo weapon script
+	if (modelTable.weaponScript ~= nil) then
+    	--CallModuleFunction("Attachments", "Attach", rootPart, LocalPlayer())
+		--rootPart.script = weaponScript
+    end
+
+
 	return rootPart
 end
 
