@@ -1,16 +1,16 @@
 --[[ Start SpiritLib Setup ]]
 
-local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
+local function SpiritLib() return PartByName("SpiritLib").scripts[1] end
 
 -- Calls functions from SpiritLib modules, and uses special sauce to give their return value
-function CallModuleFunction(moduleName, functionName, ...)
+local function CallModuleFunction(moduleName, functionName, ...)
 	local token = SpiritLib().Globals.SpiritLib.Call("GetToken", This)
 	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...)
 	return This.table.spiritLibReturns[token]
 end
 
 -- gets variables from SpiritLib modules
-function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
+local function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
 
 -- this is our special cross-script version of "return"
 function ReturnCall(caller, token, functionName, ...) caller.table.spiritLibReturns[token] = _G[functionName](...) end
@@ -18,7 +18,7 @@ function ReturnCall(caller, token, functionName, ...) caller.table.spiritLibRetu
 -- [[ End SpiritLib Setup ]]
 
 
-function MakeUIButtonWithHolder(name, position, size, --[[optional = ""]]text, parentUI)
+function MakeUIButtonWithHolder(name, position, size, --[[optional = ""]] text, parentUI)
 	local holderSize = size
 	local holderPos = position
 	local holder = MakeUIPanel(Vector2.zero, holderSize)
@@ -40,7 +40,6 @@ function MakeUIButtonWithHolder(name, position, size, --[[optional = ""]]text, p
 end
 
 function MakeUITextWithHolder(name, position, size, --[[optional = ""]] text, --[[optional = nil]] parentUI, --[[optional = 0]] wrappingPadding)
-
 	wrappingPadding = wrappingPadding or 0
 
 	local holderSize = size
@@ -243,14 +242,11 @@ local function UpdatePagination()
 end
 
 local function CreateButton(name, description, tab, modelDataJson)
-
 	local panel = tab.pages[#tab.pages]
-
 
 	local buttonSize = buttonsSize
 	local buttonPos = panel.table.occupiedSize
 	local button = MakeUIButtonWithHolder(name, buttonPos, buttonSize, "", panel)
-
 
 	local safetyPadding = 6
 	local nameLabelSize = newVector2(buttonSize.x, buttonSize.y/3)
@@ -362,9 +358,9 @@ for i, modelJson in pairs(GetModuleVariable("Default Models", "BuiltInModels")) 
 	    CallModuleFunction("Weapons", "RegisterWeapon", model.name, model.weaponScript, modelJson)
 	end
 
-
     -- once we get scripts on the side pass through the model, not the modelJson
     CreateButton(model.name, model.description, allTabs[model.objectType], modelJson)
 end
 --end
+
 UpdatePagination()
