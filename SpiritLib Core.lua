@@ -23,3 +23,11 @@ function Start()
 		print(moduleName .. " module loaded!")
 	end
 end
+
+function CallModuleFunction(caller, token, moduleName, functionName, ...)
+	local selectedModule = SpiritLib.Modules[moduleName]
+
+	if selectedModule then
+		selectedModule.scripts[1].Call("ReceiveCall", caller, token, functionName, ...)
+	end
+end
