@@ -3,9 +3,9 @@
 local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
 
 -- Calls functions from SpiritLib modules, and uses special sauce to give their return value
-function CallModuleFunction(moduleName, functionName, ...) 
+function CallModuleFunction(moduleName, functionName, ...)
 	local token = SpiritLib().Globals.SpiritLib.Call("GetToken", This)
-	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...) 
+	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...)
 	return This.table.spiritLibReturns[token]
 end
 
@@ -39,7 +39,7 @@ function MakeUIButtonWithHolder(name, position, size, --[[optional = ""]]text, p
 	return button
 end
 
-function MakeUITextWithHolder(name, position, size, --[[optional = ""]]text, --[[optional = nil]]parentUI, --[[optional = 0]]wrappingPadding)
+function MakeUITextWithHolder(name, position, size, --[[optional = ""]] text, --[[optional = nil]] parentUI, --[[optional = 0]] wrappingPadding)
 
 	wrappingPadding = wrappingPadding or 0
 
