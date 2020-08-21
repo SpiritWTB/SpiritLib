@@ -50,6 +50,10 @@ function Update()
 		NextItem()
 	end
 
+	if (InputPressed("mouse 1")) then
+		NetworkSendToHost("weaponInput", {1})
+	end
+
 	for k,v in pairs(allBoxes) do
 		if InputPressed(v.table.keyBind) then
 			SelectItem(v.table.index)
@@ -110,7 +114,7 @@ SpawnUIBoxes()
 
 
 
-if not IsHost() then return end
+if not IsHost then return end
 
 -- TODO: RUN THIS ON FIXED CONNECT
 function InitializeWeaponInventories()
@@ -147,8 +151,8 @@ WeaponsByName = {}
 function RegisterWeapon(weaponTable)
 	-- check to make sure they've got a name and stuff, basic things that will break the game if they aren't there
 	if not weaponTable.name then return end
-	if not weaponTable.scriptName then return end
-	if not weaponTable.model then return end
+	if not weaponTable.script then return end
+	--if not weaponTable.model then return end
 
 
 	table.insert(RegisteredWeapons, weaponTable)

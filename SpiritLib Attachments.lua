@@ -21,20 +21,18 @@ function Attach(_attachThis, _toThis)
 
 	-- add actual attachment info
 	attachments[_attachThis.id] = {
+		parentType = _toThis.type,
 		parentID = _toThis.id,
 		posOffset = _attachThis.position - _toThis.position,
 		angOffset = _attachThis.angles - _toThis.angles,
 		lastParentPosition = _toThis.position,
 		lastParentAngles = _toThis.angles
 	}
-
-
 	-- make sure we can get the children just by knowing the parent
 	if (reverseAssociations[_toThis.id] == nil) then
 		reverseAssociations[_toThis.id] = {}
 	end
 	table.insert(reverseAssociations[_toThis.id], _attachThis.id)
-
 end
 
 -- this is used in cases like when one part no longer exists because it has been deleted. It just removes the object from any previous association.
@@ -142,7 +140,12 @@ function updateRoutine()
 
 	for attachedPartID, attachInfo in pairs(attachments) do
 
-		local parentPart = PartByID(attachInfo.parentID)
+		local parentPart
+		if attachInfo.parentType == "Part" then
+			parentPart = PartByID(attachInfo.parentID)
+		else 
+			parentPart = PlayerByID(attachInfo.parentID)
+		end
 
 		local shouldUpdateChildren = ( attachInfo.lastParentPosition ~= parentPart.position or attachInfo.lastParentAngles ~= parentPart.angles )
 

@@ -43,12 +43,14 @@ local function CreateBoundingBox(parts)
 	encompasser.size = diff
 	encompasser.transparency = 0.2
 	encompasser.visible = false
+	encompasser.ignoreRaycast = true
 
 	local renderParent = CreatePart(0, center, Vector3.zero)
 	renderParent.visible = true
 	renderParent.cancollide = false
 	renderParent.frozen = true
 	renderParent.visible = false
+	renderParent.ignoreRaycast = true
 
 	for i, part in pairs(parts) do
 		part.parent = renderParent
@@ -87,7 +89,7 @@ local function GenerateData(part)
 	return output
 end
 
-local function GeneratePart(data, --[[optional = false]] allowPhysics)
+local function GeneratePart(data, --[[optional = false]] isMapPart)
 
 	local part = CreatePart(data.parttype, data.position + newVector3(0, 5, 0), data.angles)
 	part.name = data.name
@@ -97,8 +99,10 @@ local function GeneratePart(data, --[[optional = false]] allowPhysics)
 	part.visible = data.visible
 	part.cancollide = data.cancollide
 
-	if allowPhysics then
+	if isMapPart then
 		part.frozen = data.frozen
+	else
+		part.ignoreRaycast = true
 	end
 
 	if data.script then
@@ -172,8 +176,14 @@ function GenerateModel(modelTable, --[[optional]]position)
 
 	--todo weapon script
 	if (modelTable.weaponScript ~= nil) then
-    	--CallModuleFunction("Attachments", "Attach", rootPart, LocalPlayer())
-		--rootPart.script = weaponScript
+		rootPart.frozen = true
+		rootPart.cancollide = false
+		CallModuleFunction("Attachments", "Attach", rootPart, LocalPlayer())
+
+		rootPart.position = LocalPlayer().position + LocalPlayer().forward
+
+    	
+		rootPart.script = weaponScript
     end
 
 
