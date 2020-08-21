@@ -71,7 +71,7 @@ local function CreateBoundingBox(parts)
 		part.cancollide = false
 	end
 
-	CallModuleFunction("Attachments", "Attach", renderParent, encompasser)
+	CallModuleFunction("Attachments", "Attach", renderParent, encompasser, false)
 
 	encompasser.frozen = false
 	encompasser.cancollide = true
