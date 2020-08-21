@@ -14,26 +14,19 @@ WEAPON.CurrentPhysDistance = 0
 WEAPON.CurrentPhysRotation = Vector3.zero
 
 WEAPON.Fire = function(ply, mousePos, hitEnt)
-	-- **
-	if (raycast from ply to hitEnt hits something other than hitEnt) then
-		return
-	end
-	if ( ply doesn't own hitEnt (once prop protection is done, not needed right now)) then
-		return
-	end
+
 	self.CurrentObject = hitEnt
 	self.CurrentPhysDistance = (distance from ply to hitEnt)
 end
 
 WEAPON.think = function(unsure if we need arguments)
-	if (IsHost()) then return end
+	if IsHost then return end
 
 	if (self.CurrentObject ~= nil ) then
 		-- ****
 	end
 end
 
-CallModuleFunction("Weapons","RegisterWeapon", WEAPON)
 
 -- **  this will run on the server AND client, so let's make sure on the server (we'll do it on both for the heck of it) that they can indeed hit that entity. This is subject to a little lag if, for instance, the host runs around a corner as he's being shot, but it's decent host-level security, and that's all we have right now... we might can do this outside of the individual weapon before calling weapon.Fire
 

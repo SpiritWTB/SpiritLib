@@ -125,20 +125,55 @@ function InitializeWeaponInventories()
 		playerWeaponInventories[ply] = {}
 		ply.table.SelectedWeaponSlot = nil
 	end
+end 
+
+local usedPartNameIndices = {}
+local function GetUniqueName()
+	local index = 1
+	
+	while usedPartNameIndices[index] do
+		index = index + 1
+	end
+
+	local uniqueName = "SpiritLibWeapon##Spawned##//" .. index
+	usedPartNameIndices[uniqueName] = true
+
+	return uniqueName
 end
 
+local function RemoveUniqueName(uniqueName)
+	usedPartNameIndices[uniqueName] = nil
+end
+
+function SpawnModel(objectJSON, position)
+	local uniqueName = GetUniqueName()
+
+	CallModuleFunction("Models", "GenerateModel", objectJSON, position, uniqueName)
+	local weaponPart = PartByName(uniqueName)
+	weaponPart.name = weapon
+	RemoveUniqueName(uniqueName)
+end
 
 function GiveWeapon(player, weaponName, slot)
 	if (playerWeaponInventories[player] ~= nil and WeaponsByName[weaponName]~=nil) then
 
 		local weaponTableInstance = CopyTable(WeaponsByName[weaponName])
 
+		local me = LocalPlayer()
+
 		-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
-		--weaponPart = CallModuleFunction("Models", "LoadModel", weapon.model)
+		weaponTableInstance.part = SpawnModel(weapon.json, me.position + me.forward) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
 
-		weaponTableInstance.part = CreatePart(0)
 
-		weaponTableInstance.part.script = weaponTableInstance.scriptName
+
+		weaponTableInstance.part.frozen = true
+		weaponTableInstance.part.cancollide = false
+
+		weaponTableInstance.part.angles = LocalPlayer().angles
+
+		CallModuleFunction("Attachments", "Attach", rootPart, LocalPlayer())
+
+		weaponTableInstance.part.script = weaponTableInstance.weaponScript
 
 		playerWeaponInventories[player][slot] = weaponTableInstance
 		player.table.SelectedWeaponSlot = slot
@@ -148,12 +183,13 @@ end
 RegisteredWeapons = {}
 WeaponsByName = {}
 
-function RegisterWeapon(weaponTable)
+function RegisterWeapon(name, scriptName, modelJson)
 	-- check to make sure they've got a name and stuff, basic things that will break the game if they aren't there
-	if not weaponTable.name then return end
-	if not weaponTable.script then return end
-	--if not weaponTable.model then return end
+	if not name then return end
+	if not scriptName then return end
+	if not modelJson then return end
 
+	local weaponTable = FromJson(modelJson)
 
 	table.insert(RegisteredWeapons, weaponTable)
 	WeaponsByName[weaponTable.name] = weaponTable
@@ -163,7 +199,7 @@ function NetworkStringReceive(player, name, data)
 
 	if IsHost() and name=="selectWeaponSlot" then
 		if playerWeaponInventories[player][data[1]] ~= nil then
-			player.table.SelectedWeaponSlot = slot
+			player.table.SelectedWeaponSlot = data[1]
 		end
 	end
 
@@ -178,6 +214,7 @@ function NetworkStringReceive(player, name, data)
 		4 = AltFireRelease
 		5 = Reload
 	]]
+
 
 	if IsHost() and name == "weaponInput" and player.table.SelectedWeaponSlot ~= nil then
 		local slot = player.table.SelectedWeaponSlot
@@ -200,11 +237,7 @@ end
 
 function InitializeWeapons()
 
-	RegisterWeapon({
-		name = "Physgun",
-		scriptName = "SpiritLib Weapon Physgun",
-		model = "physicsgun"
-	})
+	--RegisterWeapon( "Physgun", "Weapon Physgun", GetModuleVariable("Default Models", "BuiltInModels"))
 
 end
 

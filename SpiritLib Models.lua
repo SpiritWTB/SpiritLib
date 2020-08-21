@@ -143,7 +143,7 @@ function SaveObject(objectType, name, description, parts)
 end
 
 
-function GenerateModel(modelTable, --[[optional]]position)
+function GenerateModel(modelTable, --[[optional]]position, --[[optional]]partNameOverride)
 	print("generating")
 
 	-- REMOVE THIS IF STATEMENT ONCE WE GET SCRIPTS ON THE SIDE
@@ -166,6 +166,9 @@ function GenerateModel(modelTable, --[[optional]]position)
 	if (modelParts) then
 		rootPart = CreateBoundingBox(modelParts)
 		rootPart.name = modelTable.name
+		if partNameOverride then
+			rootPart.name = partNameOverride
+		end
 	else
 		print("Issue creating model - modelParts does not exist")
 	end
@@ -173,18 +176,6 @@ function GenerateModel(modelTable, --[[optional]]position)
 	if (position ~= nil) then
 		rootPart.position = position
 	end
-
-	--todo weapon script
-	if (modelTable.weaponScript ~= nil) then
-		rootPart.frozen = true
-		rootPart.cancollide = false
-		CallModuleFunction("Attachments", "Attach", rootPart, LocalPlayer())
-
-		rootPart.position = LocalPlayer().position + LocalPlayer().forward
-
-    	
-		rootPart.script = weaponScript
-    end
 
 
 	return rootPart
