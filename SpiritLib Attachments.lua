@@ -2,8 +2,32 @@
 -- this is not going to work on overlapping physics objects
 -- this file says "child" and "parent" a lot but it's talking about an object being attached to another, not default WTB parenting. The whole point of the Attachments library is to avoid WTB Parenting for now.
 
--- this is actually not usually necessary, since you can attach parts together without this by attaching 2 to the same 1:1:1 ratio part.
+-- this is actually not usually necessary, since you can attach parts together without this by attaching 2 to the same 1:1:1 size part.
 -- this should then, mainly, be used for parenting to players. Occasionally also if you really need nested parents
+
+
+
+
+--[[ Start SpiritLib Setup ]]
+
+local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
+
+-- Calls functions from SpiritLib modules, and uses special sauce to give their return value
+function CallModuleFunction(moduleName, functionName, ...) 
+	local token = SpiritLib().Globals.SpiritLib.Call("GetToken", This)
+	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...) 
+	return This.table.spiritLibReturns[token]
+end
+
+-- gets variables from SpiritLib modules
+function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
+
+-- this is our special cross-script version of "return"
+function ReturnCall(caller, token, functionName, ...) caller.table.spiritLibReturns[token] = _G[functionName](...) end
+
+-- [[ End SpiritLib Setup ]]
+
+
 
 
 
@@ -13,42 +37,100 @@ attachments = {}
 -- this table holds a table of all children for a given parent, it's used for speed and does not contain all the relationship info like the attachments table. It's just a list of children ids for each parent
 reverseAssociations = {}
 
+-- in case objects no longer exist, this keeps track of the id of the OneScaledParent we've created for an object, by that objects id, this is used because the part might get deleted
+oneScaledParentAttachments = {}
 
 --SpiritLib\[ModuleName\].*function\((.*)\)
 
--- this will "parent" a part to another
-function Attach(_attachThis, _toThis)
+-- this will "parent" a part to another. 
+function Attach(_attachThis, _toThis, --[[optional = true]]useOneScaledParent)
+
+	local id = _attachThis.id
+
+	-- if it's nil or true we're good
+	if useOneScaledParent ~= false then
+		-- create a holster if this part doesn't have one yet
+		if _toThis.table.OneScaledParent==nil then
+			local oneScaledParent = CreatePart(0, _toThis.position, Vector3.zero)
+			_toThis.table.OneScaledParent = part
+			oneScaledParent.table.isHolster = true
+			oneScaledParent.cancollide = false
+			oneScaledParent.visible = false
+			oneScaledParent.frozen = true
+			oneScaledParent.ignoreRaycast = true
+			oneScaledParentAttachments[_toThis.id] = oneScaledParent.id
+		end
+
+		id = _toThis.table.OneScaledParent.id
+		_attachThis.parent = _toThis.table.OneScaledParent
+	end
 
 	-- add actual attachment info
-	attachments[_attachThis.id] = {
-		parentType = _toThis.type,
-		parentID = _toThis.id,
-		posOffset = _attachThis.position - _toThis.position,
-		angOffset = _attachThis.angles - _toThis.angles,
-		lastParentPosition = _toThis.position,
-		lastParentAngles = _toThis.angles
-	}
-	-- make sure we can get the children just by knowing the parent
-	if (reverseAssociations[_toThis.id] == nil) then
-		reverseAssociations[_toThis.id] = {}
+	if not attachments[id] then
+		attachments[id] = {
+			parentType = _toThis.type,
+			parentID = _toThis.id,
+			posOffset = _attachThis.position - _toThis.position,
+			angOffset = _attachThis.angles - _toThis.angles,
+			lastParentPosition = _toThis.position,
+			lastParentAngles = _toThis.angles
+		}
 	end
-	table.insert(reverseAssociations[_toThis.id], _attachThis.id)
+
+	-- make sure we can get the children just by knowing the parent
+	if (reverseAssociations[id] == nil) then
+		reverseAssociations[id] = {}
+	end
+
+	
+	
+	table.insert(reverseAssociations[id], _attachThis.id)
 end
 
 -- this is used in cases like when one part no longer exists because it has been deleted. It just removes the object from any previous association.
 function Unattach(_unattachThisID, _fromThisID)
-	attachments[_unattachThisID] = nil
+	local thisID = _unattachThisID
+	local fromID = _fromThisID
+
+	-- if it has an entry here, its parenting is fake (see: real, it's confusing) so we can just unparent it and stop this function
+	if oneScaledParentAttachments[thisID] then
+		local partToBeUnnattached = PartByID(thisID)
+		
+		if partToBeUnnattached then
+			partToBeUnnattached.parent = nil
+		end
+		
+		-- if there wasn't one it doesn't matter, it got deleted and unity parenting will absorb that blow
+
+		return
+	end
+
+	attachments[thisID] = nil
 
 	-- find the list of children for the parent
-	if (reverseAssociations[_fromThisID] ~= nil) then
-		for index, childID in pairs(reverseAssociations[_fromThisID]) do
-			if (childID == _unattachThisID) then
-				reverseAssociations[_fromThisID][index] = nil
+	if (reverseAssociations[fromID] ~= nil) then
+		for index, childID in pairs(reverseAssociations[fromID]) do
+			if (childID == thisID) then
+				reverseAssociations[fromID][index] = nil
 			end
 		end
 	end
 end
 
+-- this is used in cases like when one part no longer exists because it has been deleted. It just removes the object from any previous association.
+function UnattachFromAll(_unattachThisID)
+	local thisID = _unattachThisID
+	local fromID = _fromThisID
+
+	attachments[thisID] = nil
+
+	-- find the list of children for the parent
+	if (reverseAssociations[fromID] ~= nil) then
+		for index, childID in pairs(reverseAssociations[fromID]) do
+			reverseAssociations[fromID][index] = nil
+		end
+	end
+end
 
 
 -- this will refresh the position and rotation offsets, they would use this after changing the position of a "child" object relative to the parent

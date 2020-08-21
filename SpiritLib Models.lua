@@ -60,7 +60,6 @@ local function CreateBoundingBox(parts)
 	encompasser.ignoreRaycast = true
 
 	local renderParent = CreatePart(0, center, Vector3.zero)
-	renderParent.visible = true
 	renderParent.cancollide = false
 	renderParent.frozen = true
 	renderParent.visible = false
