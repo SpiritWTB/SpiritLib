@@ -8,7 +8,7 @@ local function FixedCall(moduleName, functionName, ...)
 		token = token .. string.format("%x", math.random(0, 255))
 	end
 
-	PartByName("SpiritLib").scripts[1].Call("CallModuleFunction", This, token, moduleName, functionName, ...)
+	SpiritLib().Call("CallModuleFunction", This, token, moduleName, functionName, ...)
 	return This.table[token]
 end
 
