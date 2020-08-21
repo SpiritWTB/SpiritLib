@@ -41,12 +41,21 @@ local function CreateBoundingBox(parts)
 
 	local encompasser = CreatePart(0, center, Vector3.zero)
 	encompasser.size = diff
+	encompasser.transparency = 0.2
 	encompasser.visible = false
 
+	local renderParent = CreatePart(0, center, Vector3.zero)
+	renderParent.visible = true
+	renderParent.cancollide = false
+	renderParent.frozen = true
+	renderParent.visible = false
+
 	for i, part in pairs(parts) do
+		part.parent = renderParent
 		part.cancollide = false
-		CallModuleFunction("Attachments", "Attach", part, encompasser)
 	end
+
+	CallModuleFunction("Attachments", "Attach", renderParent, encompasser)
 
 	encompasser.frozen = false
 	encompasser.cancollide = true
@@ -100,11 +109,11 @@ local function GeneratePart(data, --[[optional = false]] allowPhysics)
 end
 
 function SaveModel(name, description, parts)
-	SaveObject("Model", name, description, parts)
+	SaveObject("Models", name, description, parts)
 end
 
 function SaveObject(objectType, name, description, parts)
-	if type(name) ~= "type" or #type < 1 or type(name) ~= "string" or #name < 1 or type(description) ~= "string" or #description < 1 or type(parts) ~= "table" or #parts < 1 then
+	if type(objectType) ~= "string" or #objectType < 1 or type(name) ~= "string" or #name < 1 or type(description) ~= "string" or #description < 1 or type(parts) ~= "table" or #parts < 1 then
 		print("Invalid model setup for" .. tostring(name))
 		return
 	end
