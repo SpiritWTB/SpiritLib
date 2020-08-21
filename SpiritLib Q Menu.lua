@@ -93,7 +93,7 @@ local allTabs = {}
 local tabsRowWidth = 0
 local currentTab
 
-local mainPanelSize = newVector2(ScreenSize().x - 136, ScreenSize().y - 156)
+local mainPanelSize = newVector2(ScreenSize().x - 136, ScreenSize().y - 256)
 local mainPanelPos = newVector2(60, 96)
 local mainPanel = MakeUIPanel(mainPanelPos, mainPanelSize)
 mainPanel.color = newColor(0.14, 0.14, 0.14, 0.98)
@@ -151,6 +151,8 @@ local function CreateTab(name, width)
 	local buttonPos = newVector2(tabsRowWidth + tabButtonsPadding, tabButtonsPadding)
 
 	local button = MakeUIButtonWithHolder(name, buttonPos, buttonSize, "<b>" .. name .. "</b>", tabsPanel)
+	button.table.isTab = true
+	button.table.tabName = name
 
 	local panel = MakeUIPanel(Vector2.zero, mainPanelSize - newVector2(panelPadding * 2, panelPadding * 2))
 	panel.name = name .. " Page 1"
@@ -226,6 +228,7 @@ local function UpdatePagination()
 end
 
 local function CreateButton(name, description, tab, modelDataJson)
+
 	local panel = tab.pages[#tab.pages]
 
 
@@ -305,10 +308,17 @@ function OnUIButtonClick(button)
 	elseif button.table.isLastPageButton then
 		SelectPage(#currentTab.pages)
 	elseif button.table.isTab then
-		SelectTab(button.name)
+		SelectTab(button.table.tabName)
 	elseif button.table.isSpiritLibSpawnButton and button.table.spawnData then
 		local spawnPos = LocalPlayer().position + LocalPlayer().forward
-		CallModuleFunction("Models", "GenerateModel", button.table.spawnData, spawnPos)
+
+		local objectData = FromJson(button.table.spawnData)
+
+		if objectData.objectType == "Models" then
+			CallModuleFunction("Models", "GenerateModel", button.table.spawnData, spawnPos)
+		elseif objectData.objectType == "Weapons" then
+			CallModuleFunction("Weapons", "GiveWeapon", LocalPlayer(), data.name, 1)
+		end
 	end
 end
 
@@ -320,17 +330,23 @@ function Update()
 	end
 end
 
-CreateTab("Model", 60)
-CreateTab("Weapon", 70)
-CreateTab("Entity", 80)
-CreateTab("NPC", 40)
-CreateTab("Vehicle", 80)
-CreateTab("Dupe", 50)
-CreateTab("Save", 50)
+CreateTab("Models", 60)
+CreateTab("Weapons", 70)
+CreateTab("Entities", 80)
+CreateTab("NPCs", 40)
+CreateTab("Vehicles", 80)
+CreateTab("Saves", 50)
 
 --for i2 = 1, 100 do
-for i, modelJson in pairs(GetModuleVariable("Default Models", "AllModels")) do
+for i, modelJson in pairs(GetModuleVariable("Default Models", "BuiltInModels")) do
     local model = FromJson(modelJson)
+
+    if model.objectType == "Models" then
+    	-- Register model with models system instead of only keeping the json in the button tables
+    elseif model.objectType == "Weapons" and model.weaponScript then
+	    CallModuleFunction("Weapons", "RegisterWeapon", model.name, model.weaponScript, modelJson)
+	end
+
 
     -- once we get scripts on the side pass through the model, not the modelJson
     CreateButton(model.name, model.description, allTabs[model.objectType], modelJson)
