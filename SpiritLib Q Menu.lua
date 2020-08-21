@@ -1,7 +1,18 @@
 local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
+local usedRTs = {} -- used Return Tokens
 
-function CallModuleFunction(moduleName, name, ...) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Call(name, ...) end
-function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
+function CallModuleFunction(moduleName, functionName, ...) 
+	local token = 1
+    while usedRTs[token] do token = token + 1 end
+    usedRTs[token] = true
+
+	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...) 
+	return This.table.spiritLibReturns[token]
+end
+
+function GetModuleVariable(moduleName, name) 
+	return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] 
+end
 
 function MakeUIButtonWithHolder(name, position, size, --[[optional = ""]]text, parentUI)
 	local holderSize = size
