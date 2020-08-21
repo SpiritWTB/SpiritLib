@@ -14,6 +14,10 @@ function GetModuleVariable(moduleName, name)
 	return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] 
 end
 
+function ReturnCall(caller, token, functionName, ...)
+	caller.table.spiritLibReturns[token] = _G[functionName](...)
+end
+
 function MakeUIButtonWithHolder(name, position, size, --[[optional = ""]]text, parentUI)
 	local holderSize = size
 	local holderPos = position
