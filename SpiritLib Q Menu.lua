@@ -2,10 +2,7 @@ local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
 local usedRTs = {} -- used Return Tokens
 
 function CallModuleFunction(moduleName, functionName, ...) 
-	local token = 1
-    while usedRTs[token] do token = token + 1 end
-    usedRTs[token] = true
-
+	local token = SpiritLib().Globals.SpiritLib.Call("GetToken", This)
 	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...) 
 	return This.table.spiritLibReturns[token]
 end

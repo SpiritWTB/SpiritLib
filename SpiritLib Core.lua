@@ -69,3 +69,11 @@ end
 function ReturnCall(caller, token, functionName, ...)
 	caller.table.spiritLibReturns[token] = _G[functionName](...)
 end
+
+local returnTokensByPart = {}
+function GetToken(part)
+	local token = 1
+    while returnTokensByPart[token] do token = token + 1 end
+    returnTokensByPart[token] = true
+    return token
+end
