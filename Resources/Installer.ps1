@@ -147,9 +147,6 @@ Set-StrictMode -Version Latest
 			$AllScripts[$ScriptName] = $ScriptContent
 		}
 
-	<#┌─────────────────────────────────────────────┐
-	  │ Insert SpiritLib Core                       │
-	  └─────────────────────────────────────────────┘#>
 		Add-CorePart
 
 	<#┌─────────────────────────────────────────────┐
