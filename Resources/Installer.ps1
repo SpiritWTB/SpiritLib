@@ -79,14 +79,14 @@ Set-StrictMode -Version Latest
 	<#┌─────────────────────────────────────────────┐
 	  │ Open World File                             │
 	  └─────────────────────────────────────────────┘#>
-		$SaveDialog = New-Object Windows.Forms.OpenFileDialog
+		$SaveDialog = New-Object -TypeName Windows.Forms.OpenFileDialog
 		$SaveDialog.Title = "Import saved world"
 		$SaveDialog.Filter = "World to Build Save|*.wtb"
 		$SaveDialog.InitialDirectory = [Environment]::GetFolderPath("MyDocuments") + "\World To Build\saves"
 
-		$Caller = New-Object Windows.Forms.Form
-		$Caller.Location = New-Object Drawing.Point -100, -100
-		$Caller.Size = New-Object Drawing.Size 10, 10
+		$Caller = New-Object -TypeName Windows.Forms.Form
+		$Caller.Location = New-Object -TypeName Drawing.Point -ArgumentList -100, -100
+		$Caller.Size = New-Object -TypeName Drawing.Size -ArgumentList 10, 10
 		$Caller.StartPosition = [Windows.Forms.FormStartPosition]::Manual
 		$Caller.Icon = [Drawing.Icon]::ExtractAssociatedIcon("${PSScriptRoot}\SpiritLib.ico")
 		$Caller.TopMost = $true
@@ -139,7 +139,7 @@ Set-StrictMode -Version Latest
 	<#┌─────────────────────────────────────────────┐
 	  │ Insert All Scripts                          │
 	  └─────────────────────────────────────────────┘#>
-		$ScriptFiles = Get-ChildItem -LiteralPath "${PSScriptRoot}\Scripts" -Include "*.lua" -File
+		$ScriptFiles = Get-ChildItem -LiteralPath "${PSScriptRoot}\..\Scripts" -Include "*.lua" -File
 
 		ForEach ($File in $ScriptFiles) {
 			$ScriptName = $File.BaseName
@@ -173,14 +173,14 @@ Set-StrictMode -Version Latest
 	<#┌─────────────────────────────────────────────┐
 	  │ Save World File                             │
 	  └─────────────────────────────────────────────┘#>
-		$SaveDialog = New-Object Windows.Forms.SaveFileDialog
+		$SaveDialog = New-Object -TypeName Windows.Forms.SaveFileDialog
 		$SaveDialog.Title = "Export saved world"
 		$SaveDialog.Filter = "World to Build Save|*.wtb"
 		$SaveDialog.InitialDirectory = [Environment]::GetFolderPath("MyDocuments") + "\World To Build\saves"
 
-		$Caller = New-Object Windows.Forms.Form
-		$Caller.Location = New-Object Drawing.Point -100, -100
-		$Caller.Size = New-Object Drawing.Size 10, 10
+		$Caller = New-Object -TypeName Windows.Forms.Form
+		$Caller.Location = New-Object -TypeName Drawing.Point -ArgumentList -100, -100
+		$Caller.Size = New-Object -TypeName Drawing.Size -ArgumentList 10, 10
 		$Caller.StartPosition = [Windows.Forms.FormStartPosition]::Manual
 		$Caller.Icon = [Drawing.Icon]::ExtractAssociatedIcon("${PSScriptRoot}\SpiritLib.ico")
 		$Caller.TopMost = $true
