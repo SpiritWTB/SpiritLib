@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+#Requires -Version 5.1 -PSEdition Desktop
 Set-StrictMode -Version Latest
 
 # Installer script created by Alyx (binary#3615)
