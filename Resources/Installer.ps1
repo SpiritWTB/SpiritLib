@@ -190,9 +190,6 @@ Set-StrictMode -Version Latest
 			Exit
 		}
 
-	<#┌─────────────────────────────────────────────┐
-	  │ Export to Saved World                       │
-	  └─────────────────────────────────────────────┘#>
 		Compress-World $SavePath $Output
 
 	<#┌─────────────────────────────────────────────┐
@@ -200,5 +197,3 @@ Set-StrictMode -Version Latest
 	  └─────────────────────────────────────────────┘#>
 		[Windows.Forms.MessageBox]::Show("Installation successful. Thank you for using SpiritLib! ^_^", "SpiritLib Installer", 0, 64) > $null
 		Exit
-
-Pause
