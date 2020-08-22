@@ -159,15 +159,15 @@ Set-StrictMode -Version Latest
 		$Output = ""
 
 		$JSONWorldData = ConvertTo-Json -InputObject $WorldData -Depth 7 -Compress
-		$Base64WorldData = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($JSONWorldData))
+		$EncodedWorldData = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($JSONWorldData))
 
-		$Output = $Output + $Base64WorldData
+		$Output = $Output + $EncodedWorldData
 
 		ForEach ($Script in $AllScripts.GetEnumerator()) {
-			$Base64Name = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($Script.Name))
-			$Base64Content = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($Script.Value))
+			$EncodedName = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($Script.Name))
+			$EncodedContent = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($Script.Value))
 
-			$Output += "|||${Base64Name}||${Base64Content}"
+			$Output += "|||${EncodedName}||${EncodedContent}"
 		}
 
 	<#┌─────────────────────────────────────────────┐
@@ -202,7 +202,7 @@ Set-StrictMode -Version Latest
 	<#┌─────────────────────────────────────────────┐
 	  │ Export to Saved World                       │
 	  └─────────────────────────────────────────────┘#>
-		Compress-World $Output "C:\Users\Krypt\Documents\World To Build\saves\InstallerTest.wtb"
+		Compress-World $Output $SavePath
 
 	<#┌─────────────────────────────────────────────┐
 	  │ Finished!                                   │
