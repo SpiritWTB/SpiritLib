@@ -139,7 +139,7 @@ Set-StrictMode -Version Latest
 	<#┌─────────────────────────────────────────────┐
 	  │ Insert All Scripts                          │
 	  └─────────────────────────────────────────────┘#>
-		$ScriptFiles = Get-ChildItem -LiteralPath "${PSScriptRoot}\Scripts" | Where-Object {$_.Name -like "*.lua" -and $_.Name -notlike "!*"}
+		$ScriptFiles = Get-ChildItem -LiteralPath "${PSScriptRoot}\Scripts" -Include "*.lua" -File
 
 		ForEach ($File in $ScriptFiles) {
 			$ScriptName = $File.BaseName
