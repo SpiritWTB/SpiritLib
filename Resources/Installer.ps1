@@ -16,8 +16,6 @@ Set-StrictMode -Version Latest
 	  │ Declare Variables                           │
 	  └─────────────────────────────────────────────┘#>
 		$SelectedWorld = $null
-		$WorldData = $null
-		$AllScripts = [Ordered] @{}
 
 	<#┌─────────────────────────────────────────────┐
 	  │ Declare Functions                           │
@@ -36,7 +34,7 @@ Set-StrictMode -Version Latest
 			Return [Text.Encoding]::UTF8.GetString($OutputStream.ToArray())
 		}
 
-		Function Compress-World($Data, $Path) {
+		Function Compress-World($Path, $Data) {
 			$Bytes = [Text.Encoding]::UTF8.GetBytes($Data)
 			$OutputStream = New-Object -TypeName IO.MemoryStream
 
@@ -68,8 +66,8 @@ Set-StrictMode -Version Latest
 			}
 
 			$WTBIndex = Get-VacantWTBIndex
-			$ObjectJSON = '{"Components":[{"$type":"WorldComponent, Assembly-CSharp","Name":"World","Properties":[{"$type":"PropertyName, Assembly-CSharp","Name":"Name","dataType":"string","dataString":"SpiritLib"},{"$type":"PropertyObjectType, Assembly-CSharp","Name":"ObjectType","dataType":"string","dataString":"Part"},{"$type":"PropertyParent, Assembly-CSharp","editorDataIntView":0,"Name":"Parent","dataType":"int","dataInt":0}],"PropertiesByName":{},"IsAlwaysSameContent":true},{"$type":"TransformComponent, Assembly-CSharp","Name":"Transform","Properties":[{"$type":"PropertyCanCollide, Assembly-CSharp","Name":"CanCollide","dataType":"bool","dataBool":false},{"$type":"PropertyHasPhysics, Assembly-CSharp","Name":"HasPhysics","dataType":"bool","dataBool":false},{"$type":"PropertySize, Assembly-CSharp","Name":"Size","dataType":"Vector3","dataVector3":{"x":1,"y":1,"z":1}},{"$type":"PropertyPosition, Assembly-CSharp","Name":"Position","dataType":"Vector3","dataVector3":{"x":0,"y":0,"z":0}},{"$type":"PropertyRotation, Assembly-CSharp","Name":"Rotation","dataType":"Vector3","dataVector3":{"x":0,"y":0,"z":0}}],"PropertiesByName":{},"IsAlwaysSameContent":true},{"$type":"RendererComponent, Assembly-CSharp","Name":"Renderer","Properties":[{"$type":"PropertyColor, Assembly-CSharp","Name":"Color","dataType":"string","dataString":"00000000"},{"$type":"PropertyMaterial, Assembly-CSharp","Name":"Material","dataType":"int","dataInt":0},{"$type":"PropertyVisible, Assembly-CSharp","Name":"Visible","dataType":"bool","dataBool":false},{"$type":"PropertyTransparency, Assembly-CSharp","Name":"Transparency","dataType":"string","dataString":"0"},{"$type":"PropertyPartType, Assembly-CSharp","Name":"PartType","dataType":"int","dataInt":0},{"$type":"PropertyRounded, Assembly-CSharp","Name":"Rounded","dataType":"bool","dataBool":false},{"$type":"PropertyShadows, Assembly-CSharp","Name":"Shadows","dataType":"bool","dataBool":false}],"PropertiesByName":{},"IsAlwaysSameContent":true},{"$type":"ScriptComponent, Assembly-CSharp","Name":"Script","Properties":[{"$type":"PropertyScript, Assembly-CSharp","Name":"Script","dataType":"string","dataString":"SpiritLib"}],"PropertiesByName":{},"IsAlwaysSameContent":true}],"WTBIndex":' + $WTBIndex + ',"netID":0}'
-			$WorldData.AllWTBOData += ConvertFrom-Json -InputObject $ObjectJSON
+			$CorePartJSON = '{"Components":[{"$type":"WorldComponent, Assembly-CSharp","Name":"World","Properties":[{"$type":"PropertyName, Assembly-CSharp","Name":"Name","dataType":"string","dataString":"SpiritLib"},{"$type":"PropertyObjectType, Assembly-CSharp","Name":"ObjectType","dataType":"string","dataString":"Part"},{"$type":"PropertyParent, Assembly-CSharp","editorDataIntView":0,"Name":"Parent","dataType":"int","dataInt":0}],"PropertiesByName":{},"IsAlwaysSameContent":true},{"$type":"TransformComponent, Assembly-CSharp","Name":"Transform","Properties":[{"$type":"PropertyCanCollide, Assembly-CSharp","Name":"CanCollide","dataType":"bool","dataBool":false},{"$type":"PropertyHasPhysics, Assembly-CSharp","Name":"HasPhysics","dataType":"bool","dataBool":false},{"$type":"PropertySize, Assembly-CSharp","Name":"Size","dataType":"Vector3","dataVector3":{"x":1,"y":1,"z":1}},{"$type":"PropertyPosition, Assembly-CSharp","Name":"Position","dataType":"Vector3","dataVector3":{"x":0,"y":0,"z":0}},{"$type":"PropertyRotation, Assembly-CSharp","Name":"Rotation","dataType":"Vector3","dataVector3":{"x":0,"y":0,"z":0}}],"PropertiesByName":{},"IsAlwaysSameContent":true},{"$type":"RendererComponent, Assembly-CSharp","Name":"Renderer","Properties":[{"$type":"PropertyColor, Assembly-CSharp","Name":"Color","dataType":"string","dataString":"00000000"},{"$type":"PropertyMaterial, Assembly-CSharp","Name":"Material","dataType":"int","dataInt":0},{"$type":"PropertyVisible, Assembly-CSharp","Name":"Visible","dataType":"bool","dataBool":false},{"$type":"PropertyTransparency, Assembly-CSharp","Name":"Transparency","dataType":"string","dataString":"0"},{"$type":"PropertyPartType, Assembly-CSharp","Name":"PartType","dataType":"int","dataInt":0},{"$type":"PropertyRounded, Assembly-CSharp","Name":"Rounded","dataType":"bool","dataBool":false},{"$type":"PropertyShadows, Assembly-CSharp","Name":"Shadows","dataType":"bool","dataBool":false}],"PropertiesByName":{},"IsAlwaysSameContent":true},{"$type":"ScriptComponent, Assembly-CSharp","Name":"Script","Properties":[{"$type":"PropertyScript, Assembly-CSharp","Name":"Script","dataType":"string","dataString":"SpiritLib"}],"PropertiesByName":{},"IsAlwaysSameContent":true}],"WTBIndex":' + $WTBIndex + ',"netID":0}'
+			$WorldData.AllWTBOData += ConvertFrom-Json -InputObject $CorePartJSON
 		}
 
 
@@ -117,6 +115,7 @@ Set-StrictMode -Version Latest
 		}
 
 		$WorldData = ConvertFrom-Json -InputObject $Sections[0]
+		$AllScripts = [Ordered] @{}
 
 		If ($Sections.Count -gt 1) {
 			ForEach ($Script in ($Sections[1..($Sections.Count - 1)])) {
@@ -202,7 +201,7 @@ Set-StrictMode -Version Latest
 	<#┌─────────────────────────────────────────────┐
 	  │ Export to Saved World                       │
 	  └─────────────────────────────────────────────┘#>
-		Compress-World $Output $SavePath
+		Compress-World $SavePath $Output
 
 	<#┌─────────────────────────────────────────────┐
 	  │ Finished!                                   │
