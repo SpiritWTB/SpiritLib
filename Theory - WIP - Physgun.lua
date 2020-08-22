@@ -30,6 +30,9 @@ WEAPON.CurrentPhysRotation = Vector3.zero
 
 WEAPON.Fire = function(ply, mousePos, hitEnt)
 
+	print("fire")
+	
+	-- self should work here, I googled it at some point
 	self.CurrentObject = hitEnt
 	self.CurrentPhysDistance = (distance from ply to hitEnt)
 end

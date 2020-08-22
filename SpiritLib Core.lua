@@ -66,11 +66,11 @@ local returnTokensByPart = {}
 function GetToken(part)
 	local token = 1
 
-	while returnTokensByPart[token] do
+	while returnTokensByPart[part][token] do
 		token = token + 1
 	end
 
-	returnTokensByPart[token] = true
+	returnTokensByPart[part][token] = true
 
     return token
 end
