@@ -1,4 +1,4 @@
-﻿SpiritLib = nil
+SpiritLib = nil
 ModuleName = nil
 
 -- variables ModuleName and SpiritLib will be set before this runs

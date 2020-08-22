@@ -1,4 +1,4 @@
-﻿--
+--
 	-- WallBuy Module Usage:
 
 	-- 			make a script with, PartByName("SpiritLib").scripts[1].Call("RegisterWallBuy", This, "Pistol") (<- old syntax, needs update)

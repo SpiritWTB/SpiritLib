@@ -1,4 +1,4 @@
-﻿SpiritLib = {}
+SpiritLib = {}
 
 local modules = {
 	Animation = false, 
