@@ -13,11 +13,6 @@ Set-StrictMode -Version Latest
 		[Windows.Forms.Application]::EnableVisualStyles()
 
 	<#┌─────────────────────────────────────────────┐
-	  │ Declare Variables                           │
-	  └─────────────────────────────────────────────┘#>
-		$SelectedWorld = $null
-
-	<#┌─────────────────────────────────────────────┐
 	  │ Declare Functions                           │
 	  └─────────────────────────────────────────────┘#>
 		Function Expand-World($Path) {
