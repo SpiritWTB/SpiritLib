@@ -165,7 +165,7 @@ Set-StrictMode -Version Latest
 			$Base64Name = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($Script.Name))
 			$Base64Content = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($Script.Value))
 
-			$Output = $Output -join "|||${Base64Name}||${Base64Content}"
+			$Output += "|||${Base64Name}||${Base64Content}"
 		}
 
 	<#┌─────────────────────────────────────────────┐
