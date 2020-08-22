@@ -74,7 +74,7 @@ Set-StrictMode -Version Latest
 	  └─────────────────────────────────────────────┘#>
 		$SaveDialog = New-Object -TypeName Windows.Forms.OpenFileDialog
 		$SaveDialog.Title = "Import saved world"
-		$SaveDialog.Filter = "World to Build Save|*.wtb"
+		$SaveDialog.Filter = "World To Build Save|*.wtb"
 		$SaveDialog.InitialDirectory = [Environment]::GetFolderPath("MyDocuments") + "\World To Build\saves"
 
 		$Caller = New-Object -TypeName Windows.Forms.Form
@@ -166,7 +166,7 @@ Set-StrictMode -Version Latest
 	  └─────────────────────────────────────────────┘#>
 		$SaveDialog = New-Object -TypeName Windows.Forms.SaveFileDialog
 		$SaveDialog.Title = "Export saved world"
-		$SaveDialog.Filter = "World to Build Save|*.wtb"
+		$SaveDialog.Filter = "World To Build Save|*.wtb"
 		$SaveDialog.InitialDirectory = [Environment]::GetFolderPath("MyDocuments") + "\World To Build\saves"
 
 		$Caller = New-Object -TypeName Windows.Forms.Form
