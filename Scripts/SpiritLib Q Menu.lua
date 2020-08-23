@@ -1,11 +1,15 @@
 --[[ Start SpiritLib Setup ]]
 
 local function SpiritLib() return PartByName("SpiritLib").scripts[1] end
+usedReturnTokens ={}
+
+local function GetToken() local token = 1; while usedReturnTokens[token] do token = token + 1 end; usedReturnTokens[token] = true end
 
 -- Calls functions from SpiritLib modules, and uses special sauce to give their return value
 local function CallModuleFunction(moduleName, functionName, ...)
-	local token = SpiritLib().Globals.SpiritLib.Call("GetToken", This)
-	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...)
+	local token = GetToken()
+	SpiritLib().Call("FixedCall", moduleName, functionName, token, ...)
+	local returnValue = This.table.spiritLibReturns[token]
 	return This.table.spiritLibReturns[token]
 end
 
@@ -341,26 +345,34 @@ function Update()
 	end
 end
 
-CreateTab("Models", 60)
-CreateTab("Weapons", 70)
-CreateTab("Entities", 80)
-CreateTab("NPCs", 40)
-CreateTab("Vehicles", 80)
-CreateTab("Saves", 50)
+function OnSpiritLibLoaded()
 
---for i2 = 1, 100 do
-for i, modelJson in pairs(GetModuleVariable("Default Models", "BuiltInModels")) do
-    local model = FromJson(modelJson)
+	CreateTab("Models", 60)
+	CreateTab("Weapons", 70)
+	CreateTab("Entities", 80)
+	CreateTab("NPCs", 40)
+	CreateTab("Vehicles", 80)
+	CreateTab("Saves", 50)
 
-    if model.objectType == "Models" then
-    	-- Register model with models system instead of only keeping the json in the button tables
-    elseif model.objectType == "Weapons" and model.weaponScript then
-	    CallModuleFunction("Weapons", "RegisterWeapon", model.name, model.weaponScript, modelJson)
+	--for i2 = 1, 100 do
+	for i, modelJson in pairs(GetModuleVariable("Default Models", "BuiltInModels")) do
+
+		print(i)
+
+	    local model = FromJson(modelJson)
+
+	    print("Loading model " .. model.name)
+	    if model.objectType == "Models" then
+	    	-- Register model with models system instead of only keeping the json in the button tables
+	    elseif model.objectType == "Weapons" and model.weaponScript then
+		    CallModuleFunction("Weapons", "RegisterWeapon", model.name, model.weaponScript, modelJson)
+		end
+
+	    -- once we get scripts on the side pass through the model, not the modelJson
+	    CreateButton(model.name, model.description, allTabs[model.objectType], modelJson)
 	end
+	--end
 
-    -- once we get scripts on the side pass through the model, not the modelJson
-    CreateButton(model.name, model.description, allTabs[model.objectType], modelJson)
+	UpdatePagination()
+
 end
---end
-
-UpdatePagination()

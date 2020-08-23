@@ -14,15 +14,20 @@ SpiritLib.Modules = {
 	["Attachments"] = false,
 	["Default Models"] = false,
 	["Models"] = false,
+	["Weapons"] = false,
 	["Q Menu"] = false,
-	["Weapons"] = false
 }
+
+
+
+
+
 
 function Start()
 	This.name = "SpiritLib"
 
-	for name, active in pairs(SpiritLib.Modules) do
-		if not active then
+	for name, part in pairs(SpiritLib.Modules) do
+		if not part then
 			local modulePart = CreatePart(0)
 			modulePart.visible = false
 			modulePart.cancollide = false
@@ -34,7 +39,21 @@ function Start()
 			print(name .. " module started!")
 		end
 	end
+
+	LoadFinished()
 end
+
+-- this doesn't work yet, try to call this later so we can do init stuff once all the modules are loaded
+function LoadFinished()
+	for name, part in pairs(SpiritLib.Modules) do
+		if part and part.type and part.type == "Part" then
+			if part.script ~= nil and part.scripts[1].Globals["OnSpiritLibLoaded"] then
+				part.scripts[1].Call("OnSpiritLibLoaded")
+			end
+		end
+	end
+end
+
 
 function FixedCall(moduleName, functionName, token, ...)
 	local activeModule = SpiritLib.Modules[moduleName]
@@ -42,7 +61,7 @@ function FixedCall(moduleName, functionName, token, ...)
 	if activeModule then
 		if activeModule.scripts[1]["ReturnCall"] then
 			if activeModule.scripts[1][functionName] and type(activeModule.scripts[1][functionName]) == "function" then
-				activeModule.Call("ReturnCall", This, token, moduleName, functionName, ...)
+				activeModule.scripts[1].Call("ReturnCall", This, token, moduleName, functionName, ...)
 				return This.table[token]
 			else
 				print("CallModuleFunction: Module \"" .. moduleName .. "\" does not contain function \"" .. functionName .. "\"")
