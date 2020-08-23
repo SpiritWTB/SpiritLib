@@ -1,11 +1,17 @@
 --[[ Start SpiritLib Setup ]]
 
+local usedReturnTokens = {}
 local function SpiritLib() return PartByName("SpiritLib").scripts[1] end
 
+local function GetToken() 
+	local token = 1; while usedReturnTokens[token] do token = token + 1 end; usedReturnTokens[token] = true;
+	return token 
+end
 -- Calls functions from SpiritLib modules, and uses special sauce to give their return value
 local function CallModuleFunction(moduleName, functionName, ...)
-	local token = SpiritLib().Globals.SpiritLib.Call("GetToken", This)
-	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...)
+	local token = GetToken()
+	SpiritLib().Call("FixedCall", moduleName, functionName, token, ...)
+	local returnValue = This.table.spiritLibReturns[token]; usedReturnTokens[token] = nil
 	return This.table.spiritLibReturns[token]
 end
 

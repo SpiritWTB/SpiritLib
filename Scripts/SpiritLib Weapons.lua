@@ -1,16 +1,26 @@
 --[[ Start SpiritLib Setup ]]
 
-local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
+local usedReturnTokens = {}
+local function SpiritLib() return PartByName("SpiritLib").scripts[1] end
 
+local function GetToken() 
+	local token = 1; while usedReturnTokens[token] do token = token + 1 end; usedReturnTokens[token] = true;
+	return token 
+end
 -- Calls functions from SpiritLib modules, and uses special sauce to give their return value
-function CallModuleFunction(moduleName, functionName, ...) 
-	local token = SpiritLib().Globals.SpiritLib.Call("GetToken", This)
-	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...) 
-	return This.table.spiritLibReturns[token]
+local function CallModuleFunction(moduleName, functionName, ...)
+	local token = GetToken()
+	SpiritLib().Call("FixedCall", This, moduleName, functionName, token, ...)
+	
+	local returnValue = This.table.spiritLibReturns[token]; usedReturnTokens[token] = nil
+	
+	if This.table.spiritLibReturns[token] then
+		return This.table.spiritLibReturns[token]
+	end
 end
 
 -- gets variables from SpiritLib modules
-function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
+local function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
 
 -- this is our special cross-script version of "return"
 function ReturnCall(caller, token, functionName, ...) caller.table.spiritLibReturns[token] = _G[functionName](...) end
@@ -199,6 +209,7 @@ RegisteredWeapons = {}
 WeaponsByName = {}
 
 function RegisterWeapon(name, scriptName, modelJson)
+
 	-- check to make sure they've got a name and stuff, basic things that will break the game if they aren't there
 	if not name then return end
 	if not scriptName then return end

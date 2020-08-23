@@ -1,16 +1,22 @@
 --[[ Start SpiritLib Setup ]]
 
+local usedReturnTokens = {}
 local function SpiritLib() return PartByName("SpiritLib").scripts[1] end
-usedReturnTokens ={}
 
-local function GetToken() local token = 1; while usedReturnTokens[token] do token = token + 1 end; usedReturnTokens[token] = true end
-
+local function GetToken() 
+	local token = 1; while usedReturnTokens[token] do token = token + 1 end; usedReturnTokens[token] = true;
+	return token 
+end
 -- Calls functions from SpiritLib modules, and uses special sauce to give their return value
 local function CallModuleFunction(moduleName, functionName, ...)
 	local token = GetToken()
-	SpiritLib().Call("FixedCall", moduleName, functionName, token, ...)
-	local returnValue = This.table.spiritLibReturns[token]
-	return This.table.spiritLibReturns[token]
+	SpiritLib().Call("FixedCall", This, moduleName, functionName, token, ...)
+	
+	local returnValue = This.table.spiritLibReturns[token]; usedReturnTokens[token] = nil
+	
+	if This.table.spiritLibReturns[token] then
+		return This.table.spiritLibReturns[token]
+	end
 end
 
 -- gets variables from SpiritLib modules
@@ -357,11 +363,9 @@ function OnSpiritLibLoaded()
 	--for i2 = 1, 100 do
 	for i, modelJson in pairs(GetModuleVariable("Default Models", "BuiltInModels")) do
 
-		print(i)
-
 	    local model = FromJson(modelJson)
 
-	    print("Loading model " .. model.name)
+	    --print("Loading object: " .. model.name .. " to " .. model.objectType)
 	    if model.objectType == "Models" then
 	    	-- Register model with models system instead of only keeping the json in the button tables
 	    elseif model.objectType == "Weapons" and model.weaponScript then

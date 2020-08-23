@@ -20,9 +20,6 @@ SpiritLib.Modules = {
 
 
 
-
-
-
 function Start()
 	This.name = "SpiritLib"
 
@@ -55,14 +52,14 @@ function LoadFinished()
 end
 
 
-function FixedCall(moduleName, functionName, token, ...)
+function FixedCall(caller, moduleName, functionName, token, ...)
 	local activeModule = SpiritLib.Modules[moduleName]
 
 	if activeModule then
 		if activeModule.scripts[1]["ReturnCall"] then
 			if activeModule.scripts[1][functionName] and type(activeModule.scripts[1][functionName]) == "function" then
-				activeModule.scripts[1].Call("ReturnCall", This, token, moduleName, functionName, ...)
-				return This.table[token]
+				activeModule.scripts[1].Call("ReturnCall", caller, token, functionName, ...)
+				return caller.table.spiritLibReturns[token]
 			else
 				print("CallModuleFunction: Module \"" .. moduleName .. "\" does not contain function \"" .. functionName .. "\"")
 			end
@@ -78,18 +75,4 @@ end
 
 function ReturnCall(caller, token, functionName, ...)
 	caller.table.spiritLibReturns[token] = _G[functionName](...)
-end
-
-local returnTokensByPart = {}
-
-function GetToken(part)
-	local token = 1
-
-	while returnTokensByPart[part][token] do
-		token = token + 1
-	end
-
-	returnTokensByPart[part][token] = true
-
-    return token
 end
