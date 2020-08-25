@@ -51,15 +51,13 @@ function LoadFinished()
 	end
 end
 
-
 function FixedCall(caller, moduleName, functionName, token, ...)
 	local activeModule = SpiritLib.Modules[moduleName]
 
 	if activeModule then
-		if activeModule.scripts[1]["ReturnCall"] then
-			if activeModule.scripts[1][functionName] and type(activeModule.scripts[1][functionName]) == "function" then
+		if activeModule.scripts[1].Globals["ReturnCall"] then
+			if activeModule.scripts[1].Globals[functionName] and type(activeModule.scripts[1].Globals[functionName]) == "function" then
 				activeModule.scripts[1].Call("ReturnCall", caller, token, functionName, ...)
-				return caller.table.spiritLibReturns[token]
 			else
 				print("CallModuleFunction: Module \"" .. moduleName .. "\" does not contain function \"" .. functionName .. "\"")
 			end
