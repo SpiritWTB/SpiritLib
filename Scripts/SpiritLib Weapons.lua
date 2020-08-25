@@ -84,6 +84,8 @@ function Update()
 		NetworkSendToHost("weaponInput", {5})
 	elseif InputPressed("e") then
 		NetworkSendToHost("weaponInput", {6})
+	elseif InputPressed("f") then
+		NetworkSendToHost("weaponInput", {7})
 	end
 
 	for k,v in pairs(allBoxes) do
@@ -249,6 +251,8 @@ function NetworkStringReceive(player, name, data)
 			playerWeaponInventories[player][slot].part.scripts[1].Call("Reload", player)
 		elseif data[1] == 6 then
 			playerWeaponInventories[player][slot].part.scripts[1].Call("Use", player)
+		elseif data[1] == 7 then
+			playerWeaponInventories[player][slot].part.scripts[1].Call("Special", player, mousePos, hitObject)
 		end
 	end
 end

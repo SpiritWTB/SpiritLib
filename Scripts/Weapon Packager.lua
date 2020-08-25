@@ -73,7 +73,7 @@ function Reload(ply)
 	clearCollection()
 end
 
-function Use(ply)
+function Special(ply)
 	saveModel(objectCollection)
 	clearCollection()
 end
