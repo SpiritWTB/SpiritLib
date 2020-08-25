@@ -1,55 +1,13 @@
 --[[ Start SpiritLib Setup ]]
 
+local SL_UsedReturnTokens = {}
 local function SpiritLib() return PartByName("SpiritLib").scripts[1] end
-
--- Calls functions from SpiritLib modules, and uses special sauce to give their return value
-local function CallModuleFunction(moduleName, functionName, ...)
-	local token = SpiritLib().Globals.SpiritLib.Call("GetToken", This)
-	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...)
-	return This.table.spiritLibReturns[token]
-end
-
--- gets variables from SpiritLib modules
 local function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
-
--- this is our special cross-script version of "return"
-function ReturnCall(caller, token, functionName, ...) caller.table.spiritLibReturns[token] = _G[functionName](...) end
-
--- [[ End SpiritLib Setup ]]
-
-
--- this library just fakes parenting without the scale until WTB has some way to make multiple objects into one
--- this is not going to work on overlapping physics objects
--- this file says "child" and "parent" a lot but it's talking about an object being attached to another, not default WTB parenting. The whole point of the Attachments library is to avoid WTB Parenting for now.
-
--- this is actually not usually necessary, since you can attach parts together without this by attaching 2 to the same 1:1:1 size part.
--- this should then, mainly, be used for parenting to players. Occasionally also if you really need nested parents
-
-
-
-
---[[ Start SpiritLib Setup ]]
-
-local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
-
--- Calls functions from SpiritLib modules, and uses special sauce to give their return value
-function CallModuleFunction(moduleName, functionName, ...) 
-	local token = SpiritLib().Globals.SpiritLib.Call("GetToken", This)
-	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...) 
-	return This.table.spiritLibReturns[token]
-end
-
--- gets variables from SpiritLib modules
-function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
-
--- this is our special cross-script version of "return"
-function ReturnCall(caller, token, functionName, ...) caller.table.spiritLibReturns[token] = _G[functionName](...) end
+local function GetToken() local token = 1; while SL_UsedReturnTokens[token] do token = token + 1 end SL_UsedReturnTokens[token] = true; return token end
+local function CallModuleFunction(moduleName, functionName, ...) local token = GetToken(); SpiritLib().Call("FixedCall", This, moduleName, functionName, "!SLToken" .. token, ...); SL_UsedReturnTokens[token] = nil; return This.table["!SLToken" .. token] end
+function ReturnCall(caller, token, functionName, ...) caller.table[token] = _G[functionName](...) end
 
 -- [[ End SpiritLib Setup ]]
-
-
-
-
 
 -- this table holds the info about the relation between a child and parent
 attachments = {}

@@ -67,8 +67,6 @@ function FixedCall(caller, moduleName, functionName, token, ...)
 	else
 		print("CallModuleFunction: Module \"" .. moduleName .. "\" does not exist.")
 	end
-
-	return nil
 end
 
 function ReturnCall(caller, token, functionName, ...)
