@@ -60,8 +60,6 @@ function Attach(_attachThis, _toThis, --[[optional = true]]useOneScaledParent)
 		reverseAssociations[id] = {}
 	end
 
-	
-	
 	table.insert(reverseAssociations[id], _attachThis.id)
 end
 
@@ -73,11 +71,11 @@ function Unattach(_unattachThisID, _fromThisID)
 	-- if it has an entry here, its parenting is fake (see: real, it's confusing) so we can just unparent it and stop this function
 	if oneScaledParentAttachments[thisID] then
 		local partToBeUnnattached = PartByID(thisID)
-		
+
 		if partToBeUnnattached then
 			partToBeUnnattached.parent = nil
 		end
-		
+
 		-- if there wasn't one it doesn't matter, it got deleted and unity parenting will absorb that blow
 
 		return
@@ -220,7 +218,7 @@ function updateRoutine()
 				if (attachedPart ~= nil) then
 					attachedPart.position = parentPart.position + attachInfo.posOffset.x*parentPart.right + attachInfo.posOffset.y*parentPart.up + attachInfo.posOffset.z*parentPart.forward
 					attachedPart.angles = parentPart.angles - attachInfo.angOffset
-				else 
+				else
 					Unattach(attachInfo.parent)
 				end
 

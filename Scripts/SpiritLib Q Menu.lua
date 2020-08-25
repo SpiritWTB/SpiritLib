@@ -333,7 +333,6 @@ function Update()
 end
 
 function OnSpiritLibLoaded()
-
 	CreateTab("Models", 60)
 	CreateTab("Weapons", 70)
 	CreateTab("Entities", 80)
@@ -341,23 +340,17 @@ function OnSpiritLibLoaded()
 	CreateTab("Vehicles", 80)
 	CreateTab("Saves", 50)
 
-	--for i2 = 1, 100 do
 	for i, modelJson in pairs(GetModuleVariable("Default Models", "BuiltInModels")) do
-
 	    local model = FromJson(modelJson)
 
-	    --print("Loading object: " .. model.name .. " to " .. model.objectType)
 	    if model.objectType == "Models" then
 	    	-- Register model with models system instead of only keeping the json in the button tables
 	    elseif model.objectType == "Weapons" and model.weaponScript then
 		    CallModuleFunction("Weapons", "RegisterWeapon", model.name, model.weaponScript, modelJson)
 		end
 
-	    -- once we get scripts on the side pass through the model, not the modelJson
 	    CreateButton(model.name, model.description, allTabs[model.objectType], modelJson)
 	end
-	--end
 
 	UpdatePagination()
-
 end
