@@ -1,13 +1,22 @@
 --[[ Start SpiritLib Setup ]]
 
-local SL_UsedReturnTokens = {}
 local function SpiritLib() return PartByName("SpiritLib").scripts[1] end
+
+-- Calls functions from SpiritLib modules, and uses special sauce to give their return value
+local function CallModuleFunction(moduleName, functionName, ...)
+	local token = SpiritLib().Globals.SpiritLib.Call("GetToken", This)
+	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...)
+	return This.table.spiritLibReturns[token]
+end
+
+-- gets variables from SpiritLib modules
 local function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
-local function GetToken() local token = 1; while SL_UsedReturnTokens[token] do token = token + 1 end SL_UsedReturnTokens[token] = true; return token end
-local function CallModuleFunction(moduleName, functionName, ...) local token = GetToken(); SpiritLib().Call("FixedCall", This, moduleName, functionName, "!SLToken" .. token, ...); SL_UsedReturnTokens[token] = nil; return This.table["!SLToken" .. token] end
-function ReturnCall(caller, token, functionName, ...) caller.table[token] = _G[functionName](...) end
+
+-- this is our special cross-script version of "return"
+function ReturnCall(caller, token, functionName, ...) caller.table.spiritLibReturns[token] = _G[functionName](...) end
 
 -- [[ End SpiritLib Setup ]]
+
 
 local function CreateBoundingBox(parts)
 	if type(parts) ~= "table" or #parts < 1 then
@@ -98,6 +107,7 @@ local function GenerateData(part)
 end
 
 local function GeneratePart(data, --[[optional = false]] isMapPart)
+
 	local part = CreatePart(data.parttype, data.position + newVector3(0, 5, 0), data.angles)
 	part.name = data.name
 	part.size = data.size
@@ -150,15 +160,20 @@ function SaveObject(objectType, name, description, parts)
 end
 
 
-function GenerateModel(modelData, --[[optional]] position, --[[optional]] partNameOverride)
-	if type(modelData) == "string" then
-		modelData = FromJson(modelData)
+function GenerateModel(modelJson, --[[optional]]position, --[[optional]]partNameOverride)
+	print("generating")
+
+
+	-- REMOVE THIS IF STATEMENT ONCE WE GET SCRIPTS ON THE SIDE
+	local modelTable
+	if (type(modelJson) == "string") then
+		modelTable = FromJson(modelJson)
 	end
 
 	local modelParts = {}
 
-	for i, part in pairs(modelData.data) do
-		print(part.name)
+	for i, part in pairs(modelTable.data) do
+
 		local generated = GeneratePart(part)
 
 		if generated then
@@ -168,15 +183,15 @@ function GenerateModel(modelData, --[[optional]] position, --[[optional]] partNa
 
 	local rootPart
 
-	if modelParts then
+	if (modelParts) then
 		rootPart = CreateBoundingBox(modelParts)
-		rootPart.name = modelData.name
-
-		if position ~= nil then
-			rootPart.position = position
-		end
+		rootPart.name = modelTable.name
 	else
 		print("Issue creating model - modelParts does not exist")
+	end
+
+	if (position ~= nil) then
+		rootPart.position = position
 	end
 
 	return rootPart
