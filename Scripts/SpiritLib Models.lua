@@ -57,7 +57,7 @@ local function CreateBoundingBox(parts)
 	local encompasser = CreatePart(0, center, Vector3.zero)
 	encompasser.size = diff
 	encompasser.transparency = 0.2
-	encompasser.visible = false
+	encompasser.visible = true
 	encompasser.ignoreRaycast = true
 
 	local renderParent = CreatePart(0, center, Vector3.zero)
@@ -71,8 +71,9 @@ local function CreateBoundingBox(parts)
 		part.cancollide = false
 	end
 
+	print("call attach")
 	CallModuleFunction("Attachments", "Attach", renderParent, encompasser, false)
-
+	print("attach success")
 
 	encompasser.frozen = false
 	encompasser.cancollide = true
@@ -183,8 +184,6 @@ function GenerateModel(modelJson, --[[optional]]position, --[[optional]]partName
 	local rootPart
 
 	if (modelParts) then
-		print(modelTable.name)
-		print(modelParts[1])
 		rootPart = CreateBoundingBox(modelParts)
 		rootPart.name = modelTable.name
 	else

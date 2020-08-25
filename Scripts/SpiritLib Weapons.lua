@@ -140,27 +140,29 @@ function SpawnModel(name, objectJSON, position)
 end
 
 function GiveWeapon(player, weaponName, slot)
-	print(1)
+
 	if (playerWeaponInventories[player] ~= nil and WeaponsByName[weaponName]~=nil) then
-		print(2)
+
 		local weaponTableInstance = CopyTable(WeaponsByName[weaponName])
-		print(2.2)
+
 		local me = LocalPlayer()
-		print(2.5)
+
 		-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
 		weaponTableInstance.part = SpawnModel(weaponTableInstance.name, weaponTableInstance.modelJson, me.position + me.forward) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
-		print(3)
+
+
 
 
 		weaponTableInstance.part.frozen = true
 		weaponTableInstance.part.cancollide = false
 
 		weaponTableInstance.part.angles = LocalPlayer().angles
-print(4)
-		CallModuleFunction("Attachments", "Attach", rootPart, LocalPlayer())
+
+
+		CallModuleFunction("Attachments", "Attach", weaponTableInstance.part, LocalPlayer())
 
 		weaponTableInstance.part.script = weaponTableInstance.weaponScript
-print(5)
+
 		playerWeaponInventories[player][slot] = weaponTableInstance
 		player.table.SelectedWeaponSlot = slot
 	end
@@ -177,6 +179,7 @@ function RegisterWeapon(name, scriptName, modelJson)
 	if not modelJson then return end
 
 	local weaponTable = FromJson(modelJson)
+	weaponTable.modelJson = modelJson
 
 	table.insert(RegisteredWeapons, weaponTable)
 	WeaponsByName[weaponTable.name] = weaponTable
