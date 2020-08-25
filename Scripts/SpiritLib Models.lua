@@ -47,8 +47,7 @@ local function CreateBoundingBox(parts)
 
 	local encompasser = CreatePart(0, center, Vector3.zero)
 	encompasser.size = diff
-	encompasser.transparency = 0.2
-	encompasser.visible = true
+	encompasser.visible = false
 	encompasser.ignoreRaycast = true
 
 	local renderParent = CreatePart(0, center, Vector3.zero)
@@ -68,7 +67,6 @@ local function CreateBoundingBox(parts)
 
 	encompasser.frozen = false
 	encompasser.cancollide = true
-
 
 	return encompasser
 end

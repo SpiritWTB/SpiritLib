@@ -125,6 +125,8 @@ end
 function SpawnModel(name, objectJSON, position)
 	local weaponPart = CallModuleFunction("Models", "GenerateModel", objectJSON, position)
 	weaponPart.name = name
+
+	return weaponPart
 end
 
 function GiveWeapon(player, weaponName, slot)
@@ -135,7 +137,7 @@ function GiveWeapon(player, weaponName, slot)
 	local weaponTableInstance = CopyTable(WeaponsByName[weaponName])
 
 	-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
-	weaponTableInstance.part = SpawnModel(weaponTableInstance.name, weaponTableInstance.modelJson, player.position + player.forward) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
+	weaponTableInstance.part = SpawnModel(weaponTableInstance.name, weaponTableInstance.modelJson, player.position) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
 	weaponTableInstance.part.frozen = true
 	weaponTableInstance.part.cancollide = false
 	weaponTableInstance.part.angles = LocalPlayer().angles
