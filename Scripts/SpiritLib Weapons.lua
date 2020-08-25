@@ -45,6 +45,32 @@ function SelectItem(entryNumber)
 	NetworkSendToHost("selectWeaponSlot", {entryNumber})
 end
 
+function ProcessFire()
+	local range = 20;
+
+	-- find the position the player is shooting at
+	local shootpos = LocalPlayer.viewPosition + LocalPlayer.viewForward * range;
+
+	-- draw a line between the player and where they're looking
+	local hitdata = RayCast(LocalPlayer.viewPosition, shootpos);
+
+	local hitObjectID = nil
+	local hitObjectType = nil
+	if (hitdata.hitObject ~= nil) then
+		
+		if (hitdata.hitObject.type == "Part") then
+			hitObjectType = 1
+		elseif (hitdata.hitObject.type == "Player") then
+			hitObjectType = 2
+		end
+
+		hitObjectID = hitdata.hitObject.id
+
+	end
+
+	NetworkSendToHost("weaponInput", {1, hitObjectType, hitObjectID, MousePosWorld()})
+end
+
 function Update()
 	if InputPressed("x") then
 		PreviousItem()
@@ -52,8 +78,22 @@ function Update()
 		NextItem()
 	end
 
-	if InputPressed("mouse 1") then
-		NetworkSendToHost("weaponInput", {1})
+	if InputPressed("mouse 0") then
+
+
+		--(ply, mousePos, hitEnt)
+
+		
+
+
+	elseif InputReleased("mouse 0") then
+		NetworkSendToHost("weaponInput", {2})
+	elseif InputPressed("mouse 1") then
+		NetworkSendToHost("weaponInput", {3})
+	elseif InputReleased("mouse 1") then
+		NetworkSendToHost("weaponInput", {4})
+	elseif InputPressed("r") then
+		NetworkSendToHost("weaponInput", {5})
 	end
 
 	for k,v in pairs(allBoxes) do
@@ -148,6 +188,7 @@ function GiveWeapon(player, weaponName, slot)
 
 	playerWeaponInventories[player][slot] = weaponTableInstance
 	player.table.SelectedWeaponSlot = slot
+	print("weapon give successful")
 end
 
 RegisteredWeapons = {}
@@ -165,8 +206,12 @@ function RegisterWeapon(name, scriptName, modelJson)
 	WeaponsByName[weaponTable.name] = weaponTable
 end
 
+function TriggerInput(player, slot, inputEnum)
+
+end
+
 function NetworkStringReceive(player, name, data)
-	if IsHost() and name == "selectWeaponSlot" then
+	if IsHost and name == "selectWeaponSlot" then
 		if playerWeaponInventories[player][data[1]] ~= nil then
 			player.table.SelectedWeaponSlot = data[1]
 		end
@@ -184,7 +229,8 @@ function NetworkStringReceive(player, name, data)
 		5 = Reload
 	]]
 
-	if IsHost() and name == "weaponInput" and player.table.SelectedWeaponSlot ~= nil then
+	if IsHost and name == "weaponInput" and player.table.SelectedWeaponSlot ~= nil then
+
 		local slot = player.table.SelectedWeaponSlot
 
 		if data[1] == 1 then

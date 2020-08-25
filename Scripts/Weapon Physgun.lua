@@ -1,3 +1,4 @@
+print("physgun started")
 --[[ Start SpiritLib Setup ]]
 
 local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
@@ -28,16 +29,16 @@ WEAPON.CurrentObject = nil
 WEAPON.CurrentPhysDistance = 0
 WEAPON.CurrentPhysRotation = Vector3.zero
 
-WEAPON.Fire = function(ply, mousePos, hitEnt)
+function Fire(ply, mousePos, hitEnt)
 
 	print("fire")
 	
 	-- self should work here, I googled it at some point
 	self.CurrentObject = hitEnt
-	self.CurrentPhysDistance = (distance from ply to hitEnt)
+--	self.CurrentPhysDistance = Vector3.Distance(ply.position, hitEnt.position)
 end
 
-WEAPON.think = function(unsure if we need arguments)
+function Think()
 	if IsHost then return end
 
 	if (self.CurrentObject ~= nil ) then
