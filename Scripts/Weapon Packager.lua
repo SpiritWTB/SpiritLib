@@ -20,7 +20,7 @@ local markerCollection = {}
 
 function Fire(ply, mousePos, entityHit)
 	if entityHit and entityHit.type == "Part" and (not objectCollection[entityHit.id]) then
-		objectCollection[entityHit.id] = entityHit.name
+		objectCollection[entityHit] = entityHit.name
 
 		table.insert(objectCollection, entityHit.id)
 		local marker = CreatePart(entityHit.parttype, entityHit.position, entityHit.angles)
@@ -42,24 +42,8 @@ end
 
 previousNames = {}
 function Use(ply)
-	print("use")
-	local timename = "model_" .. tostring(Time.year) .. "-" .. tostring(Time.month) .. "-" .. tostring(Time.day) .. "-" .. tostring(Time.hour) .. "-" .. tostring(Time.minute) .. "-" .. tostring(Time.second) .. "-" .. tostring(Time.millisecond) 
-	
-	for objectID, name in pairs(objectCollection) do
-		local part = PartByID(objectID)
-		if part then
-			print(objectID)
-			print(part.name)
-			print(name)
-			part.name = timename
-		end
-	end
-	
-	CallModuleFunction("Models", "SaveModelByName", timename, "Freshly generated.", timename)
 
-	for object, name in pairs(objectCollection) do
-		object.name = name
-	end
+	saveModel(objectCollection)
 
 	clearCollection()
 end
@@ -72,10 +56,25 @@ end
 
 
 function clearCollection()
-	objectCollection = {}
-
 	for i,marker in pairs(markerCollection) do
 		marker.Remove()
 	end
+
+	objectCollection = {}
 	markerCollection = {}
+end
+
+function saveModel(collection)
+	local timename = "model_" .. tostring(Time.year) .. "-" .. tostring(Time.month) .. "-" .. tostring(Time.day) .. "-" .. tostring(Time.hour) .. "-" .. tostring(Time.minute) .. "-" .. tostring(Time.second) .. "-" .. tostring(Time.millisecond) 
+	
+	for part, name in pairs(collection) do
+		part.name = timename
+	end
+
+	-- can't pass the collection of objects over, no tables
+	CallModuleFunction("Models", "SaveModelByName", timename, "Freshly generated.", timename)
+
+	for part, name in pairs(collection) do
+		part.name = name
+	end
 end
