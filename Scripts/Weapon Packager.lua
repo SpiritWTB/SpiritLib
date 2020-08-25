@@ -69,11 +69,11 @@ function Special(ply, mousePos, entityHit)
 	end
 end
 
-function Reload(ply)
+function Reload(ply, mousePos, entityHit)
 	clearCollection()
 end
 
-function Use(ply)
+function Use(ply, mousePos, entityHit)
 	saveModel(objectCollection)
 	clearCollection()
 end
