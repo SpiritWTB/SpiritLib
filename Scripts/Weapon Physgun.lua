@@ -19,7 +19,7 @@ function ReturnCall(caller, token, functionName, ...) caller.table.spiritLibRetu
 -- [[ End SpiritLib Setup ]]
 
 
-Name = "The Grabber"
+Name = "The Physgun"
 Description = "Moves and rotates objects and SpiritModels"
 Slot = 1
 

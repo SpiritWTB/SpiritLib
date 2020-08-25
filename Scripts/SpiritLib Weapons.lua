@@ -45,19 +45,13 @@ function SelectItem(entryNumber)
 	NetworkSendToHost("selectWeaponSlot", {entryNumber})
 end
 
-function ProcessFire()
-	local range = 20;
+function ProcessFire(_input)
 
-	-- find the position the player is shooting at
-	local shootpos = LocalPlayer.viewPosition + LocalPlayer.viewForward * range;
-
-	-- draw a line between the player and where they're looking
-	local hitdata = RayCast(LocalPlayer.viewPosition, shootpos);
+	local hitdata = RayCast(LocalPlayer().viewPosition, MousePosWorld());
 
 	local hitObjectID = nil
 	local hitObjectType = nil
 	if (hitdata.hitObject ~= nil) then
-		
 		if (hitdata.hitObject.type == "Part") then
 			hitObjectType = 1
 		elseif (hitdata.hitObject.type == "Player") then
@@ -68,7 +62,7 @@ function ProcessFire()
 
 	end
 
-	NetworkSendToHost("weaponInput", {1, hitObjectType, hitObjectID, MousePosWorld()})
+	NetworkSendToHost("weaponInput", {_input, MousePosWorld(), hitObjectType, hitObjectID})
 end
 
 function Update()
@@ -79,21 +73,17 @@ function Update()
 	end
 
 	if InputPressed("mouse 0") then
-
-
-		--(ply, mousePos, hitEnt)
-
-		
-
-
+		ProcessFire(1)
 	elseif InputReleased("mouse 0") then
 		NetworkSendToHost("weaponInput", {2})
 	elseif InputPressed("mouse 1") then
-		NetworkSendToHost("weaponInput", {3})
+		ProcessFire(3)
 	elseif InputReleased("mouse 1") then
 		NetworkSendToHost("weaponInput", {4})
 	elseif InputPressed("r") then
 		NetworkSendToHost("weaponInput", {5})
+	elseif InputPressed("e") then
+		NetworkSendToHost("weaponInput", {6})
 	end
 
 	for k,v in pairs(allBoxes) do
@@ -206,10 +196,6 @@ function RegisterWeapon(name, scriptName, modelJson)
 	WeaponsByName[weaponTable.name] = weaponTable
 end
 
-function TriggerInput(player, slot, inputEnum)
-
-end
-
 function NetworkStringReceive(player, name, data)
 	if IsHost and name == "selectWeaponSlot" then
 		if playerWeaponInventories[player][data[1]] ~= nil then
@@ -234,15 +220,35 @@ function NetworkStringReceive(player, name, data)
 		local slot = player.table.SelectedWeaponSlot
 
 		if data[1] == 1 then
-			playerWeaponInventories[player][slot].part.scripts[1].Call("Fire")
+			local mousePos = data[2]
+
+			local objectType = nil
+			local objectID = nil
+
+			if data[3] then
+				objectType = data[3]
+				objectID = data[4]
+			end
+
+			local hitObject = nil
+			if objectType == 1 then
+				hitObject = PartByID(objectID)
+			elseif objectType == 2 then
+				hitObject = PlayerByID(objectID)
+			end
+
+			playerWeaponInventories[player][slot].part.scripts[1].Call("Fire", player, mousePos, hitObject)
+
 		elseif data[1] == 2 then
-			playerWeaponInventories[player][slot].part.scripts[1].Call("FireRelease")
+			playerWeaponInventories[player][slot].part.scripts[1].Call("FireRelease", player)
 		elseif data[1] == 3 then
-			playerWeaponInventories[player][slot].part.scripts[1].Call("AltFire")
+			playerWeaponInventories[player][slot].part.scripts[1].Call("AltFire", player, mousePos, hitObject)
 		elseif data[1] == 4 then
-			playerWeaponInventories[player][slot].part.scripts[1].Call("AltFireRelease")
+			playerWeaponInventories[player][slot].part.scripts[1].Call("AltFireRelease", player)
 		elseif data[1] == 5 then
-			playerWeaponInventories[player][slot].part.scripts[1].Call("Reload")
+			playerWeaponInventories[player][slot].part.scripts[1].Call("Reload", player)
+		elseif data[1] == 6 then
+			playerWeaponInventories[player][slot].part.scripts[1].Call("Use", player)
 		end
 	end
 end
