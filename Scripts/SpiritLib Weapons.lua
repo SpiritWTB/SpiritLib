@@ -9,393 +9,265 @@ function ReturnCall(caller, token, functionName, ...) caller.table[token] = _G[f
 
 -- [[ End SpiritLib Setup ]]
 
-local slotCount = 10
-local slotUIBoxSize = newVector2(52, 52)
-local slotUIBoxSpacing = 6
+local boxesCount = 10
+local boxesSize = newVector2(52, 52)
+local boxesSpacing = 6
 
-local slotUIBoxes = {}
-local selectedUIBox = nil
--- when we run out of things in the slot we will go to the next slot (todo: make sure that doesn't crash if there's no weapons trying to constantly move left or right or both)
+local allBoxes = {}
+local current = 1
 
-local myPly = LocalPlayer()
+local boxesHolderSize = newVector2(((boxesSize.x + boxesSpacing) * boxesCount) - boxesSpacing, boxesSize.y)
+local boxesHolderPos = newVector2((ScreenSize().x / 2) - (boxesHolderSize.x / 2), ScreenSize().y - boxesHolderSize.y - 36)
+local boxesHolder = MakeUIPanel(boxesHolderPos, boxesHolderSize)
+boxesHolder.color = newColor(0, 0, 0, 0)
 
-local slotUIHolderSize = newVector2(((slotUIBoxSize.x + slotUIBoxSpacing) * slotCount) - slotUIBoxSpacing, slotUIBoxSize.y)
-local slotUIHolderPos = newVector2((ScreenSize().x / 2) - (slotUIHolderSize.x / 2), ScreenSize().y - slotUIHolderSize.y - 36)
-local slotUIHolder = MakeUIPanel(slotUIHolderPos, slotUIHolderSize)
-slotUIHolder.color = newColor(0, 0, 0, 0)
+function NextItem()
+	SelectItem(current + 1)
+end
 
+function PreviousItem()
+	SelectItem(current - 1)
+end
 
--- [[ Begin Host Section]]
-
-	function SpawnModel(name, objectJSON, position)
-		local weaponPart = CallModuleFunction("Models", "GenerateModel", objectJSON, position)
-		weaponPart.name = name
-
-		return weaponPart
+function SelectItem(entryNumber)
+	if not allBoxes[entryNumber] then
+		if entryNumber < 0 then
+			entryNumber = boxesCount
+		else
+			entryNumber = 0
+		end
 	end
 
-	function GiveWeapon(player, weaponName, slot)
+	allBoxes[current].color = newColor(allBoxes[current].color.r, allBoxes[current].color.g, allBoxes[current].color.b, 0)
+	current = entryNumber
+	allBoxes[current].color = newColor(allBoxes[current].color.r, allBoxes[current].color.g, allBoxes[current].color.b, 0.4)
 
-		-- make sure the player has an inventory and that the weapon we're trying to give them exists
-		if not playerWeaponInventories[player] or not WeaponsByName[weaponName] then
-			print("Giveweapon statement invalid.")
-			return
+	NetworkSendToHost("selectWeaponSlot", {entryNumber})
+end
+
+function ProcessFire(_input)
+
+	local hitdata = RayCast(LocalPlayer().viewPosition, MousePosWorld());
+
+	local hitObjectID = nil
+	local hitObjectType = nil
+	if (hitdata.hitObject ~= nil) then
+		if (hitdata.hitObject.type == "Part") then
+			hitObjectType = 1
+		elseif (hitdata.hitObject.type == "Player") then
+			hitObjectType = 2
 		end
 
-		-- if they don't have any weapons in this slot yet add a table to this slot for their weapons
-		if not playerWeaponInventories[player][slot] then
-			playerWeaponInventories[player][slot] = {}
-		end
+		hitObjectID = hitdata.hitObject.id
 
-		-- copy the table of the weapon we're giving them
-		local weaponTableInstance = CopyTable(WeaponsByName[weaponName])
-
-		-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
-		weaponTableInstance.part = SpawnModel(weaponTableInstance.name, weaponTableInstance.modelJson, player.position) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
-		weaponTableInstance.part.frozen = true
-		weaponTableInstance.part.cancollide = false
-		weaponTableInstance.part.angles = player.angles
-
-		CallModuleFunction("Attachments", "Attach", weaponTableInstance.part, player)
-
-		weaponTableInstance.part.script = weaponTableInstance.weaponScript
-		
-		weaponTableInstance.slot = slot
-		weaponTableInstance.indexInSlot = #playerWeaponInventories[player][slot] + 1
-		
-		table.insert(playerWeaponInventories[player][slot], weaponTableInstance)
-
-		-- todo: make a way to select an index in a slot directly
-		selectSlot(player, slot)
 	end
 
-	-- [[ Begin Setup Section]]
+	NetworkSendToHost("weaponInput", {_input, MousePosWorld(), hitObjectType, hitObjectID})
+end
 
-		RegisteredWeapons = {}
-		WeaponsByName = {}
+function Update()
+	if InputPressed("x") then
+		PreviousItem()
+	elseif InputPressed("c") then
+		NextItem()
+	end
 
-		function RegisterWeapon(name, scriptName, modelJson)
-			if not name or not scriptName or not modelJson then
-				return
+	if InputPressed("mouse 0") then
+		ProcessFire(1)
+	elseif InputReleased("mouse 0") then
+		NetworkSendToHost("weaponInput", {2})
+	elseif InputPressed("mouse 1") then
+		ProcessFire(3)
+	elseif InputReleased("mouse 1") then
+		NetworkSendToHost("weaponInput", {4})
+	elseif InputPressed("r") then
+		NetworkSendToHost("weaponInput", {5})
+	elseif InputPressed("e") then
+		NetworkSendToHost("weaponInput", {6})
+	elseif InputPressed("f") then
+		NetworkSendToHost("weaponInput", {7})
+	end
+
+	for k,v in pairs(allBoxes) do
+		if InputPressed(v.table.keyBind) then
+			SelectItem(v.table.index)
+		end
+	end
+end
+
+function SpawnUIBoxes()
+	for i = 1, boxesCount do
+		local keyBind = IndexToKeyBind(i)
+
+		local boxBGPos = newVector2(((boxesSize.x + boxesSpacing) * i), 0)
+		local boxBG = MakeUIPanel(boxBGPos, boxesSize, boxesHolder)
+		boxBG.color = newColor(0.14, 0.14, 0.14, 0.76)
+
+		local box = MakeUIPanel(newVector2(1, 1), newVector2(boxesSize.x - 2, boxesSize.y - 2), boxBG)
+
+		local labelText = "<b>" .. keyBind .. "</b>"
+
+		local boxNumberLabel = MakeUIText(newVector2(4, 4), newVector2(box.size.x - 8, box.size.y - 8), labelText, box)
+		boxNumberLabel.textColor = newColor(0.8, 0.8, 0.8, 0.4)
+		boxNumberLabel.textAlignment = "TopRight"
+
+		local alpha = 0
+		if i == current then
+			alpha = 0.4
+		end
+
+		box.color = newColor(boxBG.color.r + 0.28, boxBG.color.g + 0.28, boxBG.color.b + 0.28, alpha)
+
+		box.table.keyBind = keyBind
+		box.table.index = i
+
+		table.insert(allBoxes, box)
+	end
+end
+
+function IndexToKeyBind(index)
+	local keyBind = tostring(index)
+
+	if index == 10 then
+		return "0"
+	elseif index == 11 then
+		return "-"
+	elseif index == 12 then
+		return "="
+	end
+
+	return keyBind
+end
+
+SpawnUIBoxes()
+
+if not IsHost then return end
+
+-- TODO: RUN THIS ON FIXED CONNECT
+function InitializeWeaponInventories()
+	-- use player ID as key, table as a value
+	playerWeaponInventories = {}
+
+	for _, ply in pairs(GetAllPlayers()) do
+		playerWeaponInventories[ply] = {}
+		ply.table.SelectedWeaponSlot = nil
+	end
+end
+
+function SpawnModel(name, objectJSON, position)
+	local weaponPart = CallModuleFunction("Models", "GenerateModel", objectJSON, position)
+	weaponPart.name = name
+
+	return weaponPart
+end
+
+function GiveWeapon(player, weaponName, slot)
+	if not playerWeaponInventories[player] or not WeaponsByName[weaponName] then
+		return
+	end
+
+	local weaponTableInstance = CopyTable(WeaponsByName[weaponName])
+
+	-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
+	weaponTableInstance.part = SpawnModel(weaponTableInstance.name, weaponTableInstance.modelJson, player.position) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
+	weaponTableInstance.part.frozen = true
+	weaponTableInstance.part.cancollide = false
+	weaponTableInstance.part.angles = player.angles
+
+	CallModuleFunction("Attachments", "Attach", weaponTableInstance.part, player)
+
+	weaponTableInstance.part.script = weaponTableInstance.weaponScript
+
+	playerWeaponInventories[player][slot] = weaponTableInstance
+	player.table.SelectedWeaponSlot = slot
+	print("weapon give successful")
+end
+
+RegisteredWeapons = {}
+WeaponsByName = {}
+
+function RegisterWeapon(name, scriptName, modelJson)
+	if not name or not scriptName or not modelJson then
+		return
+	end
+
+	local weaponTable = FromJson(modelJson)
+	weaponTable.modelJson = modelJson
+
+	table.insert(RegisteredWeapons, weaponTable)
+	WeaponsByName[weaponTable.name] = weaponTable
+end
+
+function NetworkStringReceive(player, name, data)
+	if IsHost and name == "selectWeaponSlot" then
+		if playerWeaponInventories[player][data[1]] ~= nil then
+			player.table.SelectedWeaponSlot = data[1]
+		end
+	end
+
+	--[[
+
+		weaponInput
+	-------------------
+
+		1 = Fire
+		2 = FireRelease
+		3 = AltFire
+		4 = AltFireRelease
+		5 = Reload
+	]]
+
+	if IsHost and name == "weaponInput" and player.table.SelectedWeaponSlot ~= nil then
+
+		local slot = player.table.SelectedWeaponSlot
+
+		if data[1] == 1 then
+			local mousePos = data[2]
+
+			local objectType = nil
+			local objectID = nil
+
+			if data[3] then
+				objectType = data[3]
+				objectID = data[4]
 			end
 
-			local weaponTable = FromJson(modelJson)
-			weaponTable.modelJson = modelJson
-
-			table.insert(RegisteredWeapons, weaponTable)
-			WeaponsByName[weaponTable.name] = weaponTable
-		end
-
-		-- TODO: RUN THIS ON FIXED CONNECT
-		function InitializeWeaponInventories()
-			-- use player ID as key, table as a value
-			playerWeaponInventories = {}
-
-			for _, ply in pairs(GetAllPlayers()) do
-				playerWeaponInventories[ply] = {}
-				ply.table.SelectedWeaponSlot = 1
-				ply.table.SelectedWeaponIndexInSlot = 1
-			end
-		end
-
-		function InitializeWeapons()
-			-- RegisterWeapon( "Physgun", "Weapon Physgun", GetModuleVariable("Default Models", "BuiltInModels"))
-		end
-
-	-- [[ End Setup Section]]
-
-
-	-- [[ Begin Selection Functions ]]
-
-		function NextItem(player)
-
-			-- no weapons equipped, do nothing
-			if #playerWeaponInventories[player]<2 then return end
-
-			-- increase the index in the slot
-			player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot + 1
-
-			-- if there's no weapon there, go back to in-slot-index 1 and bump forward to the next slot 
-			if not playerWeaponInventories[player][player.table.SelectedWeaponIndexInSlot] then
-				player.table.SelectedWeaponIndexInSlot = 1
-
-				-- if we get to the end of the players weapon inventory we go back to the beginning
-				slotNumber = rolloverIndex(slotNumber + 1, playerWeaponInventories[player])
+			local hitObject = nil
+			if objectType == 1 then
+				hitObject = PartByID(objectID)
+			elseif objectType == 2 then
+				hitObject = PlayerByID(objectID)
 			end
 
-		end
+			playerWeaponInventories[player][slot].part.scripts[1].Call("Fire", player, mousePos, hitObject)
 
-
-		function PreviousItem(player)
-
-			-- no weapons equipped, do nothing
-			if #playerWeaponInventories[player]<2 then return end
-
-			-- increase the index in the slot
-			player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot - 1
-
-			-- if there's no weapon there, go back to in-slot-index 1 and bump forward to the next slot 
-			if not playerWeaponInventories[player][player.table.SelectedWeaponIndexInSlot] then
-				player.table.SelectedWeaponIndexInSlot = 1
-
-				-- if we get to the end of the players weapon inventory we go back to the beginning
-				slotNumber = rolloverIndex(slotNumber - 1, playerWeaponInventories[player])
-			end
-
-		end
-
-		function SelectSlot(player, slotNumber)
-
-			-- no weapons equipped, do nothing
-			if #playerWeaponInventories[player]<2 then return end
-
-			-- if we get to the end of the players weapon inventory we go back to the beginning
-			slotNumber = rolloverIndex(slotNumber + 1, playerWeaponInventories[player])
-
-			-- if we keep pressing 1 it will loop through the things in slot 1
-			if player.table.SelectedWeaponSlot ~= slotNumber then
-				player.table.SelectedWeaponIndexInSlot = 1
-
-			else
-				player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot + 1
-
-				if not playerWeaponInventories[_player][player.table.SelectedWeaponIndexInSlot] then
-					player.table.SelectedWeaponIndexInSlot = 1
-				end
-			end
-		end
-
-		local function rolloverIndex(_index, _table)
-			if not _table[_index] then
-				if _index < 1 then
-					_index = #_table
-				else
-					_index = 1
-				end
-			end
-
-			return _index
-		end
-
-	-- [[ End Selection Functions ]]
-
-
--- [[ End Host Section ]]
-
-
-
-
-
-
-
-
-
-
-
--- [[ Begin Client Section ]]
-
-
-	function ProcessFire(_input)
-
-		local hitdata = RayCast(LocalPlayer().viewPosition, MousePosWorld());
-
-		local hitObjectID = nil
-		local hitObjectType = nil
-		if (hitdata.hitObject ~= nil) then
-			if (hitdata.hitObject.type == "Part") then
-				hitObjectType = 1
-			elseif (hitdata.hitObject.type == "Player") then
-				hitObjectType = 2
-			end
-
-			hitObjectID = hitdata.hitObject.id
-
-		end
-
-		NetworkSendToHost("weaponInput", {_input, MousePosWorld(), hitObjectType, hitObjectID})
-	end
-
-	function HandleNetworkInputs()
-		if InputPressed("mouse 0") then
-			ProcessFire(1)
-		elseif InputReleased("mouse 0") then
-			NetworkSendToHost("weaponInput", {2})
-		elseif InputPressed("mouse 1") then
-			ProcessFire(3)
-		elseif InputReleased("mouse 1") then
-			NetworkSendToHost("weaponInput", {4})
-		elseif InputPressed("r") then
-			NetworkSendToHost("weaponInput", {5})
-		elseif InputPressed("e") then
-			NetworkSendToHost("weaponInput", {6})
-		elseif InputPressed("g") then
-			NetworkSendToHost("weaponInput", {7})
+		elseif data[1] == 2 then
+			playerWeaponInventories[player][slot].part.scripts[1].Call("FireRelease", player)
+		elseif data[1] == 3 then
+			playerWeaponInventories[player][slot].part.scripts[1].Call("AltFire", player, mousePos, hitObject)
+		elseif data[1] == 4 then
+			playerWeaponInventories[player][slot].part.scripts[1].Call("AltFireRelease", player)
+		elseif data[1] == 5 then
+			playerWeaponInventories[player][slot].part.scripts[1].Call("Reload", player)
+		elseif data[1] == 6 then
+			playerWeaponInventories[player][slot].part.scripts[1].Call("Use", player)
+		elseif data[1] == 7 then
+			playerWeaponInventories[player][slot].part.scripts[1].Call("Special", player, mousePos, hitObject)
 		end
 	end
-
-	local function selectUIBox(slot)
-		selectedUIBox.color = newColor(selectedUIBox.color.r, selectedUIBox.color.g, selectedUIBox.color.b, 0)
-
-		selectedUIBox = slotUIBoxes[slot]
-
-		selectedUIBox.color = newColor(selectedUIBox.color.r, selectedUIBox.color.g, selectedUIBox.color.b, 0.4)
-		
-	end
-
-	function Update()
-		if InputPressed("x") then
-			NetworkSendToHost("previousWeapon", {})
-			--PreviousItem()
-		elseif InputPressed("c") then
-			NetworkSendToHost("nextWeapon", {})
-			--NextItem()
-		end
-
-		HandleNetworkInputs()
-
-		for k,v in pairs(slotUIBoxes) do
-			if InputPressed(v.table.keyBind) then
-				NetworkSendToHost("selectSlot", {v.table.index})
-			end
-		end
-	end
+end
 
 
+function InitializeWeapons()
+	-- RegisterWeapon( "Physgun", "Weapon Physgun", GetModuleVariable("Default Models", "BuiltInModels"))
+end
 
-	function SpawnUIBoxes()
-		for i = 1, slotCount do
-			local keyBind = IndexToKeyBind(i)
-
-			local boxBGPos = newVector2(((slotUIBoxSize.x + slotUIBoxSpacing) * i), 0)
-			local boxBG = MakeUIPanel(boxBGPos, slotUIBoxSize, slotUIHolder)
-			boxBG.color = newColor(0.14, 0.14, 0.14, 0.76)
-
-			local box = MakeUIPanel(newVector2(1, 1), newVector2(slotUIBoxSize.x - 2, slotUIBoxSize.y - 2), boxBG)
-
-			local labelText = "<b>" .. keyBind .. "</b>"
-
-			local boxNumberLabel = MakeUIText(newVector2(4, 4), newVector2(box.size.x - 8, box.size.y - 8), labelText, box)
-			boxNumberLabel.textColor = newColor(0.8, 0.8, 0.8, 0.4)
-			boxNumberLabel.textAlignment = "TopRight"
-
-			local alpha = 0
-			if i == currentSlot then
-				alpha = 0.4
-			end
-
-			box.color = newColor(boxBG.color.r + 0.28, boxBG.color.g + 0.28, boxBG.color.b + 0.28, alpha)
-
-			box.table.keyBind = keyBind
-			box.table.index = i
-
-			table.insert(slotUIBoxes, box)
-		end
-	end
-
-	function IndexToKeyBind(index)
-		local keyBind = tostring(index)
-
-		if index == 10 then
-			return "0"
-		elseif index == 11 then
-			return "-"
-		elseif index == 12 then
-			return "="
-		end
-
-		return keyBind
-	end
-
-	SpawnUIBoxes()
-
-
--- [[ End Client Section]]
-
-
-
-
-
-
-
--- [[ Begin Networking Section]]
-
-	-- split these for simplicity/visibility, this system makes my head spin
-	function NetworkStringReceive(sender, name, data)
-		if IsHost then
-			HostReceive(sender, name, data)
-		end
-
-		-- only accept info from the host for security sake. You can't even do that without hacking your client
-		if sender.IsHost() then
-			ClientReceive(sender, name, data)
-		end
-	end
-
-	function HostReceive(client, name, data)
-
-		if name == "nextWeapon" then
-			NextItem(client)
-		elseif name == "previousWeapon" then
-			PreviousItem(client)
-		elseif name == "selectSlot" then
-			SelectSlot(client, data[1])
-		end
-
-		if name == "weaponInput" then
-
-			if client.table.SelectedWeaponSlot ~= nil and client.table.SelectedWeaponIndexInSlot ~= nil then
-
-				local slot = client.table.SelectedWeaponSlot
-				local idInSlot = client.table.SelectedWeaponIndexInSlot
-
-				if data[1] == 1 then
-					local mousePos = data[2]
-
-					local objectType = nil
-					local objectID = nil
-
-					if data[3] then
-						objectType = data[3]
-						objectID = data[4]
-					end
-
-					local hitObject = nil
-					if objectType == 1 then
-						hitObject = PartByID(objectID)
-					elseif objectType == 2 then
-						hitObject = clientByID(objectID)
-					end
-
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Fire", client, mousePos, hitObject)
-
-				elseif data[1] == 2 then
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("FireRelease", client)
-				elseif data[1] == 3 then
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("AltFire", client, mousePos, hitObject)
-				elseif data[1] == 4 then
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("AltFireRelease", client)
-				elseif data[1] == 5 then
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Reload", client, mousePos, hitObject)
-				elseif data[1] == 6 then
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Use", client, mousePos, hitObject)
-				elseif data[1] == 7 then
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Special", client, mousePos, hitObject)
-				end
-			end
-		end
-	end
-
-	function ClientReceive(host, name, data)
-		if name == "setSelectedBox" then
-			selectUIBox(data[1])
-		end
-	end
-
--- [[ End Networking Section]]
-
+InitializeWeaponInventories()
+InitializeWeapons()
 
 -- http://lua-users.org/wiki/CopyTable
-local function CopyTable(orig, --[[optional]]copies)
+
+function CopyTable(orig, --[[optional]]copies)
     copies = copies or {}
     local orig_type = type(orig)
     local copy
@@ -415,8 +287,3 @@ local function CopyTable(orig, --[[optional]]copies)
     end
     return copy
 end
-
-
-if not IsHost then return end
-InitializeWeaponInventories()
-InitializeWeapons()
