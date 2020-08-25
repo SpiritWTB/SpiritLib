@@ -15,23 +15,57 @@ Description = "Exports models"
 Slot = 1
 
 local objectCollection = {}
-
 local markerCollection = {}
+
+instantMode = false
 
 function Fire(ply, mousePos, entityHit)
 	if entityHit and entityHit.type == "Part" and (not objectCollection[entityHit.id]) then
-		objectCollection[entityHit] = entityHit.name
 
-		table.insert(objectCollection, entityHit.id)
-		local marker = CreatePart(entityHit.parttype, entityHit.position, entityHit.angles)
+		if instantMode then
+			CallModuleFunction("Models", "SaveModelByName", entityHit.name, "Freshly generated.", entityHit.name)
+		else
+			if not objectCollection[entityHit] then
+				objectCollection[entityHit] = entityHit.name
+				local marker = CreatePart(entityHit.parttype, entityHit.position, entityHit.angles)
 
-		local s = 0.015
-		marker.size = entityHit.size + newVector3(s,s,s)
-		marker.transparency = 0.8
-		marker.color = newColor(0.3, 0.85, 0.3, 0.2)
-		marker.ignoreRaycast = true
+				local s = 0.015
+				marker.size = entityHit.size + newVector3(s,s,s)
+				marker.transparency = 0.8
+				marker.color = newColor(0.3, 0.85, 0.3, 0.2)
+				marker.ignoreRaycast = true
 
-		table.insert(markerCollection, marker)
+				table.insert(markerCollection, marker)
+			end
+		end
+	end
+end
+
+local instantModeIndicator = MakeUIText(newVector2(4, 4), newVector2(150, 180), "Instant mode is ON:")
+instantModeIndicator.textColor = newColor(255, 0.3, 0.1, 0.6)
+instantModeIndicator.textSize = 20
+instantModeIndicator.enabled = false
+
+function Update()
+	local hitdata = RayCast(LocalPlayer().viewPosition, MousePosWorld());
+
+	if (hitdata.hitObject ~= nil) then
+		if (hitdata.hitObject.type == "Part") then
+			instantModeIndicator.text = "Instant mode is ON:\n" .. hitdata.hitObject.name
+		end
+	else
+		instantModeIndicator.text = "Instant mode is ON:"
+	end
+end
+
+function AltFire(ply, mousePos, entityHit)
+
+	instantMode = not instantMode
+
+	if instantMode then
+		instantModeIndicator.enabled = true
+	else
+		instantModeIndicator.enabled = false	
 	end
 end
 
@@ -39,20 +73,11 @@ function Reload(ply)
 	clearCollection()
 end
 
-
-previousNames = {}
 function Use(ply)
-
 	saveModel(objectCollection)
-
 	clearCollection()
 end
 
-function Update()
-	if (CurrentObject ~= nil ) then
-		
-	end
-end
 
 
 function clearCollection()
@@ -64,14 +89,19 @@ function clearCollection()
 	markerCollection = {}
 end
 
-function saveModel(collection)
-	local timename = "model_" .. tostring(Time.year) .. "-" .. tostring(Time.month) .. "-" .. tostring(Time.day) .. "-" .. tostring(Time.hour) .. "-" .. tostring(Time.minute) .. "-" .. tostring(Time.second) .. "-" .. tostring(Time.millisecond) 
+function timeString()
+	return "model_" .. tostring(Time.year) .. "-" .. tostring(Time.month) .. "-" .. tostring(Time.day) .. "-" .. tostring(Time.hour) .. "-" .. tostring(Time.minute) .. "-" .. tostring(Time.second) .. "-" .. tostring(Time.millisecond) 
 	
+end
+
+function saveModel(collection)
+	local timename = timeString()
+
 	for part, name in pairs(collection) do
 		part.name = timename
 	end
 
-	-- can't pass the collection of objects over, no tables
+	-- can't pass the collection of objects over, no tables, have to name everything then set it back
 	CallModuleFunction("Models", "SaveModelByName", timename, "Freshly generated.", timename)
 
 	for part, name in pairs(collection) do

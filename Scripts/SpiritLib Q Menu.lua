@@ -317,7 +317,9 @@ function OnUIButtonClick(button)
 		local objectData = FromJson(button.table.spawnData)
 
 		if objectData.objectType == "Models" then
-			CallModuleFunction("Models", "GenerateModel", button.table.spawnData, spawnPos)
+			local part = CallModuleFunction("Models", "GenerateModel", button.table.spawnData, spawnPos)
+			part.position = LocalPlayer().position + LocalPlayer().forward * math.max(part.size.x, part.size.z) + newVector3(0,0.1,0)
+			part.angles = LocalPlayer().angles
 		elseif objectData.objectType == "Weapons" then
 			CallModuleFunction("Weapons", "GiveWeapon", LocalPlayer(), objectData.name, 1)
 		end
