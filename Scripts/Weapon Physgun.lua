@@ -19,34 +19,36 @@ function ReturnCall(caller, token, functionName, ...) caller.table.spiritLibRetu
 -- [[ End SpiritLib Setup ]]
 
 
-WEAPON = {}
+Name = "The Grabber"
+Description = "Moves and rotates objects and SpiritModels"
+Slot = 1
 
-WEAPON.Name = "The Grabber"
-WEAPON.Description = "Moves and rotates objects and SpiritModels"
-WEAPON.Slot = 1
+local CurrentObject = nil
+local CurrentPhysDistance = 0
+local CurrentPhysRotation = Vector3.zero
 
-WEAPON.CurrentObject = nil
-WEAPON.CurrentPhysDistance = 0
-WEAPON.CurrentPhysRotation = Vector3.zero
+function Fire(ply, mousePos, entityHit)
 
-function Fire(ply, mousePos, hitEnt)
-
-	print("fire")
+	print(ply)
+	print(mousePos)
+	print(entityHit)
 	
 	-- self should work here, I googled it at some point
-	self.CurrentObject = hitEnt
---	self.CurrentPhysDistance = Vector3.Distance(ply.position, hitEnt.position)
+	CurrentObject = hitEnt
+
+	local diff = hitEnt.position - ply.position
+	local angle = diff.normalized
+
+	CurrentPhysDistance = diff.magnitude
+
+
+	
+
+
 end
 
-function Think()
-	if IsHost then return end
-
-	if (self.CurrentObject ~= nil ) then
-		-- ****
+function Update()
+	if (CurrentObject ~= nil ) then
+		
 	end
 end
-
-
--- **  this will run on the server AND client, so let's make sure on the server (we'll do it on both for the heck of it) that they can indeed hit that entity. This is subject to a little lag if, for instance, the host runs around a corner as he's being shot, but it's decent host-level security, and that's all we have right now... we might can do this outside of the individual weapon before calling weapon.Fire
-
--- **** move self.CurrentObject in some way here, idk how we want to do that, we need to know if they're first person or third, so I think we need to lock them to one or the other like we said, and let them press F to change between them. Then the physgun can work different in first and third person. First person could be like gmod physgun, third person could be like the mouse moves it around on the ground and you have buttons for up/down and rotate pitch/yaw/roll
