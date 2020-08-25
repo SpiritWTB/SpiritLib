@@ -9,6 +9,15 @@ function ReturnCall(caller, token, functionName, ...) caller.table[token] = _G[f
 
 -- [[ End SpiritLib Setup ]]
 
+ModuleSettings = {
+	AllowQMenu = true,
+	
+	AllowedSpawnTypes = {
+		"Models",
+		"Weapons"
+	}
+}
+
 function MakeUIButtonWithHolder(name, position, size, --[[optional = ""]] text, parentUI)
 	local holderSize = size
 	local holderPos = position
@@ -16,7 +25,7 @@ function MakeUIButtonWithHolder(name, position, size, --[[optional = ""]] text, 
 	holder.name = tostring(name) .. " Button Holder"
 	holder.parent = parentUI
 	holder.position = holderPos
-	holder.color = Color.clear
+	holder.color = Color.clearq
 
 	local button = MakeUIButton(Vector2.zero, holderSize, text or "")
 	button.name = tostring(name) .. " Button"
@@ -312,27 +321,32 @@ function OnUIButtonClick(button)
 	elseif button.table.isTab then
 		SelectTab(button.table.tabName)
 	elseif button.table.isSpiritLibSpawnButton and button.table.spawnData then
+
 		local spawnPos = LocalPlayer().position + LocalPlayer().forward
 
 		local objectData = FromJson(button.table.spawnData)
 
-		if objectData.objectType == "Models" then
-			local part = CallModuleFunction("Models", "GenerateModel", button.table.spawnData, spawnPos)
-			part.position = LocalPlayer().position + LocalPlayer().forward * math.max(part.size.x, part.size.z) + newVector3(0,part.size.y/2 - 1.7,0)
-			
-			local angles = LocalPlayer().angles
-			angles.x = 0
-			angles.y = angles.y + 180
-			part.angles = angles
-		elseif objectData.objectType == "Weapons" then
-			CallModuleFunction("Weapons", "GiveWeapon", LocalPlayer(), objectData.name, 1)
+		if ModuleSettings.AllowedSpawnTypes[objectData.objectType] then
+			if objectData.objectType == "Models" then
+				local part = CallModuleFunction("Models", "GenerateModel", button.table.spawnData, spawnPos)
+				part.position = LocalPlayer().position + LocalPlayer().forward * math.max(part.size.x, part.size.z) + newVector3(0,part.size.y/2 - 1.7,0)
+				
+				local angles = LocalPlayer().angles
+				angles.x = 0
+				angles.y = angles.y + 180
+				part.angles = angles
+			elseif objectData.objectType == "Weapons" then
+				CallModuleFunction("Weapons", "GiveWeapon", LocalPlayer(), objectData.name, 1)
+			end
 		end
 	end
 end
 
 function Update()
 	if InputPressed("q") then
-		mainPanel.enabled = true
+		if ModuleSettings.AllowQMenu then
+			mainPanel.enabled = true
+		end
 	elseif InputReleased("q") then
 		mainPanel.enabled = false
 	end
