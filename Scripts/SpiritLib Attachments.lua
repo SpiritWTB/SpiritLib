@@ -21,8 +21,7 @@ oneScaledParentAttachments = {}
 --SpiritLib\[ModuleName\].*function\((.*)\)
 
 -- this will "parent" a part to another. 
-function Attach(_attachThis, _toThis, --[[optional = true]]useOneScaledParent)
-
+function Attach(_attachThis, _toThis, --[[optional = true]] useOneScaledParent)
 	local id = _attachThis.id
 
 	-- if it's nil or true we're good
@@ -30,7 +29,7 @@ function Attach(_attachThis, _toThis, --[[optional = true]]useOneScaledParent)
 		-- create a holster if this part doesn't have one yet
 		if _toThis.table.OneScaledParent==nil then
 			local oneScaledParent = CreatePart(0, _toThis.position, Vector3.zero)
-			_toThis.table.OneScaledParent = part
+			_toThis.table.OneScaledParent = oneScaledParent
 			oneScaledParent.table.isHolster = true
 			oneScaledParent.cancollide = false
 			oneScaledParent.visible = false
@@ -56,7 +55,7 @@ function Attach(_attachThis, _toThis, --[[optional = true]]useOneScaledParent)
 	end
 
 	-- make sure we can get the children just by knowing the parent
-	if (reverseAssociations[id] == nil) then
+	if reverseAssociations[id] == nil then
 		reverseAssociations[id] = {}
 	end
 
@@ -84,9 +83,9 @@ function Unattach(_unattachThisID, _fromThisID)
 	attachments[thisID] = nil
 
 	-- find the list of children for the parent
-	if (reverseAssociations[fromID] ~= nil) then
+	if reverseAssociations[fromID] ~= nil then
 		for index, childID in pairs(reverseAssociations[fromID]) do
-			if (childID == thisID) then
+			if childID == thisID then
 				reverseAssociations[fromID][index] = nil
 			end
 		end
@@ -101,7 +100,7 @@ function UnattachFromAll(_unattachThisID)
 	attachments[thisID] = nil
 
 	-- find the list of children for the parent
-	if (reverseAssociations[fromID] ~= nil) then
+	if reverseAssociations[fromID] ~= nil then
 		for index, childID in pairs(reverseAssociations[fromID]) do
 			reverseAssociations[fromID][index] = nil
 		end
@@ -112,7 +111,8 @@ end
 -- this will refresh the position and rotation offsets, they would use this after changing the position of a "child" object relative to the parent
 function RefreshAttachment(_attachThis)
 	local attachInfo = attachments[_attachThis.id]
-	if (attachInfo ~= nil) then
+
+	if attachInfo ~= nil then
 		local angles = _toThis.angles
 
 		_toThis.angles = newVector3(0,0,0);
@@ -136,86 +136,69 @@ function Remove(_deleteThis)
 	_deleteThis.Remove()
 end
 
-
-
 -- this wont be public use, it recursively dupes children. Children of _original will be duped and parented to _dupe, then the same will be done for the children
 function duplicateAttachments(_original, _dupe)
 	for k, attachedPartID in pairs(getAttachedIDS(_original)) do
-
 		local _originalChild = PartByName(attachedPartID)
 
-		if (_originalChild ~= nil) then
-
+		if _originalChild ~= nil then
 			-- this part is just like Duplicate() except it has to attach the duped part
 			local _dupedChild = _originalChild.Duplicate()
 			Attach(_dupedChild, _dupe)
 			duplicateAttachments(_originalChild, _dupedChild)
-
 		end
-	end 
+	end
 end
 
 -- this wont be public use, it recursively deletes children objects
 function deleteAttachments(_original)
 	for k, attachedPartID in pairs(getAttachedIDS(_original)) do
-
 		local _child = PartByName(attachedPartID)
 
-		if (_child ~= nil) then
-
+		if _child ~= nil then
 			-- this part is just like Remove()
 			_child.Remove()
 			deleteAttachments(_child)
-
 		end
-	end 
+	end
 end
 
 -- returns a list of ids for *direct* children of an object
 function getAttachedIDS(_parent)
-	if (reverseAssociations[_parent.id] ~= nil) then
+	if reverseAssociations[_parent.id] ~= nil then
 		return reverseAssociations[_parent.id]
 	end
 end
 
-
-
-
-
 function DrawUpdate()
-	if (attachmentsUpdate ~= nil) then
-		if (coroutine.status(attachmentsUpdate) == "suspended" or coroutine.running(attachmentsUpdate)==false) then
+	if attachmentsUpdate ~= nil then
+		if coroutine.status(attachmentsUpdate) == "suspended" or coroutine.running(attachmentsUpdate) == false then
 			coroutine.resume(attachmentsUpdate)
 		end
 	end
 end
 
-
-
-
 local partsUpdated = 0
 function updateRoutine()
-
 	for attachedPartID, attachInfo in pairs(attachments) do
-
 		local parentPart
+
 		if attachInfo.parentType == "Part" then
 			parentPart = PartByID(attachInfo.parentID)
-		else 
+		else
 			parentPart = PlayerByID(attachInfo.parentID)
 		end
 
-		local shouldUpdateChildren = ( attachInfo.lastParentPosition ~= parentPart.position or attachInfo.lastParentAngles ~= parentPart.angles )
+		local shouldUpdateChildren = attachInfo.lastParentPosition ~= parentPart.position or attachInfo.lastParentAngles ~= parentPart.angles
 
-		if (parentPart ~= nil) then
-			if (shouldUpdateChildren) then
-
+		if parentPart ~= nil then
+			if shouldUpdateChildren then
 				attachInfo.lastParentPosition = parentPart.position
 				attachInfo.lastParentAngles = parentPart.angles
 
 				local attachedPart = PartByID(attachedPartID)
 
-				if (attachedPart ~= nil) then
+				if attachedPart ~= nil then
 					attachedPart.position = parentPart.position + attachInfo.posOffset.x*parentPart.right + attachInfo.posOffset.y*parentPart.up + attachInfo.posOffset.z*parentPart.forward
 					attachedPart.angles = parentPart.angles - attachInfo.angOffset
 				else
@@ -224,7 +207,7 @@ function updateRoutine()
 
 				partsUpdated = partsUpdated + 1
 
-				if (partsUpdated > 175) then
+				if partsUpdated > 175 then
 					coroutine.yield()
 					partsUpdated = 0
 				end
@@ -239,4 +222,3 @@ function updateRoutine()
 end
 
 attachmentsUpdate = coroutine.create(updateRoutine)
-
