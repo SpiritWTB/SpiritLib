@@ -220,7 +220,7 @@ function updateRoutine()
 				if (attachedPart ~= nil) then
 					attachedPart.position = parentPart.position + attachInfo.posOffset.x*parentPart.right + attachInfo.posOffset.y*parentPart.up + attachInfo.posOffset.z*parentPart.forward
 					attachedPart.angles = parentPart.angles - attachInfo.angOffset
-				else 
+				else
 					Unattach(attachInfo.parent)
 				end
 

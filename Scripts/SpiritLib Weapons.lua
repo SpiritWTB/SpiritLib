@@ -30,16 +30,12 @@ function PreviousItem()
 end
 
 function SelectItem(entryNumber)
-
-	-- loop the value around so we don't have to do it in PreviousItem and NextItem
 	if not allBoxes[entryNumber] then
-
 		if entryNumber < 0 then
 			entryNumber = boxesCount
 		else
 			entryNumber = 0
 		end
-
 	end
 
 	allBoxes[current].color = newColor(allBoxes[current].color.r, allBoxes[current].color.g, allBoxes[current].color.b, 0)
@@ -56,23 +52,20 @@ function Update()
 		NextItem()
 	end
 
-	if (InputPressed("mouse 1")) then
+	if InputPressed("mouse 1") then
 		NetworkSendToHost("weaponInput", {1})
 	end
 
-	for k,v in pairs(allBoxes) do
+	for k, v in pairs(allBoxes) do
 		if InputPressed(v.table.keyBind) then
 			SelectItem(v.table.index)
 		end
 	end
-
 end
 
 function SpawnUIBoxes()
 	for i = 1, boxesCount do
-
 		local keyBind = IndexToKeyBind(i)
-		
 
 		local boxBGPos = newVector2(((boxesSize.x + boxesSpacing) * i), 0)
 		local boxBG = MakeUIPanel(boxBGPos, boxesSize, boxesHolder)
@@ -90,7 +83,7 @@ function SpawnUIBoxes()
 		if i == current then
 			alpha = 0.4
 		end
-		
+
 		box.color = newColor(boxBG.color.r + 0.28, boxBG.color.g + 0.28, boxBG.color.b + 0.28, alpha)
 
 		box.table.keyBind = keyBind
@@ -101,14 +94,13 @@ function SpawnUIBoxes()
 end
 
 function IndexToKeyBind(index)
-
 	local keyBind = tostring(index)
 
-	if (index==10) then
+	if index == 10 then
 		return "0"
-	elseif (index==11) then
+	elseif index == 11 then
 		return "-"
-	elseif (index==12) then
+	elseif index == 12 then
 		return "="
 	end
 
@@ -116,9 +108,6 @@ function IndexToKeyBind(index)
 end
 
 SpawnUIBoxes()
-
-
-
 
 if not IsHost then return end
 
@@ -131,8 +120,7 @@ function InitializeWeaponInventories()
 		playerWeaponInventories[ply] = {}
 		ply.table.SelectedWeaponSlot = nil
 	end
-end 
-
+end
 
 function SpawnModel(name, objectJSON, position)
 	local weaponPart = CallModuleFunction("Models", "GenerateModel", objectJSON, position)
@@ -140,61 +128,47 @@ function SpawnModel(name, objectJSON, position)
 end
 
 function GiveWeapon(player, weaponName, slot)
-
-	if (playerWeaponInventories[player] ~= nil and WeaponsByName[weaponName]~=nil) then
-
-		local weaponTableInstance = CopyTable(WeaponsByName[weaponName])
-
-		local me = LocalPlayer()
-
-		-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
-		weaponTableInstance.part = SpawnModel(weaponTableInstance.name, weaponTableInstance.modelJson, me.position + me.forward) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
-
-
-
-
-		weaponTableInstance.part.frozen = true
-		weaponTableInstance.part.cancollide = false
-
-		weaponTableInstance.part.angles = LocalPlayer().angles
-
-
-		CallModuleFunction("Attachments", "Attach", weaponTableInstance.part, LocalPlayer())
-
-		weaponTableInstance.part.script = weaponTableInstance.weaponScript
-
-		playerWeaponInventories[player][slot] = weaponTableInstance
-		player.table.SelectedWeaponSlot = slot
+	if not playerWeaponInventories[player] or not WeaponsByName[weaponName] then
+		return
 	end
+
+	local weaponTableInstance = CopyTable(WeaponsByName[weaponName])
+
+	-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
+	weaponTableInstance.part = SpawnModel(weaponTableInstance.name, weaponTableInstance.data, player.position + player.forward) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
+	weaponTableInstance.part.frozen = true
+	weaponTableInstance.part.cancollide = false
+	weaponTableInstance.part.angles = LocalPlayer().angles
+
+	CallModuleFunction("Attachments", "Attach", weaponTableInstance.part, LocalPlayer())
+
+	weaponTableInstance.part.script = weaponTableInstance.weaponScript
+
+	playerWeaponInventories[player][slot] = weaponTableInstance
+	player.table.SelectedWeaponSlot = slot
 end
 
 RegisteredWeapons = {}
 WeaponsByName = {}
 
-function RegisterWeapon(name, scriptName, modelJson)
+function RegisterWeapon(name, script, data)
+	if not name or not script or not data then
+		return
+	end
 
-	-- check to make sure they've got a name and stuff, basic things that will break the game if they aren't there
-	if not name then return end
-	if not scriptName then return end
-	if not modelJson then return end
-
-	local weaponTable = FromJson(modelJson)
-	weaponTable.modelJson = modelJson
-
-	table.insert(RegisteredWeapons, weaponTable)
-	WeaponsByName[weaponTable.name] = weaponTable
+	table.insert(RegisteredWeapons, data)
+	WeaponsByName[name] = data
 end
 
 function NetworkStringReceive(player, name, data)
-
-	if IsHost() and name=="selectWeaponSlot" then
+	if IsHost() and name == "selectWeaponSlot" then
 		if playerWeaponInventories[player][data[1]] ~= nil then
 			player.table.SelectedWeaponSlot = data[1]
 		end
 	end
 
 	--[[
-	
+
 		weaponInput
 	-------------------
 
@@ -204,7 +178,6 @@ function NetworkStringReceive(player, name, data)
 		4 = AltFireRelease
 		5 = Reload
 	]]
-
 
 	if IsHost() and name == "weaponInput" and player.table.SelectedWeaponSlot ~= nil then
 		local slot = player.table.SelectedWeaponSlot
@@ -224,25 +197,20 @@ function NetworkStringReceive(player, name, data)
 	end
 end
 
-
 function InitializeWeapons()
-
-	--RegisterWeapon( "Physgun", "Weapon Physgun", GetModuleVariable("Default Models", "BuiltInModels"))
-
+	-- RegisterWeapon( "Physgun", "Weapon Physgun", GetModuleVariable("Default Models", "BuiltInModels"))
 end
-
 
 InitializeWeaponInventories()
 InitializeWeapons()
 
+-- http://lua-users.org/wiki/CopyTable
 
---http://lua-users.org/wiki/CopyTable
-
-function CopyTable(orig, --[[optional]]copies)
+function CopyTable(orig, --[[optional]] copies)
     copies = copies or {}
     local orig_type = type(orig)
     local copy
-    if orig_type == 'table' then
+    if orig_type == "table" then
         if copies[orig] then
             copy = copies[orig]
         else
