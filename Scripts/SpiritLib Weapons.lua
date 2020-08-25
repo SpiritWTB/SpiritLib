@@ -140,9 +140,9 @@ function GiveWeapon(player, weaponName, slot)
 	weaponTableInstance.part = SpawnModel(weaponTableInstance.name, weaponTableInstance.modelJson, player.position) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
 	weaponTableInstance.part.frozen = true
 	weaponTableInstance.part.cancollide = false
-	weaponTableInstance.part.angles = LocalPlayer().angles
+	weaponTableInstance.part.angles = player.angles
 
-	CallModuleFunction("Attachments", "Attach", weaponTableInstance.part, LocalPlayer())
+	CallModuleFunction("Attachments", "Attach", weaponTableInstance.part, player)
 
 	weaponTableInstance.part.script = weaponTableInstance.weaponScript
 
