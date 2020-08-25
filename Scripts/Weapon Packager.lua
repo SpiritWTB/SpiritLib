@@ -1,20 +1,11 @@
-print("physgun started")
 --[[ Start SpiritLib Setup ]]
 
-local SpiritLib = function() return PartByName("SpiritLib").scripts[1] end
-
--- Calls functions from SpiritLib modules, and uses special sauce to give their return value
-function CallModuleFunction(moduleName, functionName, ...) 
-	local token = SpiritLib().Globals.SpiritLib.Call("GetToken", This)
-	SpiritLib().Globals.SpiritLib.FixedCall(moduleName, functionName, token, ...) 
-	return This.table.spiritLibReturns[token]
-end
-
--- gets variables from SpiritLib modules
-function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
-
--- this is our special cross-script version of "return"
-function ReturnCall(caller, token, functionName, ...) caller.table.spiritLibReturns[token] = _G[functionName](...) end
+local SL_UsedReturnTokens = {}
+local function SpiritLib() return PartByName("SpiritLib").scripts[1] end
+local function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
+local function GetToken() local token = 1; while SL_UsedReturnTokens[token] do token = token + 1 end SL_UsedReturnTokens[token] = true; return token end
+local function CallModuleFunction(moduleName, functionName, ...) local token = GetToken(); SpiritLib().Call("FixedCall", This, moduleName, functionName, "!SLToken" .. token, ...); SL_UsedReturnTokens[token] = nil; return This.table["!SLToken" .. token] end
+function ReturnCall(caller, token, functionName, ...) caller.table[token] = _G[functionName](...) end
 
 -- [[ End SpiritLib Setup ]]
 
@@ -24,12 +15,14 @@ Description = "Exports models"
 Slot = 1
 
 local objectCollection = {}
+
 local markerCollection = {}
 
 function Fire(ply, mousePos, entityHit)
-	if entityHit and entityHit.type == "Part" and (not objectCollection[entityHit]) then
-		objectCollection[entityHit] = true
-		table.insert(objectCollection, entityHit)
+	if entityHit and entityHit.type == "Part" and (not objectCollection[entityHit.id]) then
+		objectCollection[entityHit.id] = entityHit.name
+
+		table.insert(objectCollection, entityHit.id)
 		local marker = CreatePart(entityHit.parttype, entityHit.position, entityHit.angles)
 
 		local s = 0.015
@@ -43,29 +36,46 @@ function Fire(ply, mousePos, entityHit)
 end
 
 function Reload(ply)
-	objectCollection = {}
-
-	for i,marker in pairs(markerCollection) do
-		marker.Remove()
-	end
-	markerCollection = {}
+	clearCollection()
 end
 
+
+previousNames = {}
 function Use(ply)
-	
+	print("use")
 	local timename = "model_" .. tostring(Time.year) .. "-" .. tostring(Time.month) .. "-" .. tostring(Time.day) .. "-" .. tostring(Time.hour) .. "-" .. tostring(Time.minute) .. "-" .. tostring(Time.second) .. "-" .. tostring(Time.millisecond) 
 	
-	local partsIDs = {}
+	for objectID, name in pairs(objectCollection) do
+		local part = PartByID(objectID)
+		if part then
+			print(objectID)
+			print(part.name)
+			print(name)
+			part.name = timename
+		end
+	end
+	
+	CallModuleFunction("Models", "SaveModelByName", timename, "Freshly generated.", timename)
 
-	for i, part in pairs(objectCollection) do
-		table.insert(partsIDs,part.id)
+	for object, name in pairs(objectCollection) do
+		object.name = name
 	end
 
-	CallModuleFunction("Models", "SaveModel", timename, "Freshly generated.", partsIDs)
+	clearCollection()
 end
 
 function Update()
 	if (CurrentObject ~= nil ) then
 		
 	end
+end
+
+
+function clearCollection()
+	objectCollection = {}
+
+	for i,marker in pairs(markerCollection) do
+		marker.Remove()
+	end
+	markerCollection = {}
 end

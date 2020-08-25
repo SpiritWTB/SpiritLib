@@ -115,17 +115,8 @@ local function GeneratePart(data, --[[optional = false]] isMapPart)
 	return part
 end
 
-function SaveModelByIDs(name, description, partsIDs)
-	local parts = {}
-
-	for _, partID in pairs(partsIDs) do
-		local part = PartByID(partID)
-		if part then
-			table.insert(parts, part)
-		end
-	end
-
-	SaveObject("Models", name, description, parts)
+function SaveModelByName(name, description, partsName)
+	SaveObject("Models", name, description, PartsByName(partsName))
 end
 
 --can't use this from CallModuleFunction because it uses a table of parts
