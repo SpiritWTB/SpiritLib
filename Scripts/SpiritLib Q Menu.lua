@@ -319,7 +319,7 @@ function OnUIButtonClick(button)
 		if objectData.objectType == "Models" then
 			CallModuleFunction("Models", "GenerateModel", button.table.spawnData, spawnPos)
 		elseif objectData.objectType == "Weapons" then
-			CallModuleFunction("Weapons", "GiveWeapon", LocalPlayer(), data.name, 1)
+			CallModuleFunction("Weapons", "GiveWeapon", LocalPlayer(), objectData.name, 1)
 		end
 	end
 end

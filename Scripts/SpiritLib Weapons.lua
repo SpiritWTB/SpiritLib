@@ -133,54 +133,34 @@ function InitializeWeaponInventories()
 	end
 end 
 
-local usedPartNameIndices = {}
-local function GetUniqueName()
-	local index = 1
-	
-	while usedPartNameIndices[index] do
-		index = index + 1
-	end
 
-	local uniqueName = "SpiritLibWeapon##Spawned##//" .. index
-	usedPartNameIndices[uniqueName] = true
-
-	return uniqueName
-end
-
-local function RemoveUniqueName(uniqueName)
-	usedPartNameIndices[uniqueName] = nil
-end
-
-function SpawnModel(objectJSON, position)
-	local uniqueName = GetUniqueName()
-
-	CallModuleFunction("Models", "GenerateModel", objectJSON, position, uniqueName)
-	local weaponPart = PartByName(uniqueName)
-	weaponPart.name = weapon
-	RemoveUniqueName(uniqueName)
+function SpawnModel(name, objectJSON, position)
+	local weaponPart = CallModuleFunction("Models", "GenerateModel", objectJSON, position)
+	weaponPart.name = name
 end
 
 function GiveWeapon(player, weaponName, slot)
+	print(1)
 	if (playerWeaponInventories[player] ~= nil and WeaponsByName[weaponName]~=nil) then
-
+		print(2)
 		local weaponTableInstance = CopyTable(WeaponsByName[weaponName])
-
+		print(2.2)
 		local me = LocalPlayer()
-
+		print(2.5)
 		-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
-		weaponTableInstance.part = SpawnModel(weapon.json, me.position + me.forward) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
-
+		weaponTableInstance.part = SpawnModel(weaponTableInstance.name, weaponTableInstance.modelJson, me.position + me.forward) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
+		print(3)
 
 
 		weaponTableInstance.part.frozen = true
 		weaponTableInstance.part.cancollide = false
 
 		weaponTableInstance.part.angles = LocalPlayer().angles
-
+print(4)
 		CallModuleFunction("Attachments", "Attach", rootPart, LocalPlayer())
 
 		weaponTableInstance.part.script = weaponTableInstance.weaponScript
-
+print(5)
 		playerWeaponInventories[player][slot] = weaponTableInstance
 		player.table.SelectedWeaponSlot = slot
 	end

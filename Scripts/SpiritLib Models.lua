@@ -73,8 +73,10 @@ local function CreateBoundingBox(parts)
 
 	CallModuleFunction("Attachments", "Attach", renderParent, encompasser, false)
 
+
 	encompasser.frozen = false
 	encompasser.cancollide = true
+
 
 	return encompasser
 end
@@ -157,17 +159,20 @@ function SaveObject(objectType, name, description, parts)
 end
 
 
-function GenerateModel(modelTable, --[[optional]]position, --[[optional]]partNameOverride)
+function GenerateModel(modelJson, --[[optional]]position, --[[optional]]partNameOverride)
 	print("generating")
 
+
 	-- REMOVE THIS IF STATEMENT ONCE WE GET SCRIPTS ON THE SIDE
-	if (type(modelTable) == "string") then
-		modelTable = FromJson(modelTable)
+	local modelTable
+	if (type(modelJson) == "string") then
+		modelTable = FromJson(modelJson)
 	end
 
 	local modelParts = {}
 
 	for i, part in pairs(modelTable.data) do
+
 		local generated = GeneratePart(part)
 
 		if generated then
@@ -178,11 +183,10 @@ function GenerateModel(modelTable, --[[optional]]position, --[[optional]]partNam
 	local rootPart
 
 	if (modelParts) then
+		print(modelTable.name)
+		print(modelParts[1])
 		rootPart = CreateBoundingBox(modelParts)
 		rootPart.name = modelTable.name
-		if partNameOverride then
-			rootPart.name = partNameOverride
-		end
 	else
 		print("Issue creating model - modelParts does not exist")
 	end
@@ -190,7 +194,6 @@ function GenerateModel(modelTable, --[[optional]]position, --[[optional]]partNam
 	if (position ~= nil) then
 		rootPart.position = position
 	end
-
 
 	return rootPart
 end
