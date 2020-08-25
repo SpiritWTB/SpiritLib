@@ -58,7 +58,7 @@ function Update()
 	end
 end
 
-function AltFire(ply, mousePos, entityHit)
+function Special(ply, mousePos, entityHit)
 
 	instantMode = not instantMode
 
@@ -73,7 +73,7 @@ function Reload(ply)
 	clearCollection()
 end
 
-function Special(ply)
+function Use(ply)
 	saveModel(objectCollection)
 	clearCollection()
 end

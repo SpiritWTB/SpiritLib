@@ -318,8 +318,12 @@ function OnUIButtonClick(button)
 
 		if objectData.objectType == "Models" then
 			local part = CallModuleFunction("Models", "GenerateModel", button.table.spawnData, spawnPos)
-			part.position = LocalPlayer().position + LocalPlayer().forward * math.max(part.size.x, part.size.z) + newVector3(0,0.1,0)
-			part.angles = LocalPlayer().angles
+			part.position = LocalPlayer().position + LocalPlayer().forward * math.max(part.size.x, part.size.z) + newVector3(0,part.size.y/2 - 1.7,0)
+			
+			local angles = LocalPlayer().angles
+			angles.x = 0
+			angles.y = angles.y + 180
+			part.angles = angles
 		elseif objectData.objectType == "Weapons" then
 			CallModuleFunction("Weapons", "GiveWeapon", LocalPlayer(), objectData.name, 1)
 		end

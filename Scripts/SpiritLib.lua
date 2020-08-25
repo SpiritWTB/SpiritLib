@@ -1,11 +1,29 @@
 --[[
-SpiritLib Notes:
-
-You cannot pass certain types, (mainly functions, there may be others) between scripts
+===========            v    SpiritLib Notes:    v            ===========
 
 
+Don't forget there are always more errors in your log file! Go to windows explorer and paste in or navigate to:           %appdata%\..\LocalLow\happyninjagames\WorldToBuild
 
-]]
+DO NOT CLICK ON THE "SpiritLib Default Models" SCRIPT file in the script editor unless you want to wait a while
+
+To use SpiritLib effectively, you must always add the "SpiritLib Setup" section to the beginning of your script. 
+This gives you access to CallModuleFunction( moduleName, functionName, arguments ), which returns values as well
+
+You cannot pass certain types, (namely functions & tables) between scripts.
+If you check the log file and see errors about
+
+
+You CAN however call a function on another script. To do this easily set up your script as a SpiritLib module, so that you can call your scripts functions with CallModuleFunciton:
+	- Ddd it to the SpiritLib.Modules table below as ["<your_module_name>"]
+	- Do one of these:
+		- name your script "SpiritLib <your_module_name>" and paste it in the script editor
+		- add your script to your "SpiritLib\Scripts" folder, name the file "SpiritLib <your_module_name>" and run the SpiritLib installer on your file
+
+If you're making a weapon, the weaponScript must start with the same prefix as the other weaponScripts. In other words it must be called "Weapon <your_weapon_name>".
+
+
+===========            ^    SpiritLib Notes:    ^            =========== ]]
+
 
 SpiritLib = {}
 SpiritLib.Modules = {
