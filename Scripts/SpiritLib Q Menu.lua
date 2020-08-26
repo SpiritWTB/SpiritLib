@@ -13,8 +13,8 @@ ModuleSettings = {
 	AllowQMenu = true,
 
 	AllowedSpawnTypes = {
-		"Models",
-		"Weapons"
+		["Models"] = true,
+		["Weapons"] = true,
 	}
 }
 
@@ -323,14 +323,16 @@ function OnUIButtonClick(button)
 	elseif button.table.isSpiritLibSpawnButton and button.table.spawnData then
 
 		local spawnPos = LocalPlayer().position + LocalPlayer().forward
-
 		local objectData = FromJson(button.table.spawnData)
 
 		if ModuleSettings.AllowedSpawnTypes[objectData.objectType] then
+
 			if objectData.objectType == "Models" then
+
 				local part = CallModuleFunction("Models", "GenerateModel", button.table.spawnData, spawnPos)
+
 				part.position = LocalPlayer().position + LocalPlayer().forward * math.max(part.size.x, part.size.z) + newVector3(0,part.size.y/2 - 1.7,0)
-				
+
 				local angles = LocalPlayer().angles
 				angles.x = 0
 				angles.y = angles.y + 180
