@@ -94,11 +94,9 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			local slot = WeaponsByName[weaponName].weaponSlot
 
 			-- if they don't have any weapons in this slot yet add a table to this slot for their weapons
-			print("ummm")
+
 			if not playerWeaponInventories[player][slot] then
-				print("soooo")
 				playerWeaponInventories[player][slot] = {}
-				print("setting player " .. tostring(player.name) .. " slot " .. slot .. "to {}")
 			end
 
 			-- copy the table of the weapon we're giving them
@@ -142,8 +140,6 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 			table.insert(RegisteredWeapons, weaponTable)
 			WeaponsByName[weaponTable.name] = weaponTable
-
-			print(weaponTable.weaponSlot)
 		end
 
 		-- TODO: RUN THIS ON FIXED CONNECT
@@ -206,29 +202,20 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			-- no weapons equipped, do nothing
 			if CountTable(playerWeaponInventories[player])<2 then return end
 
-			print(7.5)
 			-- if we get to the end of the players weapon inventory we go back to the beginning
 			slotNumber = rolloverIndex(slotNumber, playerWeaponInventories[player])
-print(8 .. "   -   slotNumber:" .. slotNumber)
-			-- if we keep pressing 1 it will loop through the things in slot 1
-			print(1)
-			if player.table.SelectedWeaponSlot ~= slotNumber then
-				print(1.1)
-				player.table.SelectedWeaponIndexInSlot = 1
 
+			-- if we keep pressing 1 it will loop through the things in slot 1
+
+			if player.table.SelectedWeaponSlot ~= slotNumber then
+				player.table.SelectedWeaponIndexInSlot = 1
 			else
-				print(1.2)
 				player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot + 1
-				print(1.3)
-				print(player.table.SelectedWeaponIndexInSlot)
-				print(playerWeaponInventories[player])
+
 				if not playerWeaponInventories[player][player.table.SelectedWeaponIndexInSlot] then
-					print(1.4)
 					player.table.SelectedWeaponIndexInSlot = 1
-					print(1.5)
 				end
 			end
-			print("endfornow")
 		end
 
 	-- [[ End Selection Functions ]]
@@ -395,9 +382,6 @@ print(8 .. "   -   slotNumber:" .. slotNumber)
 		elseif name == "previousWeapon" then
 			PreviousItem(client)
 		elseif name == "selectSlot" then
-			for k,v in pairs(data) do
-				print('["'..k..'"] = ' .. tostring(v))
-			end
 			SelectSlot(client, data[1])
 		end
 
@@ -408,43 +392,25 @@ print(8 .. "   -   slotNumber:" .. slotNumber)
 				local slot = client.table.SelectedWeaponSlot
 				local idInSlot = client.table.SelectedWeaponIndexInSlot
 
+				local mousePos = data[2]
+
+				local objectType = nil
+				local objectID = nil
+
+				if data[3] then
+					objectType = data[3]
+					objectID = data[4]
+				end
+
+				local hitObject = nil
+				if objectType == 1 then
+					hitObject = PartByID(objectID)
+				elseif objectType == 2 then
+					hitObject = clientByID(objectID)
+				end
+
 				if data[1] == 1 then
-					local mousePos = data[2]
-
-					local objectType = nil
-					local objectID = nil
-
-					if data[3] then
-						objectType = data[3]
-						objectID = data[4]
-					end
-
-					local hitObject = nil
-					if objectType == 1 then
-						hitObject = PartByID(objectID)
-					elseif objectType == 2 then
-						hitObject = clientByID(objectID)
-					end
-					print(client)
-					print("slot: " .. slot)
-					print(idInSlot)
-					print(playerWeaponInventories)
-					print(playerWeaponInventories[client])
-					for k,v in pairs(playerWeaponInventories[client]) do
-						print('"[' .. tostring(k) .. ']"  -  ' .. tostring(v))
-					end
-					print("               ----")
-					print(playerWeaponInventories[client][slot])
-					for k,v in pairs(playerWeaponInventories[client][slot]) do
-						print('[' .. tostring(k) .. ']  -  ' .. tostring(v))
-					end	
-
-
-					print(playerWeaponInventories[client][slot])
-
-					print(playerWeaponInventories[client][slot][idInSlot].part)
 					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Fire", client, mousePos, hitObject)
-
 				elseif data[1] == 2 then
 					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("FireRelease", client)
 				elseif data[1] == 3 then
