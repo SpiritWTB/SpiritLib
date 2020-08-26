@@ -10,9 +10,13 @@ function ReturnCall(caller, token, functionName, ...) caller.table[token] = _G[f
 -- [[ End SpiritLib Setup ]]
 
 
+-- put all weapon ui in This.table.SpiritLibWeaponUI
+
 Name = "The Packager"
 Description = "Exports models"
 Slot = 1
+
+print(Name .. " initialized")
 
 local objectCollection = {}
 local markerCollection = {}
@@ -41,20 +45,25 @@ function Fire(ply, mousePos, entityHit)
 	end
 end
 
-local instantModeIndicator = MakeUIText(newVector2(4, 4), newVector2(150, 180), "Instant mode is ON:")
+instantModeIndicator = MakeUIText(newVector2(4, 4), newVector2(150, 180), "Instant mode is ON:")
 instantModeIndicator.textColor = newColor(255, 0.3, 0.1, 0.6)
 instantModeIndicator.textSize = 20
-instantModeIndicator.enabled = false
+This.table.SpiritLibWeaponUI = instantModeIndicator
 
 function Update()
 	local hitdata = RayCast(LocalPlayer().viewPosition, MousePosWorld());
 
+	local onOff ="OFF"
+	if instantMode then
+		onOff = "ON"
+	end
+
 	if (hitdata.hitObject ~= nil) then
 		if (hitdata.hitObject.type == "Part") then
-			instantModeIndicator.text = "Instant mode is ON:\n" .. hitdata.hitObject.name
+			instantModeIndicator.text = "Instant mode is " .. onOff .. ":\n" .. hitdata.hitObject.name
 		end
 	else
-		instantModeIndicator.text = "Instant mode is ON:"
+		instantModeIndicator.text = "Instant mode is " .. onOff .. ":"
 	end
 end
 

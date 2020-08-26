@@ -20,9 +20,7 @@ local CurrentPhysRotation = Vector3.zero
 
 function Fire(ply, mousePos, entityHit)
 
-	print(ply)
-	print(mousePos)
-	print(entityHit)
+	print("Fire " .. Name)
 	
 	-- self should work here, I googled it at some point
 	CurrentObject = hitEnt

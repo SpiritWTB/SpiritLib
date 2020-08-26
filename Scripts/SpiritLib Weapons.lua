@@ -116,9 +116,6 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			weaponTableInstance.indexInSlot = #playerWeaponInventories[player][slot] + 1
 			
 			table.insert(playerWeaponInventories[player][slot], weaponTableInstance)
-
-			-- todo: make a way to select an index in a slot directly
-			SelectSlot(player, slot)
 		end
 
 	-- [[ End Useful Functions Section]]
@@ -207,13 +204,47 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 			-- if we keep pressing 1 it will loop through the things in slot 1
 
+			local originalSlot = player.table.SelectedWeaponSlot
+			local originalIndex = player.table.SelectedWeaponIndexInSlot
+
+
+			-- increase the slot number with rollover. If we selected the same slot we're on select the next thing in it
 			if player.table.SelectedWeaponSlot ~= slotNumber then
+				player.table.SelectedWeaponSlot = slotNumber
 				player.table.SelectedWeaponIndexInSlot = 1
 			else
 				player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot + 1
 
 				if not playerWeaponInventories[player][player.table.SelectedWeaponIndexInSlot] then
 					player.table.SelectedWeaponIndexInSlot = 1
+				end
+			end
+
+
+			-- if we actually changed,
+			if originalSlot ~= player.table.SelectedWeaponSlot or originalIndex ~= player.table.SelectedWeaponIndexInSlot then
+				local oldSlot = playerWeaponInventories[player][originalSlot]
+				print("change")
+				if oldSlot then
+					if oldSlot[originalIndex] and oldSlot[originalIndex].part then
+						print("valid")
+
+						if oldSlot[originalIndex].part.table.SpiritLibWeaponUI then
+							oldSlot[originalIndex].part.table.SpiritLibWeaponUI.Remove()
+						end
+
+						print("ui removed")
+						print(0)
+						CallModuleFunction("Attachments", "deleteAttachments", curWep.part)
+						print(1)
+						curWep.part.Remove()
+						
+						curWep.part.visible = true
+						curWep.part.transparency = 0.5
+						curWep.part.color = newColor(1,0,0)
+						curWep.part.size = newColor(10,40,10)
+						print("m")
+					end
 				end
 			end
 		end
