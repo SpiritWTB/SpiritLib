@@ -11,7 +11,7 @@ function ReturnCall(caller, token, functionName, ...) caller.table[token] = _G[f
 
 ModuleSettings = {
 	AllowQMenu = true,
-	
+
 	AllowedSpawnTypes = {
 		"Models",
 		"Weapons"
@@ -25,7 +25,7 @@ function MakeUIButtonWithHolder(name, position, size, --[[optional = ""]] text, 
 	holder.name = tostring(name) .. " Button Holder"
 	holder.parent = parentUI
 	holder.position = holderPos
-	holder.color = Color.clearq
+	holder.color = Color.clear
 
 	local button = MakeUIButton(Vector2.zero, holderSize, text or "")
 	button.name = tostring(name) .. " Button"
