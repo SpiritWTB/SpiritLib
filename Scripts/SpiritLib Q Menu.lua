@@ -1,3 +1,5 @@
+--todo: raycast for spawn positions
+
 --[[ Start SpiritLib Setup ]]
 
 local SL_UsedReturnTokens = {}
@@ -17,6 +19,7 @@ ModuleSettings = {
 		["Weapons"] = true,
 	}
 }
+
 
 function MakeUIButtonWithHolder(name, position, size, --[[optional = ""]] text, parentUI)
 	local holderSize = size
@@ -331,14 +334,15 @@ function OnUIButtonClick(button)
 
 				local part = CallModuleFunction("Models", "GenerateModel", button.table.spawnData, spawnPos)
 
-				part.position = LocalPlayer().position + LocalPlayer().forward * math.max(part.size.x, part.size.z) + newVector3(0,part.size.y/2 - 1.7,0)
+				part.position = LocalPlayer().position + LocalPlayer().forward * (part.size.z+0.5) + newVector3(0,part.size.y/2-0.35,0)
 
 				local angles = LocalPlayer().angles
 				angles.x = 0
 				angles.y = angles.y + 180
 				part.angles = angles
 			elseif objectData.objectType == "Weapons" then
-				CallModuleFunction("Weapons", "GiveWeapon", LocalPlayer(), objectData.name, 1)
+				NetworkSendToHost("requestWeapon", {objectData.name, objectData.weaponSlot})
+				--CallModuleFunction("Weapons", "GiveWeapon", LocalPlayer(), objectData.name, 1)
 			end
 		end
 	end

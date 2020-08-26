@@ -94,7 +94,7 @@ local function GenerateData(part)
 end
 
 local function GeneratePart(data, --[[optional = false]] isMapPart)
-	local part = CreatePart(data.parttype, data.position + newVector3(0, 5, 0), data.angles)
+	local part = CreatePart(data.parttype, data.position, data.angles)
 	part.name = data.name
 	part.size = data.size
 	part.color = newColor(data.color.x, data.color.y, data.color.z, data.color.w)

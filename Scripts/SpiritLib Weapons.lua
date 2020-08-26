@@ -27,6 +27,53 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 -- [[ Begin Host Section]]
 
+	-- [[ Begin Utility Functions Section]]
+
+		local function CopyTable(orig, --[[optional]]copies)
+		    copies = copies or {}
+		    local orig_type = type(orig)
+		    local copy
+		    if orig_type == 'table' then
+		        if copies[orig] then
+		            copy = copies[orig]
+		        else
+		            copy = {}
+		            copies[orig] = copy
+		            for orig_key, orig_value in next, orig, nil do
+		                copy[CopyTable(orig_key, copies)] = CopyTable(orig_value, copies)
+		            end
+		            setmetatable(copy, CopyTable(getmetatable(orig), copies))
+		        end
+		    else -- number, string, boolean, etc
+		        copy = orig
+		    end
+		    return copy
+		end
+
+		local function CountTable(_table)
+		    local count = 0
+		    for k,v in pairs(_table) do
+		    	count = count + 1
+		    end
+		    return count
+		end
+
+		local function rolloverIndex(_index, _table)
+			if not _table[_index] then
+				if _index < 1 then
+					_index = #_table
+				else
+					_index = 1
+				end
+			end
+
+			return _index
+		end
+
+	-- [[ End Utility Functions Section]]
+
+
+
 	-- [[ Begin Useful Functions Section]]
 
 		function SpawnModel(name, objectJSON, position)
@@ -36,7 +83,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			return weaponPart
 		end
 
-		function GiveWeapon(player, weaponName, slot)
+		function GiveWeapon(player, weaponName)
 
 			-- make sure the player has an inventory and that the weapon we're trying to give them exists
 			if not playerWeaponInventories[player] or not WeaponsByName[weaponName] then
@@ -44,9 +91,14 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				return
 			end
 
+			local slot = WeaponsByName[weaponName].weaponSlot
+
 			-- if they don't have any weapons in this slot yet add a table to this slot for their weapons
+			print("ummm")
 			if not playerWeaponInventories[player][slot] then
+				print("soooo")
 				playerWeaponInventories[player][slot] = {}
+				print("setting player " .. tostring(player.name) .. " slot " .. slot .. "to {}")
 			end
 
 			-- copy the table of the weapon we're giving them
@@ -68,10 +120,11 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			table.insert(playerWeaponInventories[player][slot], weaponTableInstance)
 
 			-- todo: make a way to select an index in a slot directly
-			selectSlot(player, slot)
+			SelectSlot(player, slot)
 		end
 
 	-- [[ End Useful Functions Section]]
+
 
 
 	-- [[ Begin Setup Section]]
@@ -89,6 +142,8 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 			table.insert(RegisteredWeapons, weaponTable)
 			WeaponsByName[weaponTable.name] = weaponTable
+
+			print(weaponTable.weaponSlot)
 		end
 
 		-- TODO: RUN THIS ON FIXED CONNECT
@@ -103,11 +158,8 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			end
 		end
 
-		function InitializeWeapons()
-			-- RegisterWeapon( "Physgun", "Weapon Physgun", GetModuleVariable("Default Models", "BuiltInModels"))
-		end
-
 	-- [[ End Setup Section]]
+
 
 
 	-- [[ Begin Selection Functions ]]
@@ -152,37 +204,35 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		function SelectSlot(player, slotNumber)
 
 			-- no weapons equipped, do nothing
-			if #playerWeaponInventories[player]<2 then return end
+			if CountTable(playerWeaponInventories[player])<2 then return end
 
+			print(7.5)
 			-- if we get to the end of the players weapon inventory we go back to the beginning
-			slotNumber = rolloverIndex(slotNumber + 1, playerWeaponInventories[player])
-
+			slotNumber = rolloverIndex(slotNumber, playerWeaponInventories[player])
+print(8 .. "   -   slotNumber:" .. slotNumber)
 			-- if we keep pressing 1 it will loop through the things in slot 1
+			print(1)
 			if player.table.SelectedWeaponSlot ~= slotNumber then
+				print(1.1)
 				player.table.SelectedWeaponIndexInSlot = 1
 
 			else
+				print(1.2)
 				player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot + 1
-
-				if not playerWeaponInventories[_player][player.table.SelectedWeaponIndexInSlot] then
+				print(1.3)
+				print(player.table.SelectedWeaponIndexInSlot)
+				print(playerWeaponInventories[player])
+				if not playerWeaponInventories[player][player.table.SelectedWeaponIndexInSlot] then
+					print(1.4)
 					player.table.SelectedWeaponIndexInSlot = 1
+					print(1.5)
 				end
 			end
-		end
-
-		local function rolloverIndex(_index, _table)
-			if not _table[_index] then
-				if _index < 1 then
-					_index = #_table
-				else
-					_index = 1
-				end
-			end
-
-			return _index
+			print("endfornow")
 		end
 
 	-- [[ End Selection Functions ]]
+
 
 
 -- [[ End Host Section ]]
@@ -332,11 +382,22 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 	function HostReceive(client, name, data)
 
+		if name == "requestWeapon" then
+			
+			if GetModuleVariable("Q Menu", "ModuleSettings").AllowedSpawnTypes["Models"] then
+				
+				GiveWeapon(client, data[1], data[2])
+			end
+		end
+
 		if name == "nextWeapon" then
 			NextItem(client)
 		elseif name == "previousWeapon" then
 			PreviousItem(client)
 		elseif name == "selectSlot" then
+			for k,v in pairs(data) do
+				print('["'..k..'"] = ' .. tostring(v))
+			end
 			SelectSlot(client, data[1])
 		end
 
@@ -364,21 +425,38 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 					elseif objectType == 2 then
 						hitObject = clientByID(objectID)
 					end
+					print(client)
+					print("slot: " .. slot)
+					print(idInSlot)
+					print(playerWeaponInventories)
+					print(playerWeaponInventories[client])
+					for k,v in pairs(playerWeaponInventories[client]) do
+						print('"[' .. tostring(k) .. ']"  -  ' .. tostring(v))
+					end
+					print("               ----")
+					print(playerWeaponInventories[client][slot])
+					for k,v in pairs(playerWeaponInventories[client][slot]) do
+						print('[' .. tostring(k) .. ']  -  ' .. tostring(v))
+					end	
 
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Fire", client, mousePos, hitObject)
+
+					print(playerWeaponInventories[client][slot])
+
+					print(playerWeaponInventories[client][slot][idInSlot].part)
+					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Fire", client, mousePos, hitObject)
 
 				elseif data[1] == 2 then
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("FireRelease", client)
+					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("FireRelease", client)
 				elseif data[1] == 3 then
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("AltFire", client, mousePos, hitObject)
+					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("AltFire", client, mousePos, hitObject)
 				elseif data[1] == 4 then
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("AltFireRelease", client)
+					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("AltFireRelease", client)
 				elseif data[1] == 5 then
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Reload", client, mousePos, hitObject)
+					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Reload", client, mousePos, hitObject)
 				elseif data[1] == 6 then
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Use", client, mousePos, hitObject)
+					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Use", client, mousePos, hitObject)
 				elseif data[1] == 7 then
-					clientWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Special", client, mousePos, hitObject)
+					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Special", client, mousePos, hitObject)
 				end
 			end
 		end
@@ -398,28 +476,10 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 
 -- http://lua-users.org/wiki/CopyTable
-local function CopyTable(orig, --[[optional]]copies)
-    copies = copies or {}
-    local orig_type = type(orig)
-    local copy
-    if orig_type == 'table' then
-        if copies[orig] then
-            copy = copies[orig]
-        else
-            copy = {}
-            copies[orig] = copy
-            for orig_key, orig_value in next, orig, nil do
-                copy[CopyTable(orig_key, copies)] = CopyTable(orig_value, copies)
-            end
-            setmetatable(copy, CopyTable(getmetatable(orig), copies))
-        end
-    else -- number, string, boolean, etc
-        copy = orig
-    end
-    return copy
-end
+
 
 if not IsHost then return end
 
-InitializeWeaponInventories()
-InitializeWeapons()
+function Start()
+	InitializeWeaponInventories()
+end
