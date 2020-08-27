@@ -58,7 +58,7 @@ function Update()
 		onOff = "ON"
 	end
 
-	if (hitdata.hitObject ~= nil) then
+	if hitdata and hitdata.hitObject then
 		if (hitdata.hitObject.type == "Part") then
 			instantModeIndicator.text = "Instant mode is " .. onOff .. ":\n" .. hitdata.hitObject.name
 		end
@@ -117,3 +117,5 @@ function saveModel(collection)
 		part.name = name
 	end
 end
+
+print("loaded packager successfully")

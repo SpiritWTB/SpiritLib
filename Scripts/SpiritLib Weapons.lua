@@ -146,8 +146,6 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 			for _, ply in pairs(GetAllPlayers()) do
 				playerWeaponInventories[ply] = {}
-				ply.table.SelectedWeaponSlot = 1
-				ply.table.SelectedWeaponIndexInSlot = 1
 			end
 		end
 
@@ -235,10 +233,10 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 						print("ui removed")
 						print(0)
-						CallModuleFunction("Attachments", "deleteAttachments", curWep.part)
+						CallModuleFunction("Attachments", "DeleteAttachments", curWep.part)
 						print(1)
 						curWep.part.Remove()
-						
+						print(2)
 						curWep.part.visible = true
 						curWep.part.transparency = 0.5
 						curWep.part.color = newColor(1,0,0)
@@ -269,7 +267,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 		local hitObjectID = nil
 		local hitObjectType = nil
-		if (hitdata.hitObject ~= nil) then
+		if hitdata and hitdata.hitObject then
 			if (hitdata.hitObject.type == "Part") then
 				hitObjectType = 1
 			elseif (hitdata.hitObject.type == "Player") then
@@ -399,7 +397,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 	end
 
 	function HostReceive(client, name, data)
-
+		if not client then return end
 		if name == "requestWeapon" then
 			
 			if GetModuleVariable("Q Menu", "ModuleSettings").AllowedSpawnTypes["Models"] then
@@ -474,7 +472,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 -- http://lua-users.org/wiki/CopyTable
 
-
+print("loaded weapons successfully")
 if not IsHost then return end
 
 function Start()
