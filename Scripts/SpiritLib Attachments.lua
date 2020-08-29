@@ -151,15 +151,16 @@ function duplicateAttachments(_original, _dupe)
 end
 
 -- this wont be public use, it recursively deletes children objects
-function deleteAttachments(_original)
-	print(1)
+function DeleteAttachments(_original)
+	print("Deleting attachments...")
+
 	for k, attachedPartID in pairs(getAttachedIDS(_original)) do
 		local _child = PartByID(attachedPartID)
 
 		if _child ~= nil then
 			-- this part is just like Remove()
 			_child.Remove()
-			deleteAttachments(_child)
+			DeleteAttachments(_child)
 		end
 	end
 end

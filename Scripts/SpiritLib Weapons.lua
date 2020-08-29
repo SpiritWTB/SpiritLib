@@ -30,32 +30,32 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 	-- [[ Begin Utility Functions Section]]
 
 		local function CopyTable(orig, --[[optional]]copies)
-		    copies = copies or {}
-		    local orig_type = type(orig)
-		    local copy
-		    if orig_type == 'table' then
-		        if copies[orig] then
-		            copy = copies[orig]
-		        else
-		            copy = {}
-		            copies[orig] = copy
-		            for orig_key, orig_value in next, orig, nil do
-		                copy[CopyTable(orig_key, copies)] = CopyTable(orig_value, copies)
-		            end
-		            setmetatable(copy, CopyTable(getmetatable(orig), copies))
-		        end
-		    else -- number, string, boolean, etc
-		        copy = orig
-		    end
-		    return copy
+			copies = copies or {}
+			local orig_type = type(orig)
+			local copy
+			if orig_type == 'table' then
+				if copies[orig] then
+					copy = copies[orig]
+				else
+					copy = {}
+					copies[orig] = copy
+					for orig_key, orig_value in next, orig, nil do
+						copy[CopyTable(orig_key, copies)] = CopyTable(orig_value, copies)
+					end
+					setmetatable(copy, CopyTable(getmetatable(orig), copies))
+				end
+			else -- number, string, boolean, etc
+				copy = orig
+			end
+			return copy
 		end
 
 		local function CountTable(_table)
-		    local count = 0
-		    for k,v in pairs(_table) do
-		    	count = count + 1
-		    end
-		    return count
+			local count = 0
+			for k,v in pairs(_table) do
+				count = count + 1
+			end
+			return count
 		end
 
 		local function rolloverIndex(_index, _table)
@@ -156,9 +156,8 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 	-- [[ Begin Selection Functions ]]
 
 		function NextItem(player)
-
 			-- no weapons equipped, do nothing
-			if #playerWeaponInventories[player]<2 then return end
+			if CountTable(playerWeaponInventories[player]) < 1 then return end
 
 			-- increase the index in the slot
 			player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot + 1
@@ -173,11 +172,9 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 		end
 
-
 		function PreviousItem(player)
-
 			-- no weapons equipped, do nothing
-			if #playerWeaponInventories[player]<2 then return end
+			if CountTable(playerWeaponInventories[player]) < 1 then return end
 
 			-- increase the index in the slot
 			player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot - 1
@@ -189,22 +186,55 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				-- if we get to the end of the players weapon inventory we go back to the beginning
 				slotNumber = rolloverIndex(slotNumber - 1, playerWeaponInventories[player])
 			end
+		end
 
+		-- Selects the slot index inside the given slot number
+		function SelectSlot(player, slotNumber, slotIndex)
+			if not player then
+				print("SelectIndexSlot: Player argument can't be null")
+				return
+			end
+
+			if not slotNumber or type(slotNumber) ~= "number" or slotNumber < 1 then
+				print("SelectIndexSlot: Invalid slot number")
+				return
+			end
+
+			if not slotIndex or type(slotIndex) ~= "number" or slotIndex < 1 then
+				print("SelectIndexSlot: Invalid slot index")
+				return
+			end
+
+			local originalSlot = player.table.SelectedWeaponSlot
+			local originalIndex = player.table.SelectedWeaponSlotIndex
+			local slotChanged = false
+
+			if originalSlot and originalSlot ~= slotNumber then
+				player.table.SelectedWeaponSlot = slotNumber
+				slotChanged = true
+			end
+
+			if originalIndex and originalIndex ~= slotIndex then
+				player.table.SelectedWeaponSlotIndex = slotIndex
+				slotChanged = true
+			end
+
+			if slotChanged then
+				local oldSlot = playerWeaponInventories[player][originalSlot]
+				local oldWeapon = oldSlot[originalIndex].part
+			end
 		end
 
 		function SelectSlot(player, slotNumber)
-
 			-- no weapons equipped, do nothing
-			if CountTable(playerWeaponInventories[player])<2 then return end
+			if CountTable(playerWeaponInventories[player]) < 1 then return end
 
 			-- if we get to the end of the players weapon inventory we go back to the beginning
 			slotNumber = rolloverIndex(slotNumber, playerWeaponInventories[player])
 
 			-- if we keep pressing 1 it will loop through the things in slot 1
-
 			local originalSlot = player.table.SelectedWeaponSlot
 			local originalIndex = player.table.SelectedWeaponIndexInSlot
-
 
 			-- increase the slot number with rollover. If we selected the same slot we're on select the next thing in it
 			if player.table.SelectedWeaponSlot ~= slotNumber then
@@ -218,13 +248,19 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				end
 			end
 
-
 			-- if we actually changed,
 			if originalSlot ~= player.table.SelectedWeaponSlot or originalIndex ~= player.table.SelectedWeaponIndexInSlot then
+				print("Bob1")
+				print(originalSlot)
+				print("Bob2")
+				print(originalIndex)
+
 				local oldSlot = playerWeaponInventories[player][originalSlot]
+				local oldWeapon = oldSlot[originalIndex].part
+
 				print("change")
 				if oldSlot then
-					if oldSlot[originalIndex] and oldSlot[originalIndex].part then
+					if oldSlot[originalIndex] and oldWeapon then
 						print("valid")
 
 						if oldSlot[originalIndex].part.table.SpiritLibWeaponUI then
@@ -233,14 +269,10 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 						print("ui removed")
 						print(0)
-						CallModuleFunction("Attachments", "DeleteAttachments", curWep.part)
+						CallModuleFunction("Attachments", "DeleteAttachments", oldWeapon)
 						print(1)
-						curWep.part.Remove()
+						oldWeapon.Remove()
 						print(2)
-						curWep.part.visible = true
-						curWep.part.transparency = 0.5
-						curWep.part.color = newColor(1,0,0)
-						curWep.part.size = newColor(10,40,10)
 						print("m")
 					end
 				end
@@ -262,7 +294,6 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 
 	function ProcessFire(_input)
-
 		local hitdata = RayCast(LocalPlayer().viewPosition, MousePosWorld());
 
 		local hitObjectID = nil
@@ -305,7 +336,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		selectedUIBox = slotUIBoxes[slot]
 
 		selectedUIBox.color = newColor(selectedUIBox.color.r, selectedUIBox.color.g, selectedUIBox.color.b, 0.4)
-		
+
 	end
 
 	function Update()
@@ -326,8 +357,6 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		end
 	end
 
-
-
 	function SpawnUIBoxes()
 		for i = 1, slotCount do
 			local keyBind = IndexToKeyBind(i)
@@ -345,7 +374,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			boxNumberLabel.textAlignment = "TopRight"
 
 			local alpha = 0
-			if i == currentSlot then
+			if i == originalSlot then
 				alpha = 0.4
 			end
 
@@ -399,9 +428,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 	function HostReceive(client, name, data)
 		if not client then return end
 		if name == "requestWeapon" then
-			
 			if GetModuleVariable("Q Menu", "ModuleSettings").AllowedSpawnTypes["Models"] then
-				
 				GiveWeapon(client, data[1], data[2])
 			end
 		end
@@ -415,9 +442,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		end
 
 		if name == "weaponInput" then
-
 			if client.table.SelectedWeaponSlot ~= nil and client.table.SelectedWeaponIndexInSlot ~= nil then
-
 				local slot = client.table.SelectedWeaponSlot
 				local idInSlot = client.table.SelectedWeaponIndexInSlot
 
@@ -435,7 +460,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				if objectType == 1 then
 					hitObject = PartByID(objectID)
 				elseif objectType == 2 then
-					hitObject = clientByID(objectID)
+					hitObject = PlayerByID(objectID)
 				end
 
 				if data[1] == 1 then
@@ -472,7 +497,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 -- http://lua-users.org/wiki/CopyTable
 
-print("loaded weapons successfully")
+print("Loaded weapons successfully!")
 if not IsHost then return end
 
 function Start()
