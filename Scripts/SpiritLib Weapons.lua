@@ -83,8 +83,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			return weaponPart
 		end
 
-		function GiveWeapon(player, weaponName)
-
+		function GiveWeapon(player, weaponName, equip)
 			-- make sure the player has an inventory and that the weapon we're trying to give them exists
 			if not playerWeaponInventories[player] or not WeaponsByName[weaponName] then
 				print("Giveweapon statement invalid.")
@@ -111,11 +110,15 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			CallModuleFunction("Attachments", "Attach", weaponTableInstance.part, player)
 
 			weaponTableInstance.part.script = weaponTableInstance.weaponScript
-			
+
 			weaponTableInstance.slot = slot
 			weaponTableInstance.indexInSlot = #playerWeaponInventories[player][slot] + 1
-			
+
 			table.insert(playerWeaponInventories[player][slot], weaponTableInstance)
+
+			if equip then
+				SelectSlot(player, weaponTableInstance.slot, weaponTableInstance.indexInSlot)
+			end
 		end
 
 	-- [[ End Useful Functions Section]]
@@ -190,6 +193,9 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 		-- Selects the slot index inside the given slot number
 		function SelectSlot(player, slotNumber, slotIndex)
+			print("SelectSlot")
+			print(slotNumber, slotIndex)
+
 			if not player then
 				print("SelectIndexSlot: Player argument can't be null")
 				return
@@ -201,8 +207,10 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			end
 
 			if not slotIndex or type(slotIndex) ~= "number" or slotIndex < 1 then
-				print("SelectIndexSlot: Invalid slot index")
-				return
+				slotIndex = 1
+
+				-- print("SelectIndexSlot: Invalid slot index")
+				-- return
 			end
 
 			local originalSlot = player.table.SelectedWeaponSlot
@@ -222,10 +230,18 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			if slotChanged then
 				local oldSlot = playerWeaponInventories[player][originalSlot]
 				local oldWeapon = oldSlot[originalIndex].part
+
+				if oldWeapon then
+					oldWeapon.part.table.SpiritLibWeaponUI.Remove()
+				end
+
+				CallModuleFunction("Attachments", "DeleteAttachments", oldWeapon)
+
+				oldWeapon.Remove()
 			end
 		end
 
-		function SelectSlot(player, slotNumber)
+		function SelectSlotOLD(player, slotNumber)
 			-- no weapons equipped, do nothing
 			if CountTable(playerWeaponInventories[player]) < 1 then return end
 
@@ -352,7 +368,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 		HandleNetworkInputs()
 
-		for k,v in pairs(slotUIBoxes) do
+		for k, v in pairs(slotUIBoxes) do
 			if InputPressed(v.table.keyBind) then
 				NetworkSendToHost("selectSlot", {v.table.index})
 			end
@@ -431,7 +447,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		if not client then return end
 		if name == "requestWeapon" then
 			if GetModuleVariable("Q Menu", "ModuleSettings").AllowedSpawnTypes["Models"] then
-				GiveWeapon(client, data[1], data[2])
+				GiveWeapon(client, data[1], data[2], true)
 			end
 		end
 

@@ -19,25 +19,19 @@ local CurrentPhysDistance = 0
 local CurrentPhysRotation = Vector3.zero
 
 function Fire(ply, mousePos, entityHit)
-
 	print("Fire " .. Name)
-	
-	-- self should work here, I googled it at some point
-	CurrentObject = hitEnt
 
-	local diff = hitEnt.position - ply.position
+	-- self should work here, I googled it at some point
+	CurrentObject = entityHit
+
+	local diff = entityHit.position - ply.position
 	local angle = diff.normalized
 
 	CurrentPhysDistance = diff.magnitude
-
-
-	
-
-
 end
 
-function Update()
-	if (CurrentObject ~= nil ) then
+--[[ function Update()
+	if CurrentObject ~= nil then
 		
 	end
-end
+end ]]
