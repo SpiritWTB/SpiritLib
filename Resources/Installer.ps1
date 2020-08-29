@@ -7,10 +7,18 @@ Set-StrictMode -Version Latest
   │ Initialization                                                                              │
   └─────────────────────────────────────────────────────────────────────────────────────────────┘#>
 	<#┌─────────────────────────────────────────────┐
-	  │ Add Windows Forms                           │
+	  │ Add Prerequisites                           │
 	  └─────────────────────────────────────────────┘#>
 		Add-Type -AssemblyName System.Windows.Forms
 		[Windows.Forms.Application]::EnableVisualStyles()
+
+		Add-Type -Name "External" -Namespace "SpiritLib" -MemberDefinition '[DllImport("kernel32.dll")] public static extern IntPtr GetConsoleWindow(); [DllImport("user32.dll")] public static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);'
+
+	<#┌─────────────────────────────────────────────┐
+	  │ Declare Variables                           │
+	  └─────────────────────────────────────────────┘#>
+		$Host.UI.RawUI.WindowTitle = "SpiritLib Installer Script"
+		$CustomIcon = [Drawing.Icon]::ExtractAssociatedIcon("${PSScriptRoot}\SpiritLib.ico")
 
 	<#┌─────────────────────────────────────────────┐
 	  │ Declare Functions                           │
@@ -64,6 +72,12 @@ Set-StrictMode -Version Latest
 			$CorePartJSON = '{"Components":[{"$type":"WorldComponent, Assembly-CSharp","Name":"World","Properties":[{"$type":"PropertyName, Assembly-CSharp","Name":"Name","dataType":"string","dataString":"SpiritLib"},{"$type":"PropertyObjectType, Assembly-CSharp","Name":"ObjectType","dataType":"string","dataString":"Part"},{"$type":"PropertyParent, Assembly-CSharp","editorDataIntView":0,"Name":"Parent","dataType":"int","dataInt":0}],"PropertiesByName":{},"IsAlwaysSameContent":true},{"$type":"TransformComponent, Assembly-CSharp","Name":"Transform","Properties":[{"$type":"PropertyCanCollide, Assembly-CSharp","Name":"CanCollide","dataType":"bool","dataBool":false},{"$type":"PropertyHasPhysics, Assembly-CSharp","Name":"HasPhysics","dataType":"bool","dataBool":false},{"$type":"PropertySize, Assembly-CSharp","Name":"Size","dataType":"Vector3","dataVector3":{"x":1,"y":1,"z":1}},{"$type":"PropertyPosition, Assembly-CSharp","Name":"Position","dataType":"Vector3","dataVector3":{"x":0,"y":0,"z":0}},{"$type":"PropertyRotation, Assembly-CSharp","Name":"Rotation","dataType":"Vector3","dataVector3":{"x":0,"y":0,"z":0}}],"PropertiesByName":{},"IsAlwaysSameContent":true},{"$type":"RendererComponent, Assembly-CSharp","Name":"Renderer","Properties":[{"$type":"PropertyColor, Assembly-CSharp","Name":"Color","dataType":"string","dataString":"00000000"},{"$type":"PropertyMaterial, Assembly-CSharp","Name":"Material","dataType":"int","dataInt":0},{"$type":"PropertyVisible, Assembly-CSharp","Name":"Visible","dataType":"bool","dataBool":false},{"$type":"PropertyTransparency, Assembly-CSharp","Name":"Transparency","dataType":"string","dataString":"0"},{"$type":"PropertyPartType, Assembly-CSharp","Name":"PartType","dataType":"int","dataInt":0},{"$type":"PropertyRounded, Assembly-CSharp","Name":"Rounded","dataType":"bool","dataBool":false},{"$type":"PropertyShadows, Assembly-CSharp","Name":"Shadows","dataType":"bool","dataBool":false}],"PropertiesByName":{},"IsAlwaysSameContent":true},{"$type":"ScriptComponent, Assembly-CSharp","Name":"Script","Properties":[{"$type":"PropertyScript, Assembly-CSharp","Name":"Script","dataType":"string","dataString":"SpiritLib"}],"PropertiesByName":{},"IsAlwaysSameContent":true}],"WTBIndex":' + $WTBIndex + ',"netID":0}'
 			$WorldData.AllWTBOData += ConvertFrom-Json -InputObject $CorePartJSON
 		}
+	
+	<#┌─────────────────────────────────────────────┐
+	  │ Change Taskbar Icon                         │
+	  └─────────────────────────────────────────────┘#>
+		$ConsoleHandle = [SpiritLib.External]::GetConsoleWindow()
+		[SpiritLib.External]::SendMessage($ConsoleHandle, 0x80, 0, $CustomIcon.Handle)
 
 
 <#┌─────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -81,7 +95,7 @@ Set-StrictMode -Version Latest
 		$Caller.Location = New-Object -TypeName Drawing.Point -ArgumentList -100, -100
 		$Caller.Size = New-Object -TypeName Drawing.Size -ArgumentList 10, 10
 		$Caller.StartPosition = [Windows.Forms.FormStartPosition]::Manual
-		$Caller.Icon = [Drawing.Icon]::ExtractAssociatedIcon("${PSScriptRoot}\SpiritLib.ico")
+		$Caller.Icon = $CustomIcon
 		$Caller.TopMost = $true
 
 		$Caller.Add_Shown({
@@ -173,7 +187,7 @@ Set-StrictMode -Version Latest
 		$Caller.Location = New-Object -TypeName Drawing.Point -ArgumentList -100, -100
 		$Caller.Size = New-Object -TypeName Drawing.Size -ArgumentList 10, 10
 		$Caller.StartPosition = [Windows.Forms.FormStartPosition]::Manual
-		$Caller.Icon = [Drawing.Icon]::ExtractAssociatedIcon("${PSScriptRoot}\SpiritLib.ico")
+		$Caller.Icon = $CustomIcon
 		$Caller.TopMost = $true
 
 		$Caller.Add_Shown({
