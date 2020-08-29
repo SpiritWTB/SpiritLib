@@ -256,25 +256,27 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				print(originalIndex)
 
 				local oldSlot = playerWeaponInventories[player][originalSlot]
-				local oldWeapon = oldSlot[originalIndex].part
+				local oldWeapon
+
+				if oldSlot and oldSlot[originalIndex] then
+					oldWeapon = oldSlot[originalIndex].part
+				end
 
 				print("change")
-				if oldSlot then
-					if oldSlot[originalIndex] and oldWeapon then
-						print("valid")
+				if oldWeapon then
+					print("valid")
 
-						if oldSlot[originalIndex].part.table.SpiritLibWeaponUI then
-							oldSlot[originalIndex].part.table.SpiritLibWeaponUI.Remove()
-						end
-
-						print("ui removed")
-						print(0)
-						CallModuleFunction("Attachments", "DeleteAttachments", oldWeapon)
-						print(1)
-						oldWeapon.Remove()
-						print(2)
-						print("m")
+					if oldSlot[originalIndex].part.table.SpiritLibWeaponUI then
+						oldSlot[originalIndex].part.table.SpiritLibWeaponUI.Remove()
 					end
+
+					print("ui removed")
+					print(0)
+					CallModuleFunction("Attachments", "DeleteAttachments", oldWeapon)
+					print(1)
+					oldWeapon.Remove()
+					print(2)
+					print("m")
 				end
 			end
 		end
@@ -446,37 +448,42 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				local slot = client.table.SelectedWeaponSlot
 				local idInSlot = client.table.SelectedWeaponIndexInSlot
 
-				local mousePos = data[2]
+				local slotHasWeaponAtIndex = (playerWeaponInventories[client] and playerWeaponInventories[client][slot] and playerWeaponInventories[client][slot][idInSlot])
 
-				local objectType = nil
-				local objectID = nil
+				if slotHasWeaponAtIndex then
 
-				if data[3] then
-					objectType = data[3]
-					objectID = data[4]
-				end
+					local mousePos = data[2]
 
-				local hitObject = nil
-				if objectType == 1 then
-					hitObject = PartByID(objectID)
-				elseif objectType == 2 then
-					hitObject = PlayerByID(objectID)
-				end
+					local objectType = nil
+					local objectID = nil
 
-				if data[1] == 1 then
-					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Fire", client, mousePos, hitObject)
-				elseif data[1] == 2 then
-					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("FireRelease", client)
-				elseif data[1] == 3 then
-					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("AltFire", client, mousePos, hitObject)
-				elseif data[1] == 4 then
-					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("AltFireRelease", client)
-				elseif data[1] == 5 then
-					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Reload", client, mousePos, hitObject)
-				elseif data[1] == 6 then
-					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Use", client, mousePos, hitObject)
-				elseif data[1] == 7 then
-					playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Special", client, mousePos, hitObject)
+					if data[3] then
+						objectType = data[3]
+						objectID = data[4]
+					end
+
+					local hitObject = nil
+					if objectType == 1 then
+						hitObject = PartByID(objectID)
+					elseif objectType == 2 then
+						hitObject = PlayerByID(objectID)
+					end
+
+					if data[1] == 1 then
+						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Fire", client, mousePos, hitObject)
+					elseif data[1] == 2 then
+						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("FireRelease", client)
+					elseif data[1] == 3 then
+						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("AltFire", client, mousePos, hitObject)
+					elseif data[1] == 4 then
+						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("AltFireRelease", client)
+					elseif data[1] == 5 then
+						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Reload", client, mousePos, hitObject)
+					elseif data[1] == 6 then
+						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Use", client, mousePos, hitObject)
+					elseif data[1] == 7 then
+						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Special", client, mousePos, hitObject)
+					end
 				end
 			end
 		end
