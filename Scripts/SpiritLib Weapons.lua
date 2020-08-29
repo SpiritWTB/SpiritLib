@@ -83,10 +83,12 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			return weaponPart
 		end
 
-		function InstantiateAndAttachWeapon(player, _wepTable)
+		function InstantiateAndAttachWeapon(_player, _template)
 
 			-- copy the table of the weapon we're giving them
-			local weaponTableInstance = CopyTable(_wepTable)
+			local weaponTableInstance = CopyTable(_template)
+
+			weaponTableInstance.template = _template
 
 			-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
 			weaponTableInstance.part = SpawnModel(weaponTableInstance.name, weaponTableInstance.modelJson, player.position) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
@@ -94,7 +96,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			weaponTableInstance.part.cancollide = false
 			weaponTableInstance.part.angles = player.angles
 
-			CallModuleFunction("Attachments", "Attach", weaponTableInstance.part, player)
+			CallModuleFunction("Attachments", "Attach", weaponTableInstance.part, _player)
 
 			weaponTableInstance.part.script = weaponTableInstance.weaponScript
 
@@ -135,14 +137,11 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				return
 			end
 
-			-- if they don't have any weapons in this slot yet add a table to this slot for their weapons
-
+			-- if they don't have any weapons in this slot yet add a table to this slot for their weapons to be listed in
 			if not playerInventory[weaponSlot] then
 				playerInventory[weaponSlot] = {}
 			end
 
-			-- copy the table of the weapon we're giving them
-			print(weaponTemplate.name)
 			local weaponTableInstance = InstantiateAndAttachWeapon(player, weaponTemplate)
 
 			table.insert(playerInventory[weaponSlot], weaponTableInstance)
@@ -190,6 +189,8 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 	-- [[ Begin Selection Functions ]]
 
 		function NextItem(player)
+			local playerInventory = playerWeaponInventories[player]
+
 			-- no weapons equipped, do nothing
 			if CountTable(playerInventory) < 1 then return end
 
@@ -207,6 +208,8 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		end
 
 		function PreviousItem(player)
+			local playerInventory = playerWeaponInventories[player]
+
 			-- no weapons equipped, do nothing
 			if CountTable(playerInventory) < 1 then return end
 
@@ -257,81 +260,41 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				slotChanged = true
 			end
 
-			local oldSlot = playerInventory[originalSlot]
-			local oldWeaponExists = oldSlot and oldSlot[originalIndex] and oldSlot[originalIndex].part
+			
 
-			if slotChanged and oldWeaponExists then
+			if slotChanged then
 
-				local oldWeapon = oldSlot[originalIndex].part
+				-- remove the old weapon if we need to
+				local oldSlot = playerWeaponInventories[player][originalSlot]
+				local oldWeaponExists = oldSlot and oldSlot[originalIndex] and oldSlot[originalIndex].part
 
-				if oldWeapon then
-					if oldWeapon.table.SpiritLibWeaponUI then
-						oldWeapon.table.SpiritLibWeaponUI.Remove()
+				if oldWeaponExists then
+
+					local oldWeapon = oldSlot[originalIndex].part
+
+					print(player.position)
+					print(oldWeapon.position)
+
+					if oldWeapon then
+						if oldWeapon.table.SpiritLibWeaponUI then
+							oldWeapon.table.SpiritLibWeaponUI.Remove()
+						end
+
+						CallModuleFunction("Attachments", "Remove", oldWeapon)
+						oldSlot[originalIndex].part = nil
 					end
-
-					CallModuleFunction("Attachments", "Remove", oldWeapon)
 				end
+
+				-- if we're re-equipping a weapon we need to recreate it
+				local newSlot = playerInventories[player][player.table.SelectedWeaponSlot]
+				if newSlot or  newSlot[player.table.SelectedWeaponSlotIndex].part == nil then
+					-- instantiate the new weapon
+				end
+
 			end
 
 			print("SelectSlot: Final:  Slot Number:" .. tostring(player.table.SelectedWeaponSlot) .. ",  Index in slot: " .. tostring(player.table.SelectedWeaponSlotIndex))
 		end
-
-		function SelectSlotOLD(player, slotNumber)
-			-- no weapons equipped, do nothing
-			if CountTable(playerInventory) < 1 then return end
-
-			-- if we get to the end of the players weapon inventory we go back to the beginning
-			slotNumber = rolloverIndex(slotNumber, playerInventory)
-
-			-- if we keep pressing 1 it will loop through the things in slot 1
-			local originalSlot = player.table.SelectedWeaponSlot
-			local originalIndex = player.table.SelectedWeaponIndexInSlot
-
-			-- increase the slot number with rollover. If we selected the same slot we're on select the next thing in it
-			if player.table.SelectedWeaponSlot ~= slotNumber then
-				player.table.SelectedWeaponSlot = slotNumber
-				player.table.SelectedWeaponIndexInSlot = 1
-			else
-				player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot + 1
-
-				if not playerInventory[player.table.SelectedWeaponIndexInSlot] then
-					player.table.SelectedWeaponIndexInSlot = 1
-				end
-			end
-
-			-- if we actually changed,
-			if originalSlot ~= player.table.SelectedWeaponSlot or originalIndex ~= player.table.SelectedWeaponIndexInSlot then
-				print("Bob1")
-				print(originalSlot)
-				print("Bob2")
-				print(originalIndex)
-
-				local oldSlot = playerInventory[originalSlot]
-				local oldWeapon
-
-				if oldSlot and oldSlot[originalIndex] then
-					oldWeapon = oldSlot[originalIndex].part
-				end
-
-				print("change")
-				if oldWeapon then
-					print("valid")
-
-					if oldSlot[originalIndex].part.table.SpiritLibWeaponUI then
-						oldSlot[originalIndex].part.table.SpiritLibWeaponUI.Remove()
-					end
-
-					print("ui removed")
-					print(0)
-					CallModuleFunction("Attachments", "DeleteAttachments", oldWeapon)
-					print(1)
-					oldWeapon.Remove()
-					print(2)
-					print("m")
-				end
-			end
-		end
-
 	-- [[ End Selection Functions ]]
 
 
