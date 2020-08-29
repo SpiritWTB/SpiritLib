@@ -226,7 +226,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				-- print("SelectIndexSlot: Invalid slot index")
 				-- return
 			end
-			
+
 			local originalSlot = player.table.SelectedWeaponSlot
 			local originalIndex = player.table.SelectedWeaponSlotIndex
 			local slotChanged = false
@@ -252,11 +252,9 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 					if oldWeapon.table.SpiritLibWeaponUI then
 						oldWeapon.table.SpiritLibWeaponUI.Remove()
 					end
+
+					CallModuleFunction("Attachments", "Remove", oldWeapon)
 				end
-
-				CallModuleFunction("Attachments", "DeleteAttachments", oldWeapon)
-
-				oldWeapon.Remove()
 			end
 
 			print("SelectSlot: Final:  Slot Number:" .. tostring(player.table.SelectedWeaponSlot) .. ",  Index in slot: " .. tostring(player.table.SelectedWeaponSlotIndex))
