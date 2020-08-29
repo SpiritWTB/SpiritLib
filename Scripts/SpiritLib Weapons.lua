@@ -83,38 +83,10 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			return weaponPart
 		end
 
-		function GiveWeapon(player, weaponName, equip)
-			-- make sure the player has an inventory and that the weapon we're trying to give them exists
-			if not playerWeaponInventories[player] or not WeaponsByName[weaponName] then
-				print("Giveweapon statement invalid.")
-				return
-			end
-
-			local weaponSlot = WeaponsByName[weaponName].weaponSlot
-
-			if not playerWeaponInventories[player][weaponSlot] then
-				playerWeaponInventories[player][weaponSlot] = {}
-			end
-
-			local weaponSlotIndex = #playerWeaponInventories[player][weaponSlot] + 1
-
-			local currentSlot = player.table.SelectedWeaponSlot
-			local currentSlotIndex = player.table.SelectedWeaponSlotIndex
-
-			-- if we by off chance added a weapon to a slot we already have equipped, select the current slot
-			if currentSlot and currentSlotIndex and currentSlot == weaponSlot and currentSlotIndex == weaponSlotIndex then
-				SelectSlot(player, weaponSlot, weaponSlotIndex)
-				return
-			end
-
-			-- if they don't have any weapons in this slot yet add a table to this slot for their weapons
-
-			if not playerWeaponInventories[player][weaponSlot] then
-				playerWeaponInventories[player][weaponSlot] = {}
-			end
+		function InstantiateAndAttachWeapon(player, _wepTable)
 
 			-- copy the table of the weapon we're giving them
-			local weaponTableInstance = CopyTable(WeaponsByName[weaponName])
+			local weaponTableInstance = CopyTable(_wepTable)
 
 			-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
 			weaponTableInstance.part = SpawnModel(weaponTableInstance.name, weaponTableInstance.modelJson, player.position) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
@@ -129,7 +101,51 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			weaponTableInstance.slot = weaponSlot
 			weaponTableInstance.indexInSlot = weaponSlotIndex
 
-			table.insert(playerWeaponInventories[player][weaponSlot], weaponTableInstance)
+			return weaponTableInstance
+		end
+
+		function GiveWeapon(player, weaponName, equip)
+
+			local weaponTemplate = WeaponsByName[weaponName]
+			local playerInventory = playerWeaponInventories[player]
+
+			-- make sure the player has an inventory and that the weapon we're trying to give them exists
+			if not playerInventory or not weaponTemplate then
+				print("Giveweapon statement invalid.")
+				return
+			end
+
+			-- figure out what slot the weapon wants
+			local weaponSlot = weaponTemplate.weaponSlot
+
+			-- if the player doesn't have the slot the weapon wants, create it
+			if not playerInventory[weaponSlot] then
+				playerInventory[weaponSlot] = {}
+			end
+
+			-- figure out where the weapon will go in the slot
+			local weaponSlotIndex = #playerInventory[weaponSlot] + 1
+
+			local currentSlot = player.table.SelectedWeaponSlot
+			local currentSlotIndex = player.table.SelectedWeaponSlotIndex
+
+			-- if we by off chance added a weapon to a slot we already have equipped, select the current slot
+			if currentSlot and currentSlotIndex and currentSlot == weaponSlot and currentSlotIndex == weaponSlotIndex then
+				SelectSlot(player, weaponSlot, weaponSlotIndex)
+				return
+			end
+
+			-- if they don't have any weapons in this slot yet add a table to this slot for their weapons
+
+			if not playerInventory[weaponSlot] then
+				playerInventory[weaponSlot] = {}
+			end
+
+			-- copy the table of the weapon we're giving them
+			print(weaponTemplate.name)
+			local weaponTableInstance = InstantiateAndAttachWeapon(player, weaponTemplate)
+
+			table.insert(playerInventory[weaponSlot], weaponTableInstance)
 
 			if equip then
 				SelectSlot(player, weaponSlot, weaponSlotIndex)
@@ -175,34 +191,34 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 		function NextItem(player)
 			-- no weapons equipped, do nothing
-			if CountTable(playerWeaponInventories[player]) < 1 then return end
+			if CountTable(playerInventory) < 1 then return end
 
 			-- increase the index in the slot
 			player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot + 1
 
 			-- if there's no weapon there, go back to in-slot-index 1 and bump forward to the next slot 
-			if not playerWeaponInventories[player][player.table.SelectedWeaponIndexInSlot] then
+			if not playerInventory[player.table.SelectedWeaponIndexInSlot] then
 				player.table.SelectedWeaponIndexInSlot = 1
 
 				-- if we get to the end of the players weapon inventory we go back to the beginning
-				slotNumber = rolloverIndex(slotNumber + 1, playerWeaponInventories[player])
+				slotNumber = rolloverIndex(slotNumber + 1, playerInventory)
 			end
 
 		end
 
 		function PreviousItem(player)
 			-- no weapons equipped, do nothing
-			if CountTable(playerWeaponInventories[player]) < 1 then return end
+			if CountTable(playerInventory) < 1 then return end
 
 			-- increase the index in the slot
 			player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot - 1
 
 			-- if there's no weapon there, go back to in-slot-index 1 and bump forward to the next slot 
-			if not playerWeaponInventories[player][player.table.SelectedWeaponIndexInSlot] then
+			if not playerInventory[player.table.SelectedWeaponIndexInSlot] then
 				player.table.SelectedWeaponIndexInSlot = 1
 
 				-- if we get to the end of the players weapon inventory we go back to the beginning
-				slotNumber = rolloverIndex(slotNumber - 1, playerWeaponInventories[player])
+				slotNumber = rolloverIndex(slotNumber - 1, playerInventory)
 			end
 		end
 
@@ -241,7 +257,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				slotChanged = true
 			end
 
-			local oldSlot = playerWeaponInventories[player][originalSlot]
+			local oldSlot = playerInventory[originalSlot]
 			local oldWeaponExists = oldSlot and oldSlot[originalIndex] and oldSlot[originalIndex].part
 
 			if slotChanged and oldWeaponExists then
@@ -262,10 +278,10 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 		function SelectSlotOLD(player, slotNumber)
 			-- no weapons equipped, do nothing
-			if CountTable(playerWeaponInventories[player]) < 1 then return end
+			if CountTable(playerInventory) < 1 then return end
 
 			-- if we get to the end of the players weapon inventory we go back to the beginning
-			slotNumber = rolloverIndex(slotNumber, playerWeaponInventories[player])
+			slotNumber = rolloverIndex(slotNumber, playerInventory)
 
 			-- if we keep pressing 1 it will loop through the things in slot 1
 			local originalSlot = player.table.SelectedWeaponSlot
@@ -278,7 +294,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			else
 				player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot + 1
 
-				if not playerWeaponInventories[player][player.table.SelectedWeaponIndexInSlot] then
+				if not playerInventory[player.table.SelectedWeaponIndexInSlot] then
 					player.table.SelectedWeaponIndexInSlot = 1
 				end
 			end
@@ -290,7 +306,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				print("Bob2")
 				print(originalIndex)
 
-				local oldSlot = playerWeaponInventories[player][originalSlot]
+				local oldSlot = playerInventory[originalSlot]
 				local oldWeapon
 
 				if oldSlot and oldSlot[originalIndex] then
