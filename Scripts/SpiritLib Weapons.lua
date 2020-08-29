@@ -90,12 +90,26 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				return
 			end
 
-			local slot = WeaponsByName[weaponName].weaponSlot
+			local weaponSlot = WeaponsByName[weaponName].weaponSlot
+
+			if not playerWeaponInventories[player][weaponSlot] then
+				playerWeaponInventories[player][weaponSlot] = {}
+			end
+
+			local weaponSlotIndex = #playerWeaponInventories[player][weaponSlot] + 1
+
+			local currentSlot = player.table.SelectedWeaponSlot
+			local currentSlotIndex = player.table.SelectedWeaponSlotIndex
+
+			if currentSlot and currentSlotIndex and currentSlot == weaponSlot and currentSlotIndex == weaponSlotIndex then
+				SelectSlot(player, weaponSlot, weaponSlotIndex)
+				return
+			end
 
 			-- if they don't have any weapons in this slot yet add a table to this slot for their weapons
 
-			if not playerWeaponInventories[player][slot] then
-				playerWeaponInventories[player][slot] = {}
+			if not playerWeaponInventories[player][weaponSlot] then
+				playerWeaponInventories[player][weaponSlot] = {}
 			end
 
 			-- copy the table of the weapon we're giving them
@@ -111,13 +125,13 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 			weaponTableInstance.part.script = weaponTableInstance.weaponScript
 
-			weaponTableInstance.slot = slot
-			weaponTableInstance.indexInSlot = #playerWeaponInventories[player][slot] + 1
+			weaponTableInstance.slot = weaponSlot
+			weaponTableInstance.indexInSlot = weaponSlotIndex
 
-			table.insert(playerWeaponInventories[player][slot], weaponTableInstance)
+			table.insert(playerWeaponInventories[player][weaponSlot], weaponTableInstance)
 
 			if equip then
-				SelectSlot(player, weaponTableInstance.slot, weaponTableInstance.indexInSlot)
+				SelectSlot(player, weaponSlot, weaponSlotIndex)
 			end
 		end
 
