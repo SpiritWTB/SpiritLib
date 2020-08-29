@@ -101,6 +101,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			local currentSlot = player.table.SelectedWeaponSlot
 			local currentSlotIndex = player.table.SelectedWeaponSlotIndex
 
+			-- if we by off chance added a weapon to a slot we already have equipped, select the current slot
 			if currentSlot and currentSlotIndex and currentSlot == weaponSlot and currentSlotIndex == weaponSlotIndex then
 				SelectSlot(player, weaponSlot, weaponSlotIndex)
 				return
@@ -207,8 +208,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 		-- Selects the slot index inside the given slot number
 		function SelectSlot(player, slotNumber, slotIndex)
-			print("SelectSlot")
-			print(slotNumber, slotIndex)
+			print("SelectSlot: Input:  Slot Number:" .. tostring(slotNumber) .. ",  Index in slot: " .. tostring(slotIndex))
 
 			if not player then
 				print("SelectIndexSlot: Player argument can't be null")
@@ -226,33 +226,40 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				-- print("SelectIndexSlot: Invalid slot index")
 				-- return
 			end
-
+			
 			local originalSlot = player.table.SelectedWeaponSlot
 			local originalIndex = player.table.SelectedWeaponSlotIndex
 			local slotChanged = false
 
-			if originalSlot and originalSlot ~= slotNumber then
+			if originalSlot ~= slotNumber then
 				player.table.SelectedWeaponSlot = slotNumber
 				slotChanged = true
 			end
 
-			if originalIndex and originalIndex ~= slotIndex then
+			if originalIndex ~= slotIndex then
 				player.table.SelectedWeaponSlotIndex = slotIndex
 				slotChanged = true
 			end
 
-			if slotChanged then
-				local oldSlot = playerWeaponInventories[player][originalSlot]
+			local oldSlot = playerWeaponInventories[player][originalSlot]
+			local oldWeaponExists = oldSlot and oldSlot[originalIndex] and oldSlot[originalIndex].part
+
+			if slotChanged and oldWeaponExists then
+
 				local oldWeapon = oldSlot[originalIndex].part
 
 				if oldWeapon then
-					oldWeapon.part.table.SpiritLibWeaponUI.Remove()
+					if oldWeapon.table.SpiritLibWeaponUI then
+						oldWeapon.table.SpiritLibWeaponUI.Remove()
+					end
 				end
 
 				CallModuleFunction("Attachments", "DeleteAttachments", oldWeapon)
 
 				oldWeapon.Remove()
 			end
+
+			print("SelectSlot: Final:  Slot Number:" .. tostring(player.table.SelectedWeaponSlot) .. ",  Index in slot: " .. tostring(player.table.SelectedWeaponSlotIndex))
 		end
 
 		function SelectSlotOLD(player, slotNumber)

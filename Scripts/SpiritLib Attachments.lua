@@ -23,6 +23,7 @@ oneScaledParentAttachments = {}
 -- this will "parent" a part to another. 
 function Attach(_attachThis, _toThis, --[[optional = true]] useOneScaledParent)
 	local id = _attachThis.id
+	local parentID = _toThis.id
 
 	-- if it's nil or true we're good
 	if useOneScaledParent ~= false then
@@ -35,7 +36,7 @@ function Attach(_attachThis, _toThis, --[[optional = true]] useOneScaledParent)
 			oneScaledParent.visible = false
 			oneScaledParent.frozen = true
 			oneScaledParent.ignoreRaycast = true
-			oneScaledParentAttachments[_toThis.id] = oneScaledParent.id
+			oneScaledParentAttachments[parentID] = oneScaledParent.id
 		end
 
 		id = _toThis.table.OneScaledParent.id
@@ -55,11 +56,11 @@ function Attach(_attachThis, _toThis, --[[optional = true]] useOneScaledParent)
 	end
 
 	-- make sure we can get the children just by knowing the parent
-	if reverseAssociations[id] == nil then
-		reverseAssociations[id] = {}
+	if reverseAssociations[parentID] == nil then
+		reverseAssociations[parentID] = {}
 	end
 
-	table.insert(reverseAssociations[id], _attachThis.id)
+	table.insert(reverseAssociations[parentID], id)
 end
 
 -- this is used in cases like when one part no longer exists because it has been deleted. It just removes the object from any previous association.
@@ -93,16 +94,13 @@ function Unattach(_unattachThisID, _fromThisID)
 end
 
 -- this is used in cases like when one part no longer exists because it has been deleted. It just removes the object from any previous association.
-function UnattachFromAll(_unattachThisID)
-	local thisID = _unattachThisID
-	local fromID = _fromThisID
-
-	attachments[thisID] = nil
+function UnattachFromAll(_id)
+	attachments[_id] = nil
 
 	-- find the list of children for the parent
-	if reverseAssociations[fromID] ~= nil then
-		for index, childID in pairs(reverseAssociations[fromID]) do
-			reverseAssociations[fromID][index] = nil
+	if reverseAssociations[_id] ~= nil then
+		for index, childID in pairs(reverseAssociations[_id]) do
+			reverseAssociations[_id][index] = nil
 		end
 	end
 end
@@ -150,19 +148,22 @@ function duplicateAttachments(_original, _dupe)
 	end
 end
 
--- this wont be public use, it recursively deletes children objects
+
 function DeleteAttachments(_original)
 	print("Deleting attachments...")
 
 	for k, attachedPartID in pairs(getAttachedIDS(_original)) do
 		local _child = PartByID(attachedPartID)
 
+		--print(attachedPartID)
 		if _child ~= nil then
-			-- this part is just like Remove()
-			_child.Remove()
+			--print("trying to remove " .. tostring(_child))
 			DeleteAttachments(_child)
+			_child.Remove()
 		end
 	end
+
+	UnattachFromAll(_original.id)
 end
 
 -- returns a list of ids for *direct* children of an object
@@ -170,6 +171,7 @@ function getAttachedIDS(_parent)
 	if reverseAssociations[_parent.id] ~= nil then
 		return reverseAssociations[_parent.id]
 	end
+	return {}
 end
 
 function DrawUpdate()
