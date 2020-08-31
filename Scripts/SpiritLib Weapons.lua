@@ -85,23 +85,10 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			return weaponPart
 		end
 
-		function InstantiateAndAttachWeapon(_player, _template)
+		function InstantiateAndAttachWeapon(_player, _weaponTable)
 
-			print(_player)
-			print(_template)
-			-- copy the table of the weapon we're giving them
-			local weaponTableInstance = CopyTable(_template)
-
-			weaponTableInstance.template = _template
-
-			print(11)
 			-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
-			local part = SpawnModel(weaponTableInstance.name, weaponTableInstance.modelJson, _player.position)
-			weaponTableInstance.part = part
-			print(12)
-
-
-
+			local part = SpawnModel(_weaponTable.name, _weaponTable.modelJson, _player.position)
 
 			part.frozen = true
 			part.cancollide = false
@@ -109,12 +96,9 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 			CallModuleFunction("Attachments", "Attach", part, _player)
 
-			part.script = weaponTableInstance.weaponScript
+			part.script = _weaponTable.weaponScript
 
-			weaponTableInstance.slot = weaponSlot
-			weaponTableInstance.indexInSlot = weaponSlotIndex
-
-			return weaponTableInstance
+			return part
 		end
 
 		function GiveWeapon(player, weaponName, equip)
@@ -136,6 +120,13 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				playerInventory[weaponSlot] = {}
 			end
 
+			-- go through the weapons slot, make sure they don't already have this weapon
+			for k,v in pairs(playerInventory[weaponSlot]) do
+				if v.name == weaponName then
+					print("You already have this weapon!")
+				end
+			end
+
 			-- figure out where the weapon will go in the slot
 			local weaponSlotIndex = #playerInventory[weaponSlot] + 1
 
@@ -154,7 +145,17 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			end
 
 			print("instance")
-			local weaponTableInstance = InstantiateAndAttachWeapon(player, weaponTemplate)
+
+
+			-- make a new instance of the weapon template table
+			local weaponTableInstance = CopyTable(weaponTemplate)
+			weaponTableInstance.template = weaponTemplate
+
+			weaponTableInstance.slot = weaponSlot
+			weaponTableInstance.indexInSlot = weaponSlotIndex
+
+			weaponTableInstance.part = InstantiateAndAttachWeapon(player, weaponTemplate)
+			
 
 			table.insert(playerInventory[weaponSlot], weaponTableInstance)
 
@@ -283,7 +284,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 					local oldWeapon = oldSlot[originalIndex].part
 
 					if oldWeapon then
-						if oldWeapon.table.SpiritLibWeaponUI then
+						if oldWeapon.table and oldWeapon.table.SpiritLibWeaponUI then
 							oldWeapon.table.SpiritLibWeaponUI.Remove()
 						end
 
@@ -297,7 +298,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				if newSlot then
 					local newWepTable = newSlot[player.table.SelectedWeaponSlotIndex]
 					if newWepTable and newWepTable.part == nil then
-						newWepTable.part = InstantiateAndAttachWeapon(player, newWepTable.template)
+						newWepTable.part = InstantiateAndAttachWeapon(player, newWepTable)
 
 					end
 				end
