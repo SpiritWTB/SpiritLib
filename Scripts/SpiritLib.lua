@@ -30,7 +30,7 @@ SpiritLib.Modules = {
 	["Core"] = This,
 
 	["Attachments"] = false,
-	["Default Models"] = false,
+	["Default Objects"] = false,
 	["Models"] = false,
 	["Weapons"] = false,
 	["Q Menu"] = false,
