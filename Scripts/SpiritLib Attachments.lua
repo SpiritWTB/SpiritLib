@@ -25,21 +25,30 @@ function Attach(_attachThis, _toThis, --[[optional = true]] useOneScaledParent)
 	local id = _attachThis.id
 	local parentID = _toThis.id
 
+	local posOffset = _attachThis.position - _toThis.position
+
 	-- if it's nil or true we're good
 	if useOneScaledParent ~= false then
 		-- create a holster if this part doesn't have one yet
 		if _toThis.table.OneScaledParent==nil then
 			local oneScaledParent = CreatePart(0, _toThis.position, Vector3.zero)
-			_toThis.table.OneScaledParent = oneScaledParent
+			oneScaledParent.angles = _attachThis.angles
+			oneScaledParent.position = _toThis.position
 			oneScaledParent.table.isHolster = true
 			oneScaledParent.cancollide = false
+
+			--oneScaledParent.transparency = 0.3
 			oneScaledParent.visible = false
+
 			oneScaledParent.frozen = true
 			oneScaledParent.ignoreRaycast = true
+
+			_toThis.table.OneScaledParent = oneScaledParent
 			oneScaledParentAttachments[parentID] = oneScaledParent.id
 		end
 
 		id = _toThis.table.OneScaledParent.id
+		posOffset = Vector3.zero
 		_attachThis.parent = _toThis.table.OneScaledParent
 	end
 
@@ -48,7 +57,7 @@ function Attach(_attachThis, _toThis, --[[optional = true]] useOneScaledParent)
 		attachments[id] = {
 			parentType = _toThis.type,
 			parentID = _toThis.id,
-			posOffset = _attachThis.position - _toThis.position,
+			posOffset = posOffset,
 			angOffset = _attachThis.angles - _toThis.angles,
 			lastParentPosition = _toThis.position,
 			lastParentAngles = _toThis.angles
