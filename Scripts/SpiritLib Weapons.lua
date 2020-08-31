@@ -76,8 +76,8 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 	-- [[ Begin Useful Functions Section]]
 
-		function SpawnModel(name, objectJSON, position)
-			local weaponPart = CallModuleFunction("Models", "GenerateModel", objectJSON, position)
+		function SpawnModel(name, position)
+			local weaponPart = CallModuleFunction("Models", "GenerateKnownModel", name, position)
 			weaponPart.name = name
 
 			return weaponPart
@@ -86,7 +86,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		function InstantiateAndAttachWeapon(_player, _weaponTable)
 
 			-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
-			local part = SpawnModel(_weaponTable.name, _weaponTable.objectJson, _player.position + _player.forward*0.7)
+			local part = SpawnModel(_weaponTable.name, _player.position + _player.forward*0.7)
 
 			part.frozen = true
 			part.cancollide = false

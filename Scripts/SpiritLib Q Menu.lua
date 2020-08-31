@@ -332,7 +332,7 @@ function OnUIButtonClick(button)
 
 			if objectData.objectType == "Models" then
 
-				local part = CallModuleFunction("Models", "GenerateModel", button.table.spawnData, spawnPos)
+				local part = CallModuleFunction("Models", "GenerateKnownModel", button.table.spawnData, spawnPos)
 
 				part.position = LocalPlayer().position + LocalPlayer().forward * (part.size.z+0.5) + newVector3(0,part.size.y/2-0.35,0)
 
@@ -378,7 +378,7 @@ function OnSpiritLibLoaded()
 	    	-- Register model with models system instead of only keeping the json in the button tables
 	    	CallModuleFunction("Models", "RegisterModel", model.name, objectJson)
 
-	    	CreateButton(model.name, model.description, allTabs["Models"], objectJson)
+	    	CreateButton(model.name, model.description, allTabs["Models"], model.name)
 	    elseif model.objectType == "Weapon" and model.weaponScript then
 		    CallModuleFunction("Weapons", "RegisterWeapon", model.name, objectJson)
 
