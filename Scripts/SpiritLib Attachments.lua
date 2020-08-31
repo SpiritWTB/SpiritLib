@@ -130,7 +130,7 @@ end
 
 -- this will delete a part with all its attached parts
 function Remove(_deleteThis)
-	deleteAttachments(_deleteThis)
+	DeleteAttachments(_deleteThis)
 	_deleteThis.Remove()
 end
 

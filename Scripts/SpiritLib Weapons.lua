@@ -77,7 +77,9 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 	-- [[ Begin Useful Functions Section]]
 
 		function SpawnModel(name, objectJSON, position)
+			print(1)
 			local weaponPart = CallModuleFunction("Models", "GenerateModel", objectJSON, position)
+			print(2)
 			weaponPart.name = name
 
 			return weaponPart
@@ -85,20 +87,29 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 		function InstantiateAndAttachWeapon(_player, _template)
 
+			print(_player)
+			print(_template)
 			-- copy the table of the weapon we're giving them
 			local weaponTableInstance = CopyTable(_template)
 
 			weaponTableInstance.template = _template
 
+			print(11)
 			-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
-			weaponTableInstance.part = SpawnModel(weaponTableInstance.name, weaponTableInstance.modelJson, player.position) --CallModuleFunction("Models", "GenerateModel", weapon.model, )
-			weaponTableInstance.part.frozen = true
-			weaponTableInstance.part.cancollide = false
-			weaponTableInstance.part.angles = player.angles
+			local part = SpawnModel(weaponTableInstance.name, weaponTableInstance.modelJson, _player.position)
+			weaponTableInstance.part = part
+			print(12)
 
-			CallModuleFunction("Attachments", "Attach", weaponTableInstance.part, _player)
 
-			weaponTableInstance.part.script = weaponTableInstance.weaponScript
+
+
+			part.frozen = true
+			part.cancollide = false
+			part.angles = _player.angles
+
+			CallModuleFunction("Attachments", "Attach", part, _player)
+
+			part.script = weaponTableInstance.weaponScript
 
 			weaponTableInstance.slot = weaponSlot
 			weaponTableInstance.indexInSlot = weaponSlotIndex
@@ -142,6 +153,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				playerInventory[weaponSlot] = {}
 			end
 
+			print("instance")
 			local weaponTableInstance = InstantiateAndAttachWeapon(player, weaponTemplate)
 
 			table.insert(playerInventory[weaponSlot], weaponTableInstance)
@@ -260,8 +272,6 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				slotChanged = true
 			end
 
-			
-
 			if slotChanged then
 
 				-- remove the old weapon if we need to
@@ -271,9 +281,6 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				if oldWeaponExists then
 
 					local oldWeapon = oldSlot[originalIndex].part
-
-					print(player.position)
-					print(oldWeapon.position)
 
 					if oldWeapon then
 						if oldWeapon.table.SpiritLibWeaponUI then
@@ -286,9 +293,13 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				end
 
 				-- if we're re-equipping a weapon we need to recreate it
-				local newSlot = playerInventories[player][player.table.SelectedWeaponSlot]
-				if newSlot or  newSlot[player.table.SelectedWeaponSlotIndex].part == nil then
-					-- instantiate the new weapon
+				local newSlot = playerWeaponInventories[player][player.table.SelectedWeaponSlot]
+				if newSlot then
+					local newWepTable = newSlot[player.table.SelectedWeaponSlotIndex]
+					if newWepTable and newWepTable.part == nil then
+						newWepTable.part = InstantiateAndAttachWeapon(player, newWepTable.template)
+
+					end
 				end
 
 			end
