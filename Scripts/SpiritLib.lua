@@ -19,9 +19,6 @@ You CAN however call a function on another script. To do this easily set up your
 		- name your script "SpiritLib <your_module_name>" and paste it in the script editor
 		- add your script to your "SpiritLib\Scripts" folder, name the file "SpiritLib <your_module_name>" and run the SpiritLib installer on your file
 
-If you're making a weapon, the weaponScript must start with the same prefix as the other weaponScripts. In other words it must be called "Weapon <your_weapon_name>".
-
-
 ===========            ^    SpiritLib Notes:    ^            =========== ]]
 
 
@@ -87,4 +84,99 @@ end
 
 function ReturnCall(caller, token, functionName, ...)
 	caller.table.spiritLibReturns[token] = _G[functionName](...)
+end
+
+
+
+-- hooks
+
+local hookedFunctions = {}
+
+function CallHook(_hookName, ...)
+	for hookName, part in pairs(hookedFunctions) do
+		if part == nil then
+			print("CallHook: Invalid part")
+		elseif part.scripts[1] == nil then
+			print("CallHook: Part has no script")
+		elseif part.scripts[1].Globals[_hookName] == nil then
+			print("CallHook: Function does not exist")
+		elseif type(part.scripts[1].Globals[_hookName]) ~= "function" then
+			print("CallHook: Not a function")
+		else
+			part.scripts[1].Call(_hookName, ...)
+		end
+	end
+end
+
+function HookFunction(_part, _hookName)
+	if (hookedFunctions[_hookName] == nil) then
+		hookedFunctions[_hookName] = {}
+	end
+
+	table.insert(hookedFunctions[_hookName], _part )
+end
+
+
+-- fixed connect
+
+local cachedPlayers = {}
+
+function FixedOnConnect(playerInfo)
+	print(playerInfo.name .. " joined in!")
+	CallHook("FixedOnConnect")
+end
+
+function FixedOnDisconnect(playerInfo)
+	print(playerInfo.name .. " bruh....")
+	CallHook("FixedOnConnect")
+end
+
+function OnDisconnect()
+	if IsHost then
+		local allPlayers = GetAllPlayers()
+
+		for id, player in pairs(cachedPlayers) do
+			local isOnline = false
+
+			for i, onlinePlr in pairs(allPlayers) do
+				if player.id == onlinePlr.id then
+					isOnline = true
+					break
+				end
+			end
+
+			if not isOnline then
+				FixedOnDisconnect(player)
+				cachedPlayers[id] = nil
+			end
+		end
+	end
+end
+
+function NetworkStringReceive(player, name, data)
+	if name == "Connected" then
+		if not cachedPlayers[player.id] then
+			local playerInfo = {
+				id = player.id,
+				name = player.name,
+				WTBID = player.WTBID
+			}
+
+			cachedPlayers[player.id] = playerInfo
+			FixedOnConnect(playerInfo)
+		end
+	end
+end
+
+if IsHost then
+	local playerInfo = {
+		id = LocalPlayer().id,
+		name = LocalPlayer().name,
+		WTBID = LocalPlayer().WTBID
+	}
+
+	cachedPlayers[LocalPlayer().id] = playerInfo
+	FixedOnConnect(playerInfo)
+else
+	NetworkSendToHost("Connected", {})
 end
