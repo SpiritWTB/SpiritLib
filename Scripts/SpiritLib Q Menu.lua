@@ -366,16 +366,16 @@ function OnSpiritLibLoaded()
 	CreateTab("Vehicles", 80)
 	CreateTab("Saves", 50)
 
-	for i, objectJson in pairs(GetModuleVariable("Default Objects", "BuiltInObjects")) do
-	    local model = FromJson(objectJson)
+	for i, modelJson in pairs(GetModuleVariable("Default Objects", "BuiltInObjects")) do
+	    local model = FromJson(modelJson)
 
 	    if model.objectType == "Models" then
 	    	-- Register model with models system instead of only keeping the json in the button tables
 	    elseif model.objectType == "Weapons" and model.weaponScript then
-		    CallModuleFunction("Weapons", "RegisterWeapon", model.name, model.weaponScript, objectJson)
+		    CallModuleFunction("Weapons", "RegisterWeapon", model.name, model.weaponScript, modelJson)
 		end
 
-	    CreateButton(model.name, model.description, allTabs[model.objectType], objectJson)
+	    CreateButton(model.name, model.description, allTabs[model.objectType], modelJson)
 	end
 
 	UpdatePagination()
