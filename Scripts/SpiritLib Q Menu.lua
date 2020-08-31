@@ -376,7 +376,7 @@ function OnSpiritLibLoaded()
 
 	    if model.objectType == "Model" then
 	    	-- Register model with models system instead of only keeping the json in the button tables
-
+	    	CallModuleFunction("Models", "RegisterModel", model.name, objectJson)
 
 	    	CreateButton(model.name, model.description, allTabs["Models"], objectJson)
 	    elseif model.objectType == "Weapon" and model.weaponScript then
