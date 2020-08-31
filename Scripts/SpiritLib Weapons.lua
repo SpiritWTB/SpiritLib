@@ -298,7 +298,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 					end
 				end
-
+				NetworkSendToPlayer("setSelectedBox", {slotNumber}, player)
 			end
 
 			print("SelectSlot: Final:  Slot Number:" .. tostring(player.table.SelectedWeaponSlot) .. ",  Index in slot: " .. tostring(player.table.SelectedWeaponSlotIndex))
@@ -355,7 +355,9 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 	end
 
 	local function selectUIBox(slot)
-		selectedUIBox.color = newColor(selectedUIBox.color.r, selectedUIBox.color.g, selectedUIBox.color.b, 0)
+		if selectedUIBox then
+			selectedUIBox.color = newColor(selectedUIBox.color.r, selectedUIBox.color.g, selectedUIBox.color.b, 0)
+		end
 
 		selectedUIBox = slotUIBoxes[slot]
 
@@ -539,6 +541,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 	end
 
 	function ClientReceive(host, name, data)
+		print("ClientRec: " .. name)
 		if name == "setSelectedBox" then
 			selectUIBox(data[1])
 		end
