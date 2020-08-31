@@ -244,7 +244,7 @@ local function UpdatePagination()
 	pageCount.text = "<b> Page " .. tostring(currentTab.currentPage) .. "/" .. tostring(#currentTab.pages) .. "</b>"
 end
 
-local function CreateButton(name, description, tab, modelName)
+local function CreateButton(name, description, tab, objectName)
 	local panel = tab.pages[#tab.pages]
 
 	local buttonSize = buttonsSize
@@ -268,7 +268,8 @@ local function CreateButton(name, description, tab, modelName)
 	EnableButton(button, false)
 
 	button.table.isSpiritLibSpawnButton = true
-	button.table.modelName = modelName
+	button.table.objectName = objectName
+	button.table.objectType = objectType
 
 	-- figure out the size of the button with its padding
 	local realSize = buttonsSize + newVector2(buttonsPadding, buttonsPadding)
@@ -323,26 +324,32 @@ function OnUIButtonClick(button)
 		SelectPage(#currentTab.pages)
 	elseif button.table.isTab then
 		SelectTab(button.table.tabName)
-	elseif button.table.isSpiritLibSpawnButton and button.table.modelName then
+	elseif button.table.isSpiritLibSpawnButton and button.table.objectName and button.table.objectType then
 
 		local spawnPos = LocalPlayer().position + LocalPlayer().forward
-		local objectData = FromJson(button.table.modelName)
 
-		if ModuleSettings.AllowedSpawnTypes[objectData.objectType] then
+		local modelTable = GetModuleVariable("Models", "ModelsByName")
 
-			if objectData.objectType == "Models" then
+		if modelTable and modelTable[button.table.objectName] then
 
-				local part = CallModuleFunction("Models", "GenerateKnownModel", button.table.modelName, spawnPos)
+			local objectData = FromJson(modelTable[button.table.objectName])
 
-				part.position = LocalPlayer().position + LocalPlayer().forward * (part.size.z+0.5) + newVector3(0,part.size.y/2-0.35,0)
+			if ModuleSettings.AllowedSpawnTypes[button.table.objectType] then
 
-				local angles = LocalPlayer().angles
-				angles.x = 0
-				angles.y = angles.y + 180
-				part.angles = angles
-			elseif objectData.objectType == "Weapons" then
-				NetworkSendToHost("requestWeapon", {objectData.name, objectData.weaponSlot})
-				--CallModuleFunction("Weapons", "GiveWeapon", LocalPlayer(), objectData.name, 1)
+				if button.table.objectType == "Model" then
+
+					print("going to try to call generation for " .. button.table.objectName)
+					local part = CallModuleFunction("Models", "GenerateKnownModel", button.table.objectName, spawnPos)
+
+					part.position = LocalPlayer().position + LocalPlayer().forward * (part.size.z+0.5) + newVector3(0,part.size.y/2-0.35,0)
+
+					local angles = LocalPlayer().angles
+					angles.x = 0
+					angles.y = angles.y + 180
+					part.angles = angles
+				elseif button.table.objectType == "Weapon" then
+					NetworkSendToHost("requestWeapon", {button.table.objectName})
+				end
 			end
 		end
 	end
@@ -372,17 +379,17 @@ function OnSpiritLibLoaded()
 	-- Import the default objects pack
 
 	for i, objectJson in pairs(GetModuleVariable("Default Objects", "BuiltInObjects")) do
-	    local model = FromJson(objectJson)
+	    local object = FromJson(objectJson)
 
-	    if model.objectType == "Model" then
+	    if object.objectType == "Model" then
 	    	-- Register model with models system instead of only keeping the json in the button tables
-	    	CallModuleFunction("Models", "RegisterModel", model.name, objectJson)
+	    	CallModuleFunction("Models", "RegisterModel", object.name, objectJson)
 
-	    	CreateButton(model.name, model.description, allTabs["Models"], model.name)
-	    elseif model.objectType == "Weapon" and model.weaponScript then
-		    CallModuleFunction("Weapons", "RegisterWeapon", model.name, objectJson)
+	    	CreateButton(object.name, object.description, allTabs["Models"], object.name, object.type)
+	    elseif object.objectType == "Weapon" and object.weaponScript then
+		    CallModuleFunction("Weapons", "RegisterWeapon", object.name, objectJson)
 
-		    CreateButton(model.name, model.description, allTabs["Weapons"], objectJson)
+		    CreateButton(object.name, object.description, allTabs["Weapons"], object.name, object.type)
 		end
 
 	    

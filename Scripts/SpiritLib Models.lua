@@ -151,6 +151,8 @@ function SaveObject(objectType, name, description, parts)
 end
 
 function GenerateKnownModel(name, --[[optional]] position)
+	print("trying to generate model " .. name)
+	print(ModelsByName[name].objectJson)
 	if ModelsByName[name] and ModelsByName[name].objectJson then
 		return GenerateModel(ModelsByName[name].objectJson, position or Vector3.zero)
 	end
@@ -162,6 +164,7 @@ function GenerateModel(objectJson, --[[optional]]position, --[[optional]]partNam
 	local modelTable
 
 	if type(objectJson) == "string" then
+		print(1)
 		modelTable = FromJson(objectJson)
 	end
 

@@ -466,7 +466,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		if not client then return end
 		if name == "requestWeapon" then
 			if GetModuleVariable("Q Menu", "ModuleSettings").AllowedSpawnTypes["Models"] then
-				GiveWeapon(client, data[1], data[2], true)
+				GiveWeapon(client, data[1], true)
 			end
 		end
 
