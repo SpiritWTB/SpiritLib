@@ -244,7 +244,7 @@ local function UpdatePagination()
 	pageCount.text = "<b> Page " .. tostring(currentTab.currentPage) .. "/" .. tostring(#currentTab.pages) .. "</b>"
 end
 
-local function CreateButton(name, description, tab, modelDataJson)
+local function CreateButton(name, description, tab, modelName)
 	local panel = tab.pages[#tab.pages]
 
 	local buttonSize = buttonsSize
@@ -268,7 +268,7 @@ local function CreateButton(name, description, tab, modelDataJson)
 	EnableButton(button, false)
 
 	button.table.isSpiritLibSpawnButton = true
-	button.table.spawnData = modelDataJson
+	button.table.modelName = modelName
 
 	-- figure out the size of the button with its padding
 	local realSize = buttonsSize + newVector2(buttonsPadding, buttonsPadding)
@@ -323,16 +323,16 @@ function OnUIButtonClick(button)
 		SelectPage(#currentTab.pages)
 	elseif button.table.isTab then
 		SelectTab(button.table.tabName)
-	elseif button.table.isSpiritLibSpawnButton and button.table.spawnData then
+	elseif button.table.isSpiritLibSpawnButton and button.table.modelName then
 
 		local spawnPos = LocalPlayer().position + LocalPlayer().forward
-		local objectData = FromJson(button.table.spawnData)
+		local objectData = FromJson(button.table.modelName)
 
 		if ModuleSettings.AllowedSpawnTypes[objectData.objectType] then
 
 			if objectData.objectType == "Models" then
 
-				local part = CallModuleFunction("Models", "GenerateKnownModel", button.table.spawnData, spawnPos)
+				local part = CallModuleFunction("Models", "GenerateKnownModel", button.table.modelName, spawnPos)
 
 				part.position = LocalPlayer().position + LocalPlayer().forward * (part.size.z+0.5) + newVector3(0,part.size.y/2-0.35,0)
 
