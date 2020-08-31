@@ -77,9 +77,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 	-- [[ Begin Useful Functions Section]]
 
 		function SpawnModel(name, objectJSON, position)
-			print(1)
 			local weaponPart = CallModuleFunction("Models", "GenerateModel", objectJSON, position)
-			print(2)
 			weaponPart.name = name
 
 			return weaponPart
@@ -144,15 +142,13 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 				playerInventory[weaponSlot] = {}
 			end
 
-			print("instance")
-
 
 			-- make a new instance of the weapon template table
 			local weaponTableInstance = CopyTable(weaponTemplate)
 			weaponTableInstance.template = weaponTemplate
 
 			weaponTableInstance.slot = weaponSlot
-			weaponTableInstance.indexInSlot = weaponSlotIndex
+			weaponTableInstance.slotIndex = weaponSlotIndex
 
 			weaponTableInstance.part = InstantiateAndAttachWeapon(player, weaponTemplate)
 			
@@ -208,11 +204,11 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			if CountTable(playerInventory) < 1 then return end
 
 			-- increase the index in the slot
-			player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot + 1
+			player.table.SelectedWeaponSlotIndex = player.table.SelectedWeaponSlotIndex + 1
 
 			-- if there's no weapon there, go back to in-slot-index 1 and bump forward to the next slot 
-			if not playerInventory[player.table.SelectedWeaponIndexInSlot] then
-				player.table.SelectedWeaponIndexInSlot = 1
+			if not playerInventory[player.table.SelectedWeaponSlotIndex] then
+				player.table.SelectedWeaponSlotIndex = 1
 
 				-- if we get to the end of the players weapon inventory we go back to the beginning
 				slotNumber = rolloverIndex(slotNumber + 1, playerInventory)
@@ -227,11 +223,11 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			if CountTable(playerInventory) < 1 then return end
 
 			-- increase the index in the slot
-			player.table.SelectedWeaponIndexInSlot = player.table.SelectedWeaponIndexInSlot - 1
+			player.table.SelectedWeaponSlotIndex = player.table.SelectedWeaponSlotIndex - 1
 
 			-- if there's no weapon there, go back to in-slot-index 1 and bump forward to the next slot 
-			if not playerInventory[player.table.SelectedWeaponIndexInSlot] then
-				player.table.SelectedWeaponIndexInSlot = 1
+			if not playerInventory[player.table.SelectedWeaponSlotIndex] then
+				player.table.SelectedWeaponSlotIndex = 1
 
 				-- if we get to the end of the players weapon inventory we go back to the beginning
 				slotNumber = rolloverIndex(slotNumber - 1, playerInventory)
@@ -453,6 +449,17 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		end
 	end
 
+	function FunctionExists(part, functionName)
+
+		if part and part.scripts[1] then
+			if part.scripts[1].Globals[functionName] and type(part.scripts[1].Globals[functionName]) == "function" then
+				return true
+			end
+		end
+
+		return false
+	end
+
 	function HostReceive(client, name, data)
 		if not client then return end
 		if name == "requestWeapon" then
@@ -470,9 +477,9 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		end
 
 		if name == "weaponInput" then
-			if client.table.SelectedWeaponSlot ~= nil and client.table.SelectedWeaponIndexInSlot ~= nil then
+			if client.table.SelectedWeaponSlot ~= nil and client.table.SelectedWeaponSlotIndex ~= nil then
 				local slot = client.table.SelectedWeaponSlot
-				local idInSlot = client.table.SelectedWeaponIndexInSlot
+				local idInSlot = client.table.SelectedWeaponSlotIndex
 
 				local slotHasWeaponAtIndex = (playerWeaponInventories[client] and playerWeaponInventories[client][slot] and playerWeaponInventories[client][slot][idInSlot])
 
@@ -495,20 +502,36 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 						hitObject = PlayerByID(objectID)
 					end
 
+					local weapon = playerWeaponInventories[client][slot][idInSlot].part
+
 					if data[1] == 1 then
-						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Fire", client, mousePos, hitObject)
+						if FunctionExists(weapon, "Fire") then
+							weapon.scripts[1].Call("Fire", client, mousePos, hitObject)
+						end
 					elseif data[1] == 2 then
-						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("FireRelease", client)
+						if FunctionExists(weapon, "FireRelease") then
+							weapon.scripts[1].Call("FireRelease", client)
+						end
 					elseif data[1] == 3 then
-						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("AltFire", client, mousePos, hitObject)
+						if FunctionExists(weapon, "AltFire") then
+							weapon.scripts[1].Call("AltFire", client, mousePos, hitObject)
+						end
 					elseif data[1] == 4 then
-						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("AltFireRelease", client)
+						if FunctionExists(weapon, "AltFireRelease") then
+							weapon.scripts[1].Call("AltFireRelease", client)
+						end
 					elseif data[1] == 5 then
-						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Reload", client, mousePos, hitObject)
+						if FunctionExists(weapon, "Reload") then
+							weapon.scripts[1].Call("Reload", client, mousePos, hitObject)
+						end
 					elseif data[1] == 6 then
-						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Use", client, mousePos, hitObject)
+						if FunctionExists(weapon, "Use") then
+							weapon.scripts[1].Call("Use", client, mousePos, hitObject)
+						end
 					elseif data[1] == 7 then
-						playerWeaponInventories[client][slot][idInSlot].part.scripts[1].Call("Special", client, mousePos, hitObject)
+						if FunctionExists(weapon, "Special") then
+							weapon.scripts[1].Call("Special", client, mousePos, hitObject)
+						end
 					end
 				end
 			end
