@@ -99,7 +99,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 			return part
 		end
 
-		function GiveWeapon(player, weaponName, equip)
+		function GiveWeapon(player, weaponName, shouldEquip)
 
 			local weaponTemplate = WeaponsByName[weaponName]
 			local playerInventory = playerWeaponInventories[player]
@@ -155,7 +155,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 			table.insert(playerInventory[weaponSlot], weaponTableInstance)
 
-			if equip then
+			if shouldEquip then
 				SelectSlot(player, weaponSlot, weaponSlotIndex)
 			end
 		end
