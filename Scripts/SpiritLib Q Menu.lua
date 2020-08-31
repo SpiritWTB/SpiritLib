@@ -359,6 +359,8 @@ function Update()
 end
 
 function OnSpiritLibLoaded()
+
+	-- Create the tabs for the UI
 	CreateTab("Models", 60)
 	CreateTab("Weapons", 70)
 	CreateTab("Entities", 80)
@@ -366,16 +368,24 @@ function OnSpiritLibLoaded()
 	CreateTab("Vehicles", 80)
 	CreateTab("Saves", 50)
 
+
+	-- Import the default objects pack
+
 	for i, objectJson in pairs(GetModuleVariable("Default Objects", "BuiltInObjects")) do
 	    local model = FromJson(objectJson)
 
-	    if model.objectType == "Models" then
+	    if model.objectType == "Model" then
 	    	-- Register model with models system instead of only keeping the json in the button tables
-	    elseif model.objectType == "Weapons" and model.weaponScript then
+
+
+	    	CreateButton(model.name, model.description, allTabs["Models"], objectJson)
+	    elseif model.objectType == "Weapon" and model.weaponScript then
 		    CallModuleFunction("Weapons", "RegisterWeapon", model.name, model.weaponScript, objectJson)
+
+		    CreateButton(model.name, model.description, allTabs["Weapons"], objectJson)
 		end
 
-	    CreateButton(model.name, model.description, allTabs[model.objectType], objectJson)
+	    
 	end
 
 	UpdatePagination()
