@@ -247,3 +247,18 @@ function LoadWorld(name)
 
 	return returnData
 end
+
+RegisteredModels = {}
+ModelsByName = {}
+
+function RegisterModel(name, scriptName, objectJson)
+	if not name or not scriptName or not objectJson then
+		return
+	end
+
+	local modelTable = FromJson(objectJson)
+	modelTable.objectJson = objectJson
+
+	table.insert(RegisteredModels, modelTable)
+	ModelsByName[modelTable.name] = modelTable
+end

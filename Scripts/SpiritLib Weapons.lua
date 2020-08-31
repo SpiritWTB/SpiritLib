@@ -86,7 +86,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		function InstantiateAndAttachWeapon(_player, _weaponTable)
 
 			-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
-			local part = SpawnModel(_weaponTable.name, _weaponTable.modelJson, _player.position + _player.forward*0.7)
+			local part = SpawnModel(_weaponTable.name, _weaponTable.objectJson, _player.position + _player.forward*0.7)
 
 			part.frozen = true
 			part.cancollide = false
@@ -169,13 +169,13 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		RegisteredWeapons = {}
 		WeaponsByName = {}
 
-		function RegisterWeapon(name, modelJson)
-			if not name or not modelJson then
+		function RegisterWeapon(name, objectJson)
+			if not name or not objectJson then
 				return
 			end
 
-			local weaponTable = FromJson(modelJson)
-			weaponTable.modelJson = modelJson
+			local weaponTable = FromJson(objectJson)
+			weaponTable.objectJson = objectJson
 
 			table.insert(RegisteredWeapons, weaponTable)
 			WeaponsByName[weaponTable.name] = weaponTable
