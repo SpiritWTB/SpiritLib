@@ -366,7 +366,7 @@ function OnSpiritLibLoaded()
 	CreateTab("Vehicles", 80)
 	CreateTab("Saves", 50)
 
-	for i, modelJson in pairs(GetModuleVariable("Default Objects", "BuiltInObjects")) do
+	for i, modelJson in pairs(GetModuleVariable("Default Models", "BuiltInModels")) do
 	    local model = FromJson(modelJson)
 
 	    if model.objectType == "Models" then
