@@ -151,13 +151,13 @@ function SaveObject(objectType, name, description, parts)
 end
 
 
-function GenerateModel(modelJson, --[[optional]]position, --[[optional]]partNameOverride)
+function GenerateModel(objectJson, --[[optional]]position, --[[optional]]partNameOverride)
 	print("Generating model...")
 
 	local modelTable
 
-	if type(modelJson) == "string" then
-		modelTable = FromJson(modelJson)
+	if type(objectJson) == "string" then
+		modelTable = FromJson(objectJson)
 	end
 
 	local modelParts = {}
