@@ -150,6 +150,11 @@ function SaveObject(objectType, name, description, parts)
 	File.Write("model_" .. name, ToJson(allParts))
 end
 
+function GenerateKnownModel(name, --[[optional]] position)
+	if ModelsByName[name] and ModelsByName[name].objectJson then
+		return GenerateModel(ModelsByName[name].objectJson, position or Vector3.zero)
+	end
+end
 
 function GenerateModel(objectJson, --[[optional]]position, --[[optional]]partNameOverride)
 	print("Generating model...")
