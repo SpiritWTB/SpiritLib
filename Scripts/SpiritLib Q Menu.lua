@@ -380,7 +380,7 @@ function OnSpiritLibLoaded()
 
 	    	CreateButton(model.name, model.description, allTabs["Models"], objectJson)
 	    elseif model.objectType == "Weapon" and model.weaponScript then
-		    CallModuleFunction("Weapons", "RegisterWeapon", model.name, model.weaponScript, objectJson)
+		    CallModuleFunction("Weapons", "RegisterWeapon", model.name, objectJson)
 
 		    CreateButton(model.name, model.description, allTabs["Weapons"], objectJson)
 		end

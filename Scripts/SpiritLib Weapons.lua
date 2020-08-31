@@ -169,8 +169,8 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		RegisteredWeapons = {}
 		WeaponsByName = {}
 
-		function RegisterWeapon(name, scriptName, modelJson)
-			if not name or not scriptName or not modelJson then
+		function RegisterWeapon(name, modelJson)
+			if not name or not modelJson then
 				return
 			end
 
