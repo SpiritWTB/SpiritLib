@@ -86,7 +86,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		function InstantiateAndAttachWeapon(_player, _weaponTable)
 
 			-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
-			local part = SpawnModel(_weaponTable.name, _weaponTable.modelJson, _player.position)
+			local part = SpawnModel(_weaponTable.name, _weaponTable.modelJson, _player.position + _player.forward*0.7)
 
 			part.frozen = true
 			part.cancollide = false
