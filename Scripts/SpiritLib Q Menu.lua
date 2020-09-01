@@ -15,8 +15,8 @@ ModuleSettings = {
 	AllowQMenu = true,
 
 	AllowedSpawnTypes = {
-		["Models"] = true,
-		["Weapons"] = true,
+		["Model"] = true,
+		["Weapon"] = true,
 	}
 }
 
@@ -244,7 +244,7 @@ local function UpdatePagination()
 	pageCount.text = "<b> Page " .. tostring(currentTab.currentPage) .. "/" .. tostring(#currentTab.pages) .. "</b>"
 end
 
-local function CreateButton(name, description, tab, objectName)
+local function CreateButton(name, description, tab, objectName, objectType)
 	local panel = tab.pages[#tab.pages]
 
 	local buttonSize = buttonsSize
@@ -314,6 +314,11 @@ local function SelectPage(number)
 end
 
 function OnUIButtonClick(button)
+
+	print(button.table.isSpiritLibSpawnButton)
+	print(button.table.objectName)
+	print(button.table.objectType)
+
 	if button.table.isFirstPageButton then
 		SelectPage(1)
 	elseif button.table.isPreviousPageButton then
@@ -330,26 +335,24 @@ function OnUIButtonClick(button)
 
 		local modelTable = GetModuleVariable("Models", "ModelsByName")
 
-		if modelTable and modelTable[button.table.objectName] then
+		print("button click")
 
-			local objectData = FromJson(modelTable[button.table.objectName])
+		if ModuleSettings.AllowedSpawnTypes[button.table.objectType] then
 
-			if ModuleSettings.AllowedSpawnTypes[button.table.objectType] then
+			if button.table.objectType == "Model" then
 
-				if button.table.objectType == "Model" then
+				local part = CallModuleFunction("Models", "GenerateKnownModel", button.table.objectName, spawnPos)
 
-					print("going to try to call generation for " .. button.table.objectName)
-					local part = CallModuleFunction("Models", "GenerateKnownModel", button.table.objectName, spawnPos)
-
+				if part then
 					part.position = LocalPlayer().position + LocalPlayer().forward * (part.size.z+0.5) + newVector3(0,part.size.y/2-0.35,0)
 
 					local angles = LocalPlayer().angles
 					angles.x = 0
 					angles.y = angles.y + 180
 					part.angles = angles
-				elseif button.table.objectType == "Weapon" then
-					NetworkSendToHost("requestWeapon", {button.table.objectName})
 				end
+			elseif button.table.objectType == "Weapon" then
+				NetworkSendToHost("requestWeapon", {button.table.objectName})
 			end
 		end
 	end
@@ -385,11 +388,11 @@ function OnSpiritLibLoaded()
 	    	-- Register model with models system instead of only keeping the json in the button tables
 	    	CallModuleFunction("Models", "RegisterModel", object.name, objectJson)
 
-	    	CreateButton(object.name, object.description, allTabs["Models"], object.name, object.type)
+	    	CreateButton(object.name, object.description, allTabs["Models"], object.name, object.objectType)
 	    elseif object.objectType == "Weapon" and object.weaponScript then
 		    CallModuleFunction("Weapons", "RegisterWeapon", object.name, objectJson)
 
-		    CreateButton(object.name, object.description, allTabs["Weapons"], object.name, object.type)
+		    CreateButton(object.name, object.description, allTabs["Weapons"], object.name, object.objectType)
 		end
 
 	    

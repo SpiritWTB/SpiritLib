@@ -259,14 +259,18 @@ end
 RegisteredModels = {}
 ModelsByName = {}
 
-function RegisterModel(name, scriptName, objectJson)
-	if not name or not scriptName or not objectJson then
+function RegisterModel(name, objectJson)
+	if not name or not objectJson then
 		return
 	end
 
+	print(name)
 	local modelTable = FromJson(objectJson)
+	print(modelTable.name)
+	print(objectJson)
 	modelTable.objectJson = objectJson
 
 	table.insert(RegisteredModels, modelTable)
 	ModelsByName[modelTable.name] = modelTable
+	
 end
