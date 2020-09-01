@@ -57,9 +57,9 @@ BuiltInObjects = {
 
 	-- WEAPONS
 
-	'{"name":"Physgun","description":"The physics gun","objectType":"Weapon","weaponScript":"Weapon Physgun","weaponSlot":1,"model":"Physgun Model"}',
+	'{"name":"Physgun","description":"The physics gun","objectType":"Weapon","weaponScript":"Weapon Physgun","weaponSlot":1,"modelName":"Physgun Model"}',
 
-	'{"name":"The Packager","description":"Helps devs export models","objectType":"Weapon","weaponScript":"Weapon Packager","weaponSlot":2,"model":"Traffic Cone"}',
+	'{"name":"The Packager","description":"Helps devs export models","objectType":"Weapon","weaponScript":"Weapon Packager","weaponSlot":2,"modelName":"Traffic Cone"}',
 	
-	'{"name":"Physgun Slot3","description":"The physics gun, but it goes in slot 3 for testing, and has a different model","objectType":"Weapon","weaponScript":"Weapon Physgun","weaponSlot":3,"model":"Traffic Cone"}',
+	'{"name":"Physgun Slot3","description":"The physics gun, but it goes in slot 3 for testing, and has a different model","objectType":"Weapon","weaponScript":"Weapon Physgun","weaponSlot":3,"modelName":"Traffic Cone"}',
 }

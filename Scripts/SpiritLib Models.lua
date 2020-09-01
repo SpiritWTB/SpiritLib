@@ -264,10 +264,7 @@ function RegisterModel(name, objectJson)
 		return
 	end
 
-	print(name)
 	local modelTable = FromJson(objectJson)
-	print(modelTable.name)
-	print(objectJson)
 	modelTable.objectJson = objectJson
 
 	table.insert(RegisteredModels, modelTable)

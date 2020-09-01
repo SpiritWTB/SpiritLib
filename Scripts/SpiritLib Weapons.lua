@@ -86,7 +86,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 		function InstantiateAndAttachWeapon(_player, _weaponTable)
 
 			-- todo use LoadModel instead of just CreatePart, we need it to return before we can do that though
-			local part = SpawnModel(_weaponTable.name, _player.position + _player.forward*0.7)
+			local part = SpawnModel(_weaponTable.modelName, _player.position + _player.forward*0.7)
 
 			part.frozen = true
 			part.cancollide = false
@@ -433,7 +433,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 -- [[ End Client Section]]
 
 
-
+	
 
 
 
@@ -465,7 +465,7 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 	function HostReceive(client, name, data)
 		if not client then return end
 		if name == "requestWeapon" then
-			if GetModuleVariable("Q Menu", "ModuleSettings").AllowedSpawnTypes["Models"] then
+			if GetModuleVariable("Q Menu", "ModuleSettings").AllowedSpawnTypes["Weapon"] then
 				GiveWeapon(client, data[1], true)
 			end
 		end

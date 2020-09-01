@@ -21,13 +21,15 @@ local CurrentPhysRotation = Vector3.zero
 function Fire(ply, mousePos, entityHit)
 	print("Fire " .. Name)
 
-	-- self should work here, I googled it at some point
-	CurrentObject = entityHit
+	if entityHit then
+		-- self should work here, I googled it at some point
+		CurrentObject = entityHit
 
-	local diff = entityHit.position - ply.position
-	local angle = diff.normalized
+		local diff = entityHit.position - ply.position
+		local angle = diff.normalized
 
-	CurrentPhysDistance = diff.magnitude
+		CurrentPhysDistance = diff.magnitude
+	end
 end
 
 --[[ function Update()
