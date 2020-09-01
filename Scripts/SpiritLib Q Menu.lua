@@ -341,7 +341,7 @@ function OnUIButtonClick(button)
 
 			if button.table.objectType == "Model" then
 
-				local part = CallModuleFunction("Models", "GenerateKnownModel", button.table.objectName, spawnPos)
+				local part = CallModuleFunction("Models", "GenerateKnownModel", button.table.objectName, spawnPos, false)
 
 				if part then
 					part.position = LocalPlayer().position + LocalPlayer().forward * (part.size.z+0.5) + newVector3(0,part.size.y/2-0.35,0)

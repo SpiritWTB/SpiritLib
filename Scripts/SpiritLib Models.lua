@@ -93,7 +93,7 @@ local function GenerateData(part)
 	return output
 end
 
-local function GeneratePart(data, --[[optional = false]] isMapPart)
+local function GeneratePart(data, --[[optional = false]] isMapPart, ignoreRaycast)
 	local part = CreatePart(data.parttype, data.position, data.angles)
 	part.name = data.name
 	part.size = data.size
@@ -105,7 +105,7 @@ local function GeneratePart(data, --[[optional = false]] isMapPart)
 	if isMapPart then
 		part.frozen = data.frozen
 	else
-		part.ignoreRaycast = true
+		part.ignoreRaycast = ignoreRaycast or true
 	end
 
 	if data.script then
@@ -150,15 +150,15 @@ function SaveObject(objectType, name, description, parts)
 	File.Write("model_" .. name, ToJson(allParts))
 end
 
-function GenerateKnownModel(name, --[[optional]] position)
+function GenerateKnownModel(name, --[[optional]] position, --[[optional]]ignoreRaycast)
 	print("trying to generate model " .. name)
 	print(ModelsByName[name].objectJson)
 	if ModelsByName[name] and ModelsByName[name].objectJson then
-		return GenerateModel(ModelsByName[name].objectJson, position or Vector3.zero)
+		return GenerateModel(ModelsByName[name].objectJson, position or Vector3.zero, ignoreRaycast)
 	end
 end
 
-function GenerateModel(objectJson, --[[optional]]position, --[[optional]]partNameOverride)
+function GenerateModel(objectJson, --[[optional]]position, --[[optional]]ignoreRaycast, --[[optional]]partNameOverride)
 	print("Generating model...")
 
 	local modelTable
@@ -171,7 +171,7 @@ function GenerateModel(objectJson, --[[optional]]position, --[[optional]]partNam
 	local modelParts = {}
 
 	for i, part in pairs(modelTable.data) do
-		local generated = GeneratePart(part)
+		local generated = GeneratePart(part, false, ignoreRaycast)
 
 		if generated then
 			table.insert(modelParts, generated)
