@@ -51,7 +51,13 @@ instantModeIndicator.textSize = 20
 This.table.SpiritLibWeaponUI = instantModeIndicator
 
 function Update()
-	local hitdata = RayCast(LocalPlayer().viewPosition, MousePosWorld());
+
+	local mousepos = MousePosWorld()
+	local player = LocalPlayer()
+
+	local viewDirection = newVector3( math.cos(player.viewAngles.y)*math.cos(player.viewAngles.x), math.sin(player.viewAngles.y)*math.cos(player.viewAngles.x), math.sin(player.viewAngles.x) )
+	local raycastStart = mousepos - viewDirection*0.04
+	local hitdata = RayCast(raycastStart, mousepos + viewDirection * 0.04);
 
 	local onOff ="OFF"
 	if instantMode then

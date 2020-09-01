@@ -318,7 +318,14 @@ slotUIHolder.color = newColor(0, 0, 0, 0)
 
 
 	function ProcessFire(_input)
-		local hitdata = RayCast(LocalPlayer().viewPosition, MousePosWorld());
+
+
+		local angles = LocalPlayer().viewAngles
+		local mousePos = MousePosWorld()
+
+		local viewDirection = newVector3( math.cos(angles.y)*math.cos(angles.x), math.sin(angles.y)*math.cos(angles.x), math.sin(angles.x) )
+		local raycastStart = mousePos - viewDirection*0.04
+		local hitdata = RayCast(raycastStart, mousePos + viewDirection * 0.04);
 
 		local hitObjectID = nil
 		local hitObjectType = nil

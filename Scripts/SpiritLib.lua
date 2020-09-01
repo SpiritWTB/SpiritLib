@@ -88,3 +88,9 @@ end
 function ReturnCall(caller, token, functionName, ...)
 	caller.table.spiritLibReturns[token] = _G[functionName](...)
 end
+
+-- dunno if we can use this from here but lets keep it around so it doesn't get lost
+-- it takes pitch/yaw/roll angles and converts them to direction vector like blah.forward
+function AngleToDirectionVector(_angle)
+	return newVector3( math.cos(_angle.y)*math.cos(_angle.x), math.sin(_angle.y)*math.cos(_angle.x), math.sin(_angle.x) )
+end
