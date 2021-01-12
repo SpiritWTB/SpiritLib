@@ -29,6 +29,8 @@ SpiritLib = {}
 SpiritLib.Modules = {
 	["Core"] = This,
 
+	["Networking"] = false,
+	["MousePos"] = false,
 	["Attachments"] = false,
 	["Default Objects"] = false,
 	["Models"] = false,
