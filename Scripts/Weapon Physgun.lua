@@ -17,23 +17,36 @@ Slot = 1
 local CurrentObject = nil
 local CurrentPhysDistance = 0
 local CurrentPhysRotation = Vector3.zero
+local CurrentPhysHeight = 0
 
 function Fire(ply, mousePos, entityHit)
-	print("Fire " .. Name)
-
+	
 	if entityHit then
-		-- self should work here, I googled it at some point
+
 		CurrentObject = entityHit
+		CurrentObject.ignoreRaycast = true
 
 		local diff = entityHit.position - ply.position
 		local angle = diff.normalized
 
 		CurrentPhysDistance = diff.magnitude
+
+		CurrentPhysHeight = CurrentObject.position.y
 	end
 end
 
---[[ function Update()
+function FireRelease(ply, mousePos, entityHit)
 	if CurrentObject ~= nil then
-		
+		CurrentObject.ignoreRaycast = false
+		CurrentObject = nil
 	end
-end ]]
+end
+
+function Update()
+	if CurrentObject ~= nil then
+
+		local mousePos = CallModuleFunction("Networking", "GetStreamedValue", "MousePos:" .. LocalPlayer().id)
+
+		CurrentObject.position = newVector3(mousePos.x, CurrentPhysHeight, mousePos.z)  
+	end
+end

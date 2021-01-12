@@ -4,18 +4,13 @@ local SLNet = function(...) SpiritLib().Call("ExecuteFunction", "Networking", ..
 function CallModuleFunction(moduleName, name, ...) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Call(name, ...) end
 function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
 
-function Update()
-	if InputPressed("z") then
-		CallModuleFunction("Networking", "CreateStreamedValue", "MousePos:" .. LocalPlayer().id, MousePosWorld())
-	elseif InputPressed("x") then
-		for i, player in pairs(GetAllPlayers()) do
-			local key = "MousePos:" .. player.id
+local mousePosRegistered = false
 
-			if player.table[key] then
-				print(player.id, player.table[key].position)
-			end
-		end
-	elseif InputPressed("c") then
+function Update()
+	if mousePosRegistered==false then
+		CallModuleFunction("Networking", "CreateStreamedValue", "MousePos:" .. LocalPlayer().id, MousePosWorld())
+    	mousePosRegistered = true
+	else
 		CallModuleFunction("Networking", "UpdateStreamedValue", "MousePos:" .. LocalPlayer().id, MousePosWorld())
 	end
 end
