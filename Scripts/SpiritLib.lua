@@ -7,7 +7,7 @@ Don't forget there are always more errors in your log file! Go to windows explor
 DO NOT CLICK ON THE "SpiritLib Default Models" SCRIPT file in the script editor unless you want to wait a while
 
 To use SpiritLib effectively, you must always add the "SpiritLib Setup" section to the beginning of your script. 
-This gives you access to CallModuleFunction( moduleName, functionName, arguments ), which returns values as well
+This gives you access to GetModule( moduleName).Call( functionName, arguments ), which returns values as well
 
 You cannot pass certain types, (namely functions & tables) between scripts.
 If you check the log file and see errors about
@@ -24,6 +24,21 @@ If you're making a weapon, the weaponScript must start with the same prefix as t
 
 ===========            ^    SpiritLib Notes:    ^            =========== ]]
 
+
+SpiritLibSetup = [[
+	local CachedSpiritLibPart = nil
+
+	local function SpiritLib()
+		if (CachedSpiritLibPart == nil) then
+			CachedSpiritLibPart = PartByName('SpiritLib')
+		end
+		return CachedSpiritLibPart.scripts[1] 
+	end
+
+	local function GetModule(moduleName)
+			return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1]
+	end
+]]
 
 SpiritLib = {}
 SpiritLib.Modules = {
@@ -69,27 +84,7 @@ function LoadFinished()
 	end
 end
 
-function FixedCall(caller, moduleName, functionName, token, ...)
-	local activeModule = SpiritLib.Modules[moduleName]
 
-	if activeModule then
-		if activeModule.scripts[1].Globals["ReturnCall"] then
-			if activeModule.scripts[1].Globals[functionName] and type(activeModule.scripts[1].Globals[functionName]) == "function" then
-				activeModule.scripts[1].Call("ReturnCall", caller, token, functionName, ...)
-			else
-				print("CallModuleFunction: Module \"" .. moduleName .. "\" does not contain function \"" .. functionName .. "\"")
-			end
-		else
-			print("CallModuleFunction: Module \"" .. moduleName .. "\" has not implemented ReturnCall. Add this function to the module you're trying to call.")
-		end
-	else
-		print("CallModuleFunction: Module \"" .. moduleName .. "\" does not exist.")
-	end
-end
-
-function ReturnCall(caller, token, functionName, ...)
-	caller.table.spiritLibReturns[token] = _G[functionName](...)
-end
 
 -- dunno if we can use this from here but lets keep it around so it doesn't get lost
 -- it takes pitch/yaw/roll angles and converts them to direction vector like blah.forward

@@ -1,12 +1,5 @@
 --[[ Start SpiritLib Setup ]]
-
-local SL_UsedReturnTokens = {}
-local function SpiritLib() return PartByName("SpiritLib").scripts[1] end
-local function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
-local function GetToken() local token = 1; while SL_UsedReturnTokens[token] do token = token + 1 end SL_UsedReturnTokens[token] = true; return token end
-local function CallModuleFunction(moduleName, functionName, ...) local token = GetToken(); SpiritLib().Call("FixedCall", This, moduleName, functionName, "!SLToken" .. token, ...); SL_UsedReturnTokens[token] = nil; return This.table["!SLToken" .. token] end
-function ReturnCall(caller, token, functionName, ...) caller.table[token] = _G[functionName](...) end
-
+loadstring(PartByName("SpiritLib").scripts[1].Globals.SpiritLibSetup)
 -- [[ End SpiritLib Setup ]]
 
 
@@ -27,7 +20,7 @@ function Fire(ply, mousePos, entityHit)
 	if entityHit and entityHit.type == "Part" and (not objectCollection[entityHit.id]) then
 
 		if instantMode then
-			CallModuleFunction("Models", "SaveModelByName", entityHit.name, "Freshly generated.", entityHit.name)
+			GetModule("Models").Call( "SaveModelByName", entityHit.name, "Freshly generated.", entityHit.name)
 		else
 			if not objectCollection[entityHit] then
 				objectCollection[entityHit] = entityHit.name
@@ -117,7 +110,7 @@ function saveModel(collection)
 	end
 
 	-- can't pass the collection of objects over, no tables, have to name everything then set it back
-	CallModuleFunction("Models", "SaveModelByName", timename, "Freshly generated.", timename)
+	GetModule("Models").Call( "SaveModelByName", timename, "Freshly generated.", timename)
 
 	for part, name in pairs(collection) do
 		part.name = name

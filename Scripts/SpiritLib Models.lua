@@ -1,12 +1,5 @@
 --[[ Start SpiritLib Setup ]]
-
-local SL_UsedReturnTokens = {}
-local function SpiritLib() return PartByName("SpiritLib").scripts[1] end
-local function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
-local function GetToken() local token = 1; while SL_UsedReturnTokens[token] do token = token + 1 end SL_UsedReturnTokens[token] = true; return token end
-local function CallModuleFunction(moduleName, functionName, ...) local token = GetToken(); SpiritLib().Call("FixedCall", This, moduleName, functionName, "!SLToken" .. token, ...); SL_UsedReturnTokens[token] = nil; return This.table["!SLToken" .. token] end
-function ReturnCall(caller, token, functionName, ...) caller.table[token] = _G[functionName](...) end
-
+loadstring(PartByName("SpiritLib").scripts[1].Globals.SpiritLibSetup)
 -- [[ End SpiritLib Setup ]]
 
 local function CreateBoundingBox(parts)
@@ -61,7 +54,7 @@ local function CreateBoundingBox(parts)
 		part.cancollide = false
 	end
 
-	CallModuleFunction("Attachments", "Attach", renderParent, encompasser, false)
+	GetModule("Attachments").Call("Attach", renderParent, encompasser, false)
 
 	encompasser.frozen = false
 	encompasser.cancollide = true

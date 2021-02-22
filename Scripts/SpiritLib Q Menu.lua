@@ -1,14 +1,5 @@
---todo: raycast for spawn positions
-
 --[[ Start SpiritLib Setup ]]
-
-local SL_UsedReturnTokens = {}
-local function SpiritLib() return PartByName("SpiritLib").scripts[1] end
-local function GetModuleVariable(moduleName, name) return SpiritLib().Globals.SpiritLib.Modules[moduleName].scripts[1].Globals[name] end
-local function GetToken() local token = 1; while SL_UsedReturnTokens[token] do token = token + 1 end SL_UsedReturnTokens[token] = true; return token end
-local function CallModuleFunction(moduleName, functionName, ...) local token = GetToken(); SpiritLib().Call("FixedCall", This, moduleName, functionName, "!SLToken" .. token, ...); SL_UsedReturnTokens[token] = nil; return This.table["!SLToken" .. token] end
-function ReturnCall(caller, token, functionName, ...) caller.table[token] = _G[functionName](...) end
-
+loadstring(PartByName("SpiritLib").scripts[1].Globals.SpiritLibSetup)
 -- [[ End SpiritLib Setup ]]
 
 ModuleSettings = {
@@ -333,7 +324,7 @@ function OnUIButtonClick(button)
 
 		local spawnPos = LocalPlayer().position + LocalPlayer().forward
 
-		local modelTable = GetModuleVariable("Models", "ModelsByName")
+		local modelTable = GetModule("Models").Globals[ "ModelsByName"]
 
 		print("button click")
 
@@ -341,7 +332,7 @@ function OnUIButtonClick(button)
 
 			if button.table.objectType == "Model" then
 
-				local part = CallModuleFunction("Models", "GenerateKnownModel", button.table.objectName, spawnPos, false)
+				local part = GetModule("Models").Call( "GenerateKnownModel", button.table.objectName, spawnPos, false)
 
 				if part then
 					part.position = LocalPlayer().position + LocalPlayer().forward * (part.size.z+0.5) + newVector3(0,part.size.y/2-0.35,0)
@@ -381,16 +372,16 @@ function OnSpiritLibLoaded()
 
 	-- Import the default objects pack
 
-	for i, objectJson in pairs(GetModuleVariable("Default Objects", "BuiltInObjects")) do
+	for i, objectJson in pairs(GetModule("Default Objects").Globals[ "BuiltInObjects"]) do
 	    local object = FromJson(objectJson)
 
 	    if object.objectType == "Model" then
 	    	-- Register model with models system instead of only keeping the json in the button tables
-	    	CallModuleFunction("Models", "RegisterModel", object.name, objectJson)
+	    	GetModule("Models").Call( "RegisterModel", object.name, objectJson)
 
 	    	CreateButton(object.name, object.description, allTabs["Models"], object.name, object.objectType)
 	    elseif object.objectType == "Weapon" and object.weaponScript then
-		    CallModuleFunction("Weapons", "RegisterWeapon", object.name, objectJson)
+		    GetModule("Weapons").Call( "RegisterWeapon", object.name, objectJson)
 
 		    CreateButton(object.name, object.description, allTabs["Weapons"], object.name, object.objectType)
 		end
